@@ -389,4 +389,3 @@ print("_G.env_global_var       = nil           result:", _G.env_global_var)
 
 print("test_env.env_local_var   = nil           result:", test_env.env_local_var)           -- 这里是 _G.test_env.env_local_var
 print("test_env.env_global_var  = env_global_var result:", test_env.env_global_var)         -- 这里是 _G.test_env.env_local_var  如果test_env.lua中 test_env 变量前面加上 local 这里就不能这么用
-
