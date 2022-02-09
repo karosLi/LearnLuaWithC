@@ -184,7 +184,7 @@ static int toLuaTableFromStruct(lua_State *L, const char * typeDescription, void
 
 void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
 {
-    char type = kkp_getTypeFromTypeDescription(typeDescription);
+    char type = kkp_removeProtocolEncodings(typeDescription);
     
     if (type == @encode(void)[0]) {
         return NULL;
@@ -402,7 +402,7 @@ int kkp_toLuaObject(lua_State *L, id object)
 int kkp_toLuaObjectWithType(lua_State *L, const char * typeDescription, void *buffer)
 {
     return kkp_safeInLuaStack(L, ^int{
-        char type = kkp_getTypeFromTypeDescription(typeDescription);
+        char type = kkp_removeProtocolEncodings(typeDescription);
         if (type == @encode(bool)[0]) {
             lua_pushboolean(L, *(bool *)buffer);
         } else if (type == @encode(char *)[0] || type == @encode(SEL)[0]) {

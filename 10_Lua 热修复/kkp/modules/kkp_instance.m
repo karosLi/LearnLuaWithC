@@ -15,15 +15,21 @@
 #import "kkp_converter.h"
 
 #pragma mark - 公共方法
+/// 获取一个 oc 对象对应的 实例 userdata，并压栈
+void kkp_instance_pushUserdata(lua_State *L, id object)
+{
+    /// 获取实例列表元表，并压栈
+    luaL_getmetatable(L, KKP_INSTANCE_USER_DATA_LIST_TABLE);
+    lua_pushlightuserdata(L, (__bridge void *)(object));// oc 实例对地址作为 key
+    lua_rawget(L, -2);// 获取 oc 实例对象地址 key 对应的 实例 userdata，并压栈，如果没有获取到值，压入的将会是 nil
+    lua_remove(L, -2); // 从栈上移除实例列表元表
+}
+
 /// 针对 oc 实例对象创建一个对应的 实例 userdata
 int kkp_instance_create_userdata(lua_State *L, id object)
 {
     return kkp_safeInLuaStack(L, ^int{
-        // 获取实例列表元表，并压栈
-        luaL_getmetatable(L, KKP_INSTANCE_USER_DATA_LIST_TABLE);
-        lua_pushlightuserdata(L, (__bridge void *)(object));// oc 实例对地址作为 key
-        lua_rawget(L, -2);// 获取 oc 实例对象地址 key 对应的 实例 userdata，并压栈，如果没有获取到值，压入的将会是 nil
-        lua_remove(L, -2); // 从栈上移除实例列表元表
+        kkp_instance_pushUserdata(L, object);
         
         KKPInstanceUserdata* instanceInTable = lua_touserdata(L, -1);// 转换栈顶数据到一个 实例 userdata 指针
         
@@ -56,7 +62,6 @@ int kkp_instance_create_userdata(lua_State *L, id object)
             }
             
             // 给 实例 userdata 设置一个关联表，关联表不等于元表
-            // 目前用不到
             lua_newtable(L);
             lua_setuservalue(L, -2);
         }
@@ -70,9 +75,24 @@ int kkp_instance_create_userdata(lua_State *L, id object)
 /// 注意：此时还没有发生实际调用，只是为了寻找 view 这个属性对应的闭包函数
 static int LUserData_kkp_instance__index(lua_State *L)
 {
-    // 获取要检索的 key，此时的 key 也是函数名字
+    // 获取要检索的 key，此时的 key 也是函数名字，也有可能是 lua 里定义的属性名
     const char* func = lua_tostring(L, -1);
     if (func) {
+        /// 先获取 lua 里定义的属性值
+        // 获取 实例 userdata 的关联表，并压栈
+        lua_getuservalue(L, -2);
+        // 复制 key，并压栈
+        lua_pushvalue(L, -2);
+        // 后去 key 对应的值，并放入栈顶
+        lua_rawget(L, -2);
+        if (!lua_isnil(L, -1)) {// 栈顶是否有值，有值就返回 lua 属性值
+            return 1;
+        } else {
+            // 恢复栈
+            lua_pop(L, 2);
+        }
+        
+        /// 再获取原生的函数闭包 self:view  获取的是一个闭包，self:view() 这个才是实际调用
         NSString* selector = [NSString stringWithFormat:@"%s", func];
         // if super
         if ([selector hasPrefix:KKP_SUPER_PREFIX]) {
@@ -100,13 +120,14 @@ static int LUserData_kkp_instance__index(lua_State *L)
 }
 
 /// 给实例属性赋值
+/// 比如：self.a = "hello"
 static int LUserData_kkp_instance__newIndex(lua_State *L)
 {
-    KKPInstanceUserdata* instance = lua_touserdata(L, -3);
+    KKPInstanceUserdata* instance = lua_touserdata(L, 1);
     if (!instance || !instance->instance) {
         return 0;
     }
-    const char* prop = lua_tostring(L, -2);
+    const char* prop = lua_tostring(L, 2);
     char* func = kkp_toObjcPropertySel(prop);
     if (!func) {
         return 0;
@@ -114,14 +135,14 @@ static int LUserData_kkp_instance__newIndex(lua_State *L)
     
     SEL sel = NSSelectorFromString([NSString stringWithFormat:@"%s", func]);
     Class klass = object_getClass(instance->instance);
-    NSMethodSignature  *signature = [klass instanceMethodSignatureForSelector:sel];
-    if (signature) {
+    NSMethodSignature *signature = [klass instanceMethodSignatureForSelector:sel];
+    if (signature) {// 给原生 OC 实例存在的属性赋值
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
         invocation.target = instance->instance;
         invocation.selector = sel;
         const char* typeDescription = [signature getArgumentTypeAtIndex:2];
         if (typeDescription) {
-            void *argValue = kkp_toOCObject(L, typeDescription, -1);
+            void *argValue = kkp_toOCObject(L, typeDescription, 3);
             if (argValue == NULL) {
                 id object = nil;
                 [invocation setArgument:&object atIndex:2];
@@ -133,9 +154,27 @@ static int LUserData_kkp_instance__newIndex(lua_State *L)
             NSString* error = [NSString stringWithFormat:@"can not found param [%@ %s]", klass, func];
             KKP_ERROR(L, error.UTF8String);
         }
-    } else {
-        NSString* error = [NSString stringWithFormat:@"can not found prop [%@ %s]", klass, func];
-        KKP_ERROR(L, error.UTF8String);
+    } else {// 否则就给 lua 自己定义的属性保存到实例的关联表里
+        // 获取 实例 userdata 的关联表，并压栈
+        lua_getuservalue(L, 1);
+        // 把关联表移动到 第二个 索引上
+        lua_insert(L, 2);
+        /**
+         此时的栈
+         
+         4/-1: type=值
+         3/-2: type=string value=属性key
+         2/-3: type=table
+         value=
+         {
+         }
+         1/-4: type=userdata
+         */
+        // 把 索引 3 作为 key，索引 4 作为 value，设置到关联表上
+        lua_rawset(L, 2);
+        
+//        NSString* error = [NSString stringWithFormat:@"can not found prop [%@ %s]", klass, func];
+//        KKP_ERROR(L, error.UTF8String);
     }
     free(func);
     return 0;

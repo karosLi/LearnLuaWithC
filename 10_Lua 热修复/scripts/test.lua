@@ -3,6 +3,9 @@ _ENV = kkp_class("ViewController")
 
 -- 替换实例方法
 function doSomeThing()
+    -- 设置/获取 lua 属性
+    self.aa = "hh"
+    print("获取 lua 属性 aa", self.aa)
     -- 调用实例方法
     print("print in lua", self:getHello())
     -- 调用当前类的静态方法

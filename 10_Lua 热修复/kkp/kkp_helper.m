@@ -107,17 +107,16 @@ void kkp_stackDump(lua_State *L) {
 }
 
 /// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
-char kkp_getTypeFromTypeDescription(const char *typeDescription)
+char kkp_removeProtocolEncodings(const char *typeDescription)
 {
     char type = typeDescription[0];
     switch (type) {
-        case 'r':
-        case 'n':
-        case 'N':
-        case 'o':
-        case 'O':
-        case 'R':
-        case 'V':
+        case KKP_PROTOCOL_TYPE_CONST:
+        case KKP_PROTOCOL_TYPE_INOUT:
+        case KKP_PROTOCOL_TYPE_OUT:
+        case KKP_PROTOCOL_TYPE_BYCOPY:
+        case KKP_PROTOCOL_TYPE_BYREF:
+        case KKP_PROTOCOL_TYPE_ONEWAY:
             type = typeDescription[1];
             break;
     }
@@ -212,7 +211,7 @@ int kkp_callBlock(lua_State *L)
     
     if (nresults > 0) {
         const char *typeDescription = [signature methodReturnType];
-        char type = kkp_getTypeFromTypeDescription(typeDescription);
+        char type = kkp_removeProtocolEncodings(typeDescription);
         if (type == @encode(id)[0] || type == @encode(Class)[0]) {
             __unsafe_unretained id object = nil;
             [invocation getReturnValue:&object];
@@ -268,7 +267,7 @@ int kkp_invoke(lua_State *L)
                 
                 if (nresults > 0) {
                     const char *typeDescription = [signature methodReturnType];
-                    char type = kkp_getTypeFromTypeDescription(typeDescription);
+                    char type = kkp_removeProtocolEncodings(typeDescription);
                     if (type == @encode(id)[0] || type == @encode(Class)[0]) {
                         __unsafe_unretained id object = nil;
                         [invocation getReturnValue:&object];

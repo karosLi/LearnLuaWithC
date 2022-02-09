@@ -19,6 +19,7 @@
 static int kkp_class_callLuaFunction(lua_State *L, id self, SEL selector, NSInvocation *invocation);
 static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL selector, NSInvocation *invocation);
 
+#pragma mark - 运行时方法替换
 static NSMutableArray * kkp_class_replacedClassMethods() {
     static NSMutableArray *class2method = nil;
     if (class2method == nil) {
@@ -111,6 +112,37 @@ static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL sel
     });
 }
 
+/// 添加新的属性支持
+static void kkp_setValueForUndefinedKey(id self, SEL cmd, id value, NSString *key) {
+    lua_State* L = kkp_currentLuaState();
+    kkp_safeInLuaStack(L, ^int{
+        kkp_instance_pushUserdata(L, self); // 实例对应的 实例 user data 压栈
+        kkp_toLuaObjectWithType(L, "@", (void *)&value);// 解析 value 成 lua 类型，并压栈
+        lua_setfield(L, -2, [key UTF8String]);// 给 实例 user data 赋值
+
+        return 0;
+    });
+}
+//
+//static id valueForUndefinedKey(id self, SEL cmd, NSString *key) {
+//    lua_State *L = wax_currentLuaState();
+//    id result = nil;
+//
+//    BEGIN_STACK_MODIFY(L);
+//
+//    wax_instance_pushUserdata(L, self);
+//    lua_getfield(L, -1, [key UTF8String]);
+//
+//    id *keyValue = wax_copyToObjc(L, "@", -1, nil);
+//    result = *keyValue;
+//    free(keyValue);
+//
+//    END_STACK_MODIFY(L, 0);
+//
+//    return result;
+//}
+
+
 #pragma mark - 帮助方法
 static int kkp_class_create_userdata(lua_State *L, const char *klass_name)
 {
@@ -202,7 +234,7 @@ static int kkp_class_callLuaFunction(lua_State *L, id self, SEL selector, NSInvo
         // 如果有参数，就把参数转成 lua 对象，并压栈
         for (NSUInteger i = 2; i < [signature numberOfArguments]; i++) { // start at 2 because to skip the automatic self and _cmd arugments
             const char *typeDescription = [signature getArgumentTypeAtIndex:i];
-            char type = kkp_getTypeFromTypeDescription(typeDescription);
+            char type = kkp_removeProtocolEncodings(typeDescription);
             if (type == @encode(id)[0] || type == @encode(Class)[0]) {
                 id __autoreleasing object;
                 [invocation getArgument:&object atIndex:i];
@@ -400,12 +432,41 @@ static int LM_kkp_class__index(lua_State *L)
 /// 解释下 __call 元方法
 /// __call: 函数调用操作 func(args)。 当 Lua 尝试调用一个非函数的值的时候会触发这个事件 （即 func 不是一个函数）。 查找 func 的元方法， 如果找得到，就调用这个元方法， func 作为第一个参数传入，原来调用的参数（args）后依次排在后面。
 /// 比如 a = {}
-/// meta_table = { __call = function(self, arg1, arg2, arg3...) print(self, arg1, arg2) end}
+/// meta_table = { __call = function(self, arg1, arg2, arg3...) print(self, arg1, arg2, arg3) end}
 /// setmetatable(a, meta_table)
-/// a("hello", {key: "world"})
-/// 这里的 self 就是 a, arg1 是 hello"， arg2 是 {key: "world"}，那么栈索引1是 self，栈索引2是 arg1，栈索引3是 arg2
+/// a("ViewController", "BaseViewController", protocols = {"UITableViewDelegate"})
+/// 这里 arg1 是 a, arg2 是 "ViewController", arg3 是 "BaseViewController"， arg4 是 protocols = {"UITableViewDelegate"}，那么栈索引1是 arg1，栈索引2是 arg2，栈索引3是 arg3，栈索引4是 arg4
 static int LM_kkp_class__call(lua_State *L)
 {
+    const char *className = luaL_checkstring(L, 2);
+    Class klass = objc_getClass(className);
+    
+    if (!klass) {// 类不存在
+        
+        /// 获取父类
+        Class superClass;
+        if (lua_isnoneornil(L, 3)) {// 如果没有指定父类，就默认父类是 NSObject
+            superClass = [NSObject class];
+        } else {// 如果指定了父类
+            const char *superClassName = luaL_checkstring(L, 3);
+            superClass = objc_getClass(superClassName);
+        }
+        
+        if (!superClass) {
+            NSString* error = [NSString stringWithFormat:@"Failed to create '%s'. Unknown superclass \"%s\" received.", className, luaL_checkstring(L, 3)];
+            KKP_ERROR(L, error.UTF8String);
+        }
+        
+        /// 创建新类
+        klass = objc_allocateClassPair(superClass, className, 0);
+        objc_registerClassPair(klass);
+        
+        /// 支持 key-value，用于处理不存在的属性 key 场景
+        
+        
+    }
+    
+    kkp_class_create_userdata(L, className);
     
     return 0;
 }
