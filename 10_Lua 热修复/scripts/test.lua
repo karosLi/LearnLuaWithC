@@ -7,7 +7,8 @@ function doSomeThing()
     self.aa = "hh"
     print("获取 lua 属性 aa", self.aa)
     -- 设置原生属性
-    self.age = 18
+    self:setAge_(18)
+    print("获取 原生 属性 age", self:age())
     -- 调用实例方法
     print("print in lua", self:getHello())
     -- 调用当前类的静态方法

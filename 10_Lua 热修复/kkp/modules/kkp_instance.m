@@ -119,61 +119,35 @@ static int LUserData_kkp_instance__index(lua_State *L)
     return 0;
 }
 
-/// 给实例属性赋值
+/// 用于保存 lua 定义的属性
 /// 比如：self.a = "hello"
+/// 原生属性的设置和获取通过 self:setAge_(18)/self:age() 形式
 static int LUserData_kkp_instance__newIndex(lua_State *L)
 {
     KKPInstanceUserdata* instance = lua_touserdata(L, 1);
     if (!instance || !instance->instance) {
         return 0;
     }
-    const char* prop = lua_tostring(L, 2);
-    char* func = kkp_toObjcPropertySel(prop);
-    if (!func) {
-        return 0;
-    }
     
-    SEL sel = NSSelectorFromString([NSString stringWithFormat:@"%s", func]);
-    Class klass = object_getClass(instance->instance);
-    NSMethodSignature *signature = [klass instanceMethodSignatureForSelector:sel];
-    if (signature) {// 给原生 OC 实例存在的属性赋值
-        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-        invocation.target = instance->instance;
-        invocation.selector = sel;
-        const char* typeDescription = [signature getArgumentTypeAtIndex:2];
-        if (typeDescription) {
-            void *argValue = kkp_toOCObject(L, typeDescription, 3);
-            if (argValue == NULL) {
-                id object = nil;
-                [invocation setArgument:&object atIndex:2];
-            } else {
-                [invocation setArgument:argValue atIndex:2];
-            }
-            [invocation invoke];
-        } else {
-            NSString* error = [NSString stringWithFormat:@"can not found param [%@ %s]", klass, func];
-            KKP_ERROR(L, error.UTF8String);
-        }
-    } else {// 否则就给 lua 自己定义的属性保存到实例的关联表里
-        // 获取 实例 userdata 的关联表，并压栈
-        lua_getuservalue(L, 1);
-        // 把关联表移动到 第二个 索引上
-        lua_insert(L, 2);
-        /**
-         此时的栈
-         
-         4/-1: type=值
-         3/-2: type=string value=属性key
-         2/-3: type=table
-         value=
-         {
-         }
-         1/-4: type=userdata
-         */
-        // 把 索引 3 作为 key，索引 4 作为 value，设置到关联表上
-        lua_rawset(L, 2);
-    }
-    free(func);
+    /// 把 lua 自己定义的属性保存到实例的关联表里
+    // 获取 实例 userdata 的关联表，并压栈
+    lua_getuservalue(L, 1);
+    // 把关联表移动到 第二个 索引上
+    lua_insert(L, 2);
+    /**
+     此时的栈
+     
+     4/-1: type=值
+     3/-2: type=string value=属性key
+     2/-3: type=table
+     value=
+     {
+     }
+     1/-4: type=userdata
+     */
+    // 把 索引 3 作为 key，索引 4 作为 value，设置到关联表上
+    lua_rawset(L, 2);
+    
     return 0;
 }
 
