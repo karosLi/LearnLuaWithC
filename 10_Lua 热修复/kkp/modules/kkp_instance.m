@@ -78,7 +78,7 @@ static int LUserData_kkp_instance__index(lua_State *L)
     // 获取要检索的 key，此时的 key 也是函数名字，也有可能是 lua 里定义的属性名
     const char* func = lua_tostring(L, -1);
     if (func) {
-        /// 先获取 lua 里定义的属性值
+        /// 先获取 lua 里定义的属性值。比如 self.a
         // 获取 实例 userdata 的关联表，并压栈
         lua_getuservalue(L, -2);
         // 复制 key，并压栈
