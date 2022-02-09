@@ -29,4 +29,24 @@ print("_ENV.local_var       = nil           result:", _G.local_var)
 print("_ENV.env_local_var   = nil           result:", _ENV.env_local_var)
 print("_ENV.env_global_var  = env_global_var result:", _ENV.env_global_var)
 
+-- print("===环境ENV===")
+-- local env = require("test_env")
+
+-- print("env:             ", env)
+-- print("test_env:        ", test_env)
+-- print("_G.test_env:     ", _G.test_env)
+
+-- print("env.local_var            = nil           result:", env.local_var)
+-- print("env.global_var           = global_var    result:", env.global_var)       -- 这里的 global_var 其实是 _G.global_var
+
+-- print("_G.global_var            = global_var    result:", _G.global_var)
+
+-- print("_G.env_local_var        = nil           result:", _G.env_local_var)
+-- print("_G.env_global_var       = nil           result:", _G.env_global_var)
+
+-- print("test_env.env_local_var   = nil           result:", test_env.env_local_var)           -- 这里是 _G.test_env.env_local_var
+-- print("test_env.env_global_var  = env_global_var result:", test_env.env_global_var)         -- 这里是 _G.test_env.env_local_var  如果test_env.lua中 test_env 变量前面加上 local 这里就不能这么用
+
+
 return test_env
+
