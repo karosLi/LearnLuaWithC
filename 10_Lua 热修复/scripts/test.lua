@@ -6,7 +6,7 @@ function doSomeThing()
     -- 设置/获取 lua 属性
     self.aa = "hh"
     print("获取 lua 属性 aa", self.aa)
-    -- 设置原生属性
+    -- 设置/获取 原生 属性
     self:setAge_(18)
     print("获取 原生 属性 age", self:age())
     -- 调用实例方法
