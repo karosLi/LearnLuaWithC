@@ -172,9 +172,6 @@ static int LUserData_kkp_instance__newIndex(lua_State *L)
          */
         // 把 索引 3 作为 key，索引 4 作为 value，设置到关联表上
         lua_rawset(L, 2);
-        
-//        NSString* error = [NSString stringWithFormat:@"can not found prop [%@ %s]", klass, func];
-//        KKP_ERROR(L, error.UTF8String);
     }
     free(func);
     return 0;

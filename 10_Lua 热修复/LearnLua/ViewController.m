@@ -9,6 +9,8 @@
 
 @interface ViewController ()
 
+@property(nonatomic, assign) NSInteger age;
+
 @end
 
 @implementation ViewController
@@ -17,6 +19,7 @@
     [super viewDidLoad];
     [self doSomeThing];
 //    [ViewController printHello];
+    NSLog(@"ViewController 年龄 %zd", self.age);
 }
 
 - (void)doSomeThing {
