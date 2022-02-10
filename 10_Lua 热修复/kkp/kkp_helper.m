@@ -251,7 +251,7 @@ static const bool kkp_propKeyExists(NSString *propName) {
 }
 
 /// lua 层调用 c 层
-/// 比如调用是这样的： self:view()，在 lua 语法糖中，self:view() == self.view(self)
+/// 比如调用是这样的： self:view()，在 lua 语法糖中，self:view() == self.view(self)，self 后面必须跟随冒号，否则闭包调用的时候获取不到 user data
 /// 所以 第一个参数是 self（userdata，如果是调用实例方法就是 实例 user data，如果是调用类方法就是 class userdata），索引是 1，后面的索引全部都是参数了
 /// 而第一个 upvalue 则是之前捕获的 view 字符串
 int kkp_invoke_closure(lua_State *L)
