@@ -46,6 +46,9 @@ int kkp_instance_create_userdata(lua_State *L, id object)
             size_t nbytes = sizeof(KKPInstanceUserdata);
             KKPInstanceUserdata *instance = (KKPInstanceUserdata *)lua_newuserdata(L, nbytes);
             instance->instance = object;// 是指 oc 实例对象
+            instance->isClass = false;
+            instance->isCallSuper = false;
+            instance->isCallOrigin = false;
             instance->isBlock = kkp_isBlock(object);// 判读下对象是否是 block 对象
             
             // 给 实例 userdata 设置元表

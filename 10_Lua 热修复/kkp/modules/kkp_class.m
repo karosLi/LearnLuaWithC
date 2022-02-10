@@ -138,6 +138,9 @@ int kkp_class_create_userdata(lua_State *L, const char *klass_name)
             KKPInstanceUserdata *userData = (KKPInstanceUserdata *)lua_newuserdata(L, nbytes);
             userData->instance = klass;
             userData->isClass = true;
+            userData->isCallSuper = false;
+            userData->isCallOrigin = false;
+            userData->isBlock = false;
             
             // 给 class userdata 设置 元表
             luaL_getmetatable(L, KKP_CLASS_USER_DATA_META_TABLE);

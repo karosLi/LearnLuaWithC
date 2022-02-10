@@ -235,9 +235,25 @@ int kkp_callBlock(lua_State *L)
     return nresults;
 }
 
+static NSMutableDictionary *_propKeys;
+static const void *kkp_propKey(NSString *propName) {
+    if (!_propKeys) _propKeys = [[NSMutableDictionary alloc] init];
+    id key = _propKeys[propName];
+    if (!key) {
+        key = [propName copy];
+        [_propKeys setObject:key forKey:propName];
+    }
+    return (__bridge const void *)(key);
+}
+
+static const bool kkp_propKeyExists(NSString *propName) {
+    return [_propKeys.allKeys containsObject:propName];
+}
+
 /// lua 层调用 c 层
 /// 比如调用是这样的： self:view()，在 lua 语法糖中，self:view() == self.view(self)
-/// 所以 第一个参数是 self（userdata，如果是调用实例方法就是 实例 user data，如果是调用类方法就是 class userdata），而第一个 upvalue 则是之前捕获的 view 字符串
+/// 所以 第一个参数是 self（userdata，如果是调用实例方法就是 实例 user data，如果是调用类方法就是 class userdata），索引是 1，后面的索引全部都是参数了
+/// 而第一个 upvalue 则是之前捕获的 view 字符串
 int kkp_invoke_closure(lua_State *L)
 {
     return kkp_safeInLuaStack(L, ^int{
@@ -301,7 +317,31 @@ int kkp_invoke_closure(lua_State *L)
                     free(buffer);
                 }
                 return nresults;
-            } else {
+            } else {// 说明要调用的方法不存在
+                if (!instance->isClass && instance->instance) {// 如果是实例的话，尝试把添加值到关联属性里
+                    /// 计算参数个数，通过偏离 : 符号来确定个数
+                    int argCount = 0;
+                    const char *match = selectorName.UTF8String;
+                    while ((match = strchr(match, ':'))) {
+                        match += 1; // Skip past the matched char
+                        argCount++;
+                    }
+                    
+                    NSString *propName = selectorName;
+                    if (argCount == 1 && [selectorName hasPrefix:@"set"]) {// 说明调用的是设置属性
+                        void *argValue = kkp_toOCObject(L, "@", 2);
+                        id value = *(__unsafe_unretained id *)argValue;
+                        propName = [propName stringByReplacingOccurrencesOfString:@"set" withString:@""];
+                        propName = [propName stringByReplacingOccurrencesOfString:@":" withString:@""];
+                        propName = [propName lowercaseString];
+                        objc_setAssociatedObject(instance->instance, kkp_propKey(propName), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+                        return 0;
+                    } else if (argCount == 0 && kkp_propKeyExists(propName)) {// 说明调用的是获取属性，属性 key 一定要存在，只有先调用 set 属性方法，才会存在 key
+                        id value = objc_getAssociatedObject(instance->instance, kkp_propKey(propName));
+                        return kkp_toLuaObject(L, value);
+                    }
+                }
+                
                 NSString* error = [NSString stringWithFormat:@"selector %s not be found in %@. You may need to use ‘_’ to indicate that there are parameters. If your selector is 'function:', use 'function_', if your selector is 'function:a:b:', use 'function_a_b_'", func, klass];
                 KKP_ERROR(L, error.UTF8String);
                 return 0;

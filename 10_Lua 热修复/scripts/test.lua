@@ -11,6 +11,9 @@ function doSomeThing()
     -- 设置/获取 原生 属性
     self:setAge_(18)
     print("获取 原生 属性 age", self:age())
+    -- 动态添加 设置/获取 原生 属性
+    self:setSex_(1)
+    print("获取 动态 原生 属性 sex", self:sex())
     -- 调用实例方法
     print("print in lua", self:getHello())
     -- 调用当前类的静态方法
