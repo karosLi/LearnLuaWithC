@@ -101,10 +101,18 @@ static int LUserData_kkp_instance__index(lua_State *L)
             
             /// 再获取原生的函数闭包 self:view  获取的是一个闭包，self:view() 这个才是实际调用
             NSString *selector = [NSString stringWithFormat:@"%s", func];
-            // if super
+            
+            /// 检测到 super 关键字
             if ([selector isEqualToString:KKP_SUPER_KEYWORD]) {// 如果是父类调用，就设置临时设置 super 为 true，待实际调用完成时，需要还原成 false
-                instanceUserData->isSuper = true;
+                instanceUserData->isCallSuper = true;
                 // super 实例 user data 压栈
+                lua_pushvalue(L, 1);
+                return 1;
+            }
+            /// 检测到 origin 关键字
+            else if ([selector isEqualToString:KKP_ORIGIN_KEYWORD]) {// 如果是原始调用，就设置临时设置 origin 为 true，待实际调用完成时，需要还原成 false
+                instanceUserData->isCallOrigin = true;
+                // origin 实例 user data 压栈
                 lua_pushvalue(L, 1);
                 return 1;
             }

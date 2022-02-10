@@ -251,8 +251,8 @@ int kkp_invoke_closure(lua_State *L)
             // May be you call class function user static prefix, need to be remove
             selectorName = [selectorName stringByReplacingOccurrencesOfString:KKP_STATIC_PREFIX withString:@""];
             
-            if (instance->isSuper) {// 如果是调用父类方法，就需要为当前类添加一个父类方法实现
-                instance->isSuper = false;// 还原 super 到 false
+            if (instance->isCallSuper) {// 如果是调用父类方法，就需要为当前类添加一个父类方法实现
+                instance->isCallSuper = false;// 还原 super 到 false
                 NSString *superSelectorName = [NSString stringWithFormat:@"%@%@", KKP_SUPER_PREFIX, selectorName];
                 SEL superSelector = NSSelectorFromString(superSelectorName);
                 Class klass = object_getClass(instance->instance);
@@ -264,6 +264,10 @@ int kkp_invoke_closure(lua_State *L)
                 // 如果是调用父类方法，就为当前类添加一个父类的实现
                 class_addMethod(klass, superSelector, superMethodImp, typeDescription);
                 selectorName = superSelectorName;
+            } else if (instance->isCallOrigin) {// 如果是调用原始方法，就重新拼接原始方法前缀
+                instance->isCallOrigin = false;// 还原 origin 到 false
+                NSString *originSelectorName = [NSString stringWithFormat:@"%@%@", KKP_ORIGIN_PREFIX, selectorName];
+                selectorName = originSelectorName;
             }
             
             SEL sel = NSSelectorFromString(selectorName);

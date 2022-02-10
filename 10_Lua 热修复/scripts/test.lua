@@ -17,7 +17,7 @@ function doSomeThing()
     ViewController:printHello()
     self:view():setBackgroundColor_(UIColor:redColor())
     -- 调用原始方法
-    self:ORIGdoSomeThing()
+    self.origin:doSomeThing()
     -- 调用父类方法
     self.super:doSomeThing()
 end
