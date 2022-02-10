@@ -11,6 +11,7 @@
 /// 自定义用户数据，类 和 实例对象都会用到
 typedef struct _KKPInstanceUserdata {
     __weak id instance;// 如果是类用户数据，代表的是 class；如果是实例用户数据，代表的是 实例
+    bool isClass;
     bool isBlock;
 } KKPInstanceUserdata;
 

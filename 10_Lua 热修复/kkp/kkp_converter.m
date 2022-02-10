@@ -11,10 +11,9 @@
 #import "lauxlib.h"
 #import "kkp_define.h"
 #import "kkp_helper.h"
+#import "kkp_class.h"
 #import "kkp_instance.h"
 #import "KKPBlockInstance.h"
-
-#define KKP_LUA_NUMBER_CONVERT(T) else if (type == @encode(T)[0]) { lua_pushnumber(L, *(T *)buffer); }
 
 typedef void (^kkp_hoder_free_block_t)(void);
 
@@ -399,20 +398,47 @@ int kkp_toLuaObject(lua_State *L, id object)
     });
 }
 
-int kkp_toLuaObjectWithType(lua_State *L, const char * typeDescription, void *buffer)
+#define KKP_LUA_NUMBER_CONVERT(T) else if (type == @encode(T)[0]) { lua_pushnumber(L, *(T *)buffer); }
+int kkp_toLuaObjectWithBuffer(lua_State *L, const char * typeDescription, void *buffer)
 {
     return kkp_safeInLuaStack(L, ^int{
         char type = kkp_removeProtocolEncodings(typeDescription);
-        if (type == @encode(bool)[0]) {
+        
+        // http://developer.apple.com/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
+        if (type == _C_VOID) {// 没有返回值
+            lua_pushnil(L);
+        } else if (type == _C_PTR) {// 返回值是 指针 类型
+            lua_pushlightuserdata(L, *(void **)buffer);
+        } else if (type == @encode(bool)[0]) {// 返回值是 布尔 类型
             lua_pushboolean(L, *(bool *)buffer);
-        } else if (type == @encode(char *)[0] || type == @encode(SEL)[0]) {
+        } else if (type == @encode(char *)[0] || type == @encode(SEL)[0]) {// 返回值是 字符串/选择器 类型
             lua_pushstring(L, *(char **)buffer);
-        } else if (type == @encode(char)[0]) {
+        } else if (type == @encode(char)[0]) {// 返回值是 字符 类型
             char s[2];
             s[0] = *(char *)buffer;
             s[1] = '\0';
             lua_pushstring(L, s);
-        } else if (type == _C_STRUCT_B) {
+        } else if (type == _C_ID) {// 返回值是 OC 对象 类型
+            /**
+             A bridged cast is a C-style cast annotated with one of three keywords:
+
+             (__bridge T) op casts the operand to the destination type T. If T is a retainable object pointer type, then op must have a non-retainable pointer type. If T is a non-retainable pointer type, then op must have a retainable object pointer type. Otherwise the cast is ill-formed. There is no transfer of ownership, and ARC inserts no retain operations.
+             (__bridge_retained T) op casts the operand, which must have retainable object pointer type, to the destination type, which must be a non-retainable pointer type. ARC retains the value, subject to the usual optimizations on local values, and the recipient is responsible for balancing that +1.
+             (__bridge_transfer T) op casts the operand, which must have non-retainable pointer type, to the destination type, which must be a retainable object pointer type. ARC will release the value at the end of the enclosing full-expression, subject to the usual optimizations on local values.
+             
+             __bridge 转换Objective-C 和 Core Foundation 指针，不移交持有权.
+             __bridge_retained 或 CFBridgingRetain 转换 Objective-C 指针到Core Foundation 指针并移交持有权.
+             你要负责调用 CFRelease 或一个相关的函数来释放对象.
+             __bridge_transfer 或 CFBridgingRelease 传递一个非Objective-C 指针到 Objective-C 指针并移交持有权给ARC. ARC负责释放对象.
+             
+             */
+            
+            id instance = *((__unsafe_unretained id *)buffer);
+            kkp_instance_create_userdata(L, instance);
+        } else if (type == _C_CLASS) {// 返回值是 class 类型
+            id instance = *((__unsafe_unretained id *)buffer);
+            kkp_class_create_userdata(L, NSStringFromClass(instance).UTF8String);
+        } else if (type == _C_STRUCT_B) {// 返回值是 结构体 类型
             toLuaTableFromStruct(L, typeDescription, buffer);
         }
         KKP_LUA_NUMBER_CONVERT(char)
@@ -427,10 +453,11 @@ int kkp_toLuaObjectWithType(lua_State *L, const char * typeDescription, void *bu
         KKP_LUA_NUMBER_CONVERT(float)
         KKP_LUA_NUMBER_CONVERT(double)
         else {
-            NSString* error = [NSString stringWithFormat:@"type %s in not support !", typeDescription];
+            NSString* error = [NSString stringWithFormat:@"Unable to convert Obj-C type with type description '%s'", typeDescription];
             KKP_ERROR(L, error.UTF8String);
             return 0;
         }
+        
         return 1;
     });
 }

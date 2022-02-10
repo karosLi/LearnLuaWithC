@@ -39,9 +39,11 @@ extern SEL kkp_originForSelector(SEL sel);
 
 extern bool kkp_isBlock(id object);
 
+extern bool kkp_isAllocMethod(const char *methodName);
+
 extern int kkp_callBlock(lua_State *L);
 
-extern int kkp_invoke(lua_State *L);
+extern int kkp_invoke_closure(lua_State *L);
 
 extern NSArray* kkp_parseStructFromTypeDescription(NSString *typeDes);
 

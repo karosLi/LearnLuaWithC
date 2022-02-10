@@ -28,27 +28,35 @@ static NSMutableArray * kkp_class_replacedClassMethods() {
     return class2method;
 }
 
-static void kkp_class_replaceMethod(Class klass, SEL sel)
+static void kkp_class_overrideMethod(Class klass, SEL sel, const char *typeDescription)
 {
     if (klass == nil || sel == nil) {
-        return ;
+        return;
     }
     
-    Method targetMethod = class_getInstanceMethod(klass, sel);
-    if (targetMethod) {
-        // 给类添加一个原始方法，方便被 hook 的方法内部调用原始的方法
-        const char *typeEncoding = method_getTypeEncoding(targetMethod);
-        SEL originSelector = kkp_runtime_originForSelector(sel);
-        class_addMethod(klass, originSelector, method_getImplementation(targetMethod), typeEncoding);
-        // 给类添加自定义的 forwardInvocation 方法实现，并替换掉旧的 forwardInvocation 方法
-        kkp_runtime_swizzleForwardInvocation(klass, (IMP)__KKP_ARE_BEING_CALLED__);
-        
-        // 把要 hook 的方法实现，直接替换成 _objc_msgForward，意味着 hook 的方法在调用时，直接走消息转发流程，不用经过 method list 查找流程
-        class_replaceMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, sel), typeEncoding);
-        
-        // 把已经替换的方法记录下
-        [kkp_class_replacedClassMethods() addObject:@{@"class":NSStringFromClass(klass), @"sel":NSStringFromSelector(sel)}];
+    if (!typeDescription) {// 类型描述为空时，就从类里获取
+        Method method = class_getInstanceMethod(klass, sel);
+        typeDescription = (char *)method_getTypeEncoding(method);
     }
+    
+    /// 给类添加自定义的 forwardInvocation 方法实现，并替换掉旧的 forwardInvocation 方法
+    kkp_runtime_swizzleForwardInvocation(klass, (IMP)__KKP_ARE_BEING_CALLED__);
+    
+    /// 如果类能响应入参方法，就给类添加一个原始方法，方便被 hook 的方法内部调用原始的方法
+    if (class_respondsToSelector(klass, sel)) {
+        IMP originalImp = class_getMethodImplementation(klass, sel);
+        SEL originSelector = kkp_runtime_originForSelector(sel);
+        if(!class_respondsToSelector(klass, originSelector)) {
+            class_addMethod(klass, originSelector, originalImp, typeDescription);
+        }
+    }
+    
+    /// 把要 hook 的方法实现，直接替换成 _objc_msgForward，意味着 hook 的方法在调用时，直接走消息转发流程，不用经过 method list 查找流程
+    /// 如果方法存在就替换，否则就是添加
+    class_replaceMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, sel), typeDescription);
+    
+    /// 把已经替换的方法记录下
+    [kkp_class_replacedClassMethods() addObject:@{@"class":NSStringFromClass(klass), @"sel":NSStringFromSelector(sel)}];
 }
 
 static bool kkp_class_recoverMethod(const char* class_name, const char* selector_name)
@@ -112,39 +120,8 @@ static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL sel
     });
 }
 
-/// 添加新的属性支持
-static void kkp_setValueForUndefinedKey(id self, SEL cmd, id value, NSString *key) {
-    lua_State* L = kkp_currentLuaState();
-    kkp_safeInLuaStack(L, ^int{
-        kkp_instance_pushUserdata(L, self); // 实例对应的 实例 user data 压栈
-        kkp_toLuaObjectWithType(L, "@", (void *)&value);// 解析 value 成 lua 类型，并压栈
-        lua_setfield(L, -2, [key UTF8String]);// 给 实例 user data 赋值
-
-        return 0;
-    });
-}
-//
-//static id valueForUndefinedKey(id self, SEL cmd, NSString *key) {
-//    lua_State *L = wax_currentLuaState();
-//    id result = nil;
-//
-//    BEGIN_STACK_MODIFY(L);
-//
-//    wax_instance_pushUserdata(L, self);
-//    lua_getfield(L, -1, [key UTF8String]);
-//
-//    id *keyValue = wax_copyToObjc(L, "@", -1, nil);
-//    result = *keyValue;
-//    free(keyValue);
-//
-//    END_STACK_MODIFY(L, 0);
-//
-//    return result;
-//}
-
-
 #pragma mark - 帮助方法
-static int kkp_class_create_userdata(lua_State *L, const char *klass_name)
+int kkp_class_create_userdata(lua_State *L, const char *klass_name)
 {
     return kkp_safeInLuaStack(L, ^int{
         // 从类列表元表里获取 class_name 对应 class userdata，并压栈，如果没有的话，压入会是一个 nil
@@ -160,6 +137,7 @@ static int kkp_class_create_userdata(lua_State *L, const char *klass_name)
             size_t nbytes = sizeof(KKPInstanceUserdata);
             KKPInstanceUserdata *userData = (KKPInstanceUserdata *)lua_newuserdata(L, nbytes);
             userData->instance = klass;
+            userData->isClass = true;
             
             // 给 class userdata 设置 元表
             luaL_getmetatable(L, KKP_CLASS_USER_DATA_META_TABLE);
@@ -234,19 +212,12 @@ static int kkp_class_callLuaFunction(lua_State *L, id self, SEL selector, NSInvo
         // 如果有参数，就把参数转成 lua 对象，并压栈
         for (NSUInteger i = 2; i < [signature numberOfArguments]; i++) { // start at 2 because to skip the automatic self and _cmd arugments
             const char *typeDescription = [signature getArgumentTypeAtIndex:i];
-            char type = kkp_removeProtocolEncodings(typeDescription);
-            if (type == @encode(id)[0] || type == @encode(Class)[0]) {
-                id __autoreleasing object;
-                [invocation getArgument:&object atIndex:i];
-                kkp_toLuaObject(L, object);
-            } else {
-                NSUInteger size = 0;
-                NSGetSizeAndAlignment(typeDescription, &size, NULL);
-                void *buffer = malloc(size);
-                [invocation getArgument:buffer atIndex:i];
-                kkp_toLuaObjectWithType(L, typeDescription, buffer);
-                free(buffer);
-            }
+            NSUInteger size = 0;
+            NSGetSizeAndAlignment(typeDescription, &size, NULL);
+            void *buffer = malloc(size);
+            [invocation getArgument:buffer atIndex:i];
+            kkp_toLuaObjectWithBuffer(L, typeDescription, buffer);
+            free(buffer);
         }
         
         // 栈上有了 lua 函数，self 参数，和其他参数后，就可以调用 lua 函数了
@@ -259,6 +230,21 @@ static int kkp_class_callLuaFunction(lua_State *L, id self, SEL selector, NSInvo
             NSCAssert(NO, log);
         }
         return nresults;
+    });
+}
+
+/// lua 层调用 c 层，在初始化时，需要先创建出来一个 实例对象的 实例 user data
+/// 第一个参数是 class user data，而第一个 upvalue 则是之前捕获的 alloc 字符串
+static int kkp_alloc_closure(lua_State *L)
+{
+    return kkp_safeInLuaStack(L, ^int{
+        KKPInstanceUserdata *classUserData = lua_touserdata(L, 1);
+        
+        // 创建一个实例，并加入自动释放池，目的让 navigationController 可以接管实例，而后的下一个 runloop 才 release 一次实例，这样 实例的引用计数还是 1
+        __autoreleasing id instance = [((Class)classUserData->instance) alloc];
+        // 创建实例 user data
+        kkp_instance_create_userdata(L, instance);
+        return 1;
     });
 }
 
@@ -279,15 +265,22 @@ static int LUserData_kkp_class__index(lua_State *L)
         return 0;
     }
     
-    // 获取 class
+    // 是否是 alloc 函数，返回一个 alloc 调用闭包
+    if (kkp_isAllocMethod(func)) {
+        lua_pushcclosure(L, kkp_alloc_closure, 1);
+        return 1;
+    }
+    
+    // 返回一个普通函数调用闭包
     Class klass = object_getClass(userdata->instance);
     if ([klass instancesRespondToSelector:NSSelectorFromString([NSString stringWithFormat:@"%s", kkp_toObjcSel(func)])]) {
-        lua_pushcclosure(L, kkp_invoke, 1);
+        lua_pushcclosure(L, kkp_invoke_closure, 1);
         return 1;
     }
     return 0;
 }
 
+/// 用于替换和添加 OC 类方法
 /// 因为 class userdata 指针是不会存 key的，所以这里更新时会调用 class_userdata[key] = value，1：userdata 指针，2：key，3：value（函数）
 static int LUserData_kkp_class__newIndex(lua_State *L)
 {
@@ -308,8 +301,11 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
                 const char* func = lua_tostring(L, 2);
                 Class klass = userdata->instance;
                 Class metaClass = object_getClass(klass);
+                char *typeDescription = nil;
+                
                 BOOL canBeReplace = NO;
-                NSString* selectorName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(func)];
+                NSString *selectorName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(func)];
+                
                 SEL sel = NSSelectorFromString(selectorName);
                 if ([selectorName hasPrefix:KKP_STATIC_PREFIX]) {// lua 脚本里如果方法名是以 STATIC 为前缀，说明一个静态方法，此时就需要找到 OC 里的元类
                     sel = NSSelectorFromString([selectorName substringFromIndex:[KKP_STATIC_PREFIX length]]);
@@ -327,53 +323,70 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
                         }
                     }
                 }
-                if (canBeReplace) {
-                    kkp_class_replaceMethod(klass, sel);
+                
+                if (canBeReplace) {// 替换方法
+                    /// 替换方法
+                    kkp_class_overrideMethod(klass, sel, NULL);
+                } else {// 添加新方法
+                    /// 计算参数个数，通过偏离 : 符号来确定个数
+                    int argCount = 0;
+                    const char *match = selectorName.UTF8String;
+                    while ((match = strchr(match, ':'))) {
+                        match += 1; // Skip past the matched char
+                        argCount++;
+                    }
                     
-                    // 获取 class userdata 的关联表，并压栈
-                    lua_getuservalue(L, 1);
+                    /// 配置类型描述
+                    size_t typeDescriptionSize = 3 + argCount;// 前三个是 返回类型，self 和 :，后面都是参数了。比如 @@: 表示返回类型是对象，self 和 sel
+                    typeDescription = calloc(typeDescriptionSize + 1, sizeof(char));
+                    memset(typeDescription, '@', typeDescriptionSize);// 设置每个字符都是 @
+                    typeDescription[2] = ':'; // 设置第三个字符是 :
                     
-                    /**
-                     此时的栈
-                     4/-1: type=table
-                     value=
-                     {
-                     }
-
-                     3/-2: type=function
-                     2/-3: type=string value=doSomeThing
-                     1/-4: type=userdata
-                     */
-                    
-                    // 把关联表移动到 第二个 索引上
-                    lua_insert(L, 2);
-                    
-                    /**
-                     此时的栈
-                     
-                     4/-1: type=function
-                     3/-2: type=string value=doSomeThing
-                     2/-3: type=table
-                     value=
-                     {
-                     }
-                     1/-4: type=userdata
-                     */
-                    // 把 索引 3 作为 key，索引 4 作为 value，设置到关联表上
-                    lua_rawset(L, 2);
-                    /**
-                     此时的栈
-                     2/-3: type=table
-                     value=
-                     {
-                     doSomeThing = function
-                     }
-                     1/-4: type=userdata
-                     */
-                } else {
-                    NSString* error = [NSString stringWithFormat:@"selector %s not be found in %@. You may need to use ‘_’ to indicate that there are parameters. If your selector is 'function:', use 'function_', if your selector is 'function:a:b:', use 'function_a_b_'", func, klass];
-                    KKP_ERROR(L, error.UTF8String);
+                    /// 添加方法
+                    kkp_class_overrideMethod(klass, sel, typeDescription);
+                    free(typeDescription);
                 }
+                
+                // 获取 class userdata 的关联表，并压栈
+                lua_getuservalue(L, 1);
+                
+                /**
+                 此时的栈
+                 4/-1: type=table
+                 value=
+                 {
+                 }
+
+                 3/-2: type=function
+                 2/-3: type=string value=doSomeThing
+                 1/-4: type=userdata
+                 */
+                
+                // 把关联表移动到 第二个 索引上
+                lua_insert(L, 2);
+                
+                /**
+                 此时的栈
+                 
+                 4/-1: type=function
+                 3/-2: type=string value=doSomeThing
+                 2/-3: type=table
+                 value=
+                 {
+                 }
+                 1/-4: type=userdata
+                 */
+                // 把 索引 3 作为 key，索引 4 作为 value，设置到关联表上
+                lua_rawset(L, 2);
+                /**
+                 此时的栈
+                 2/-3: type=table
+                 value=
+                 {
+                 doSomeThing = function
+                 }
+                 1/-4: type=userdata
+                 */
             }
         } else {
             KKP_ERROR(L, "type must function");
@@ -441,8 +454,7 @@ static int LM_kkp_class__call(lua_State *L)
     const char *className = luaL_checkstring(L, 2);
     Class klass = objc_getClass(className);
     
-    if (!klass) {// 类不存在
-        
+    if (!klass) {// 类不存在，就创建新 OC 类
         /// 获取父类
         Class superClass;
         if (lua_isnoneornil(L, 3)) {// 如果没有指定父类，就默认父类是 NSObject
@@ -460,15 +472,9 @@ static int LM_kkp_class__call(lua_State *L)
         /// 创建新类
         klass = objc_allocateClassPair(superClass, className, 0);
         objc_registerClassPair(klass);
-        
-        /// 支持 key-value，用于处理不存在的属性 key 场景
-        
-        
     }
     
-    kkp_class_create_userdata(L, className);
-    
-    return 0;
+    return kkp_class_create_userdata(L, className);
 }
 
 static const struct luaL_Reg Methods[] = {

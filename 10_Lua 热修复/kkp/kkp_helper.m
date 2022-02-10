@@ -93,6 +93,10 @@ void kkp_stackDump(lua_State *L) {
                 if (lua_iscfunction(L, positive)) {
                     printf(" C:%p", lua_tocfunction(L, positive));
                 }
+            case LUA_TUSERDATA:
+                if (lua_isuserdata(L, positive)) {
+                    printf(" C:%p", lua_touserdata(L, positive));
+                }
             case LUA_TTABLE:
                 if (lua_istable(L, positive)) {
                     printf("\nvalue=\n{\n");
@@ -188,6 +192,15 @@ bool kkp_isBlock(id object)
     return false;
 }
 
+bool kkp_isAllocMethod(const char *methodName) {
+    if (strncmp(methodName, "alloc", 5) == 0) {
+        if (methodName[5] == '\0') return true; // It's just an alloc
+        if (isupper(methodName[5]) || isdigit(methodName[5])) return YES; // It's alloc[A-Z0-9]
+    }
+    
+    return false;
+}
+
 int kkp_callBlock(lua_State *L)
 {
     KKPInstanceUserdata* instance = lua_touserdata(L, 1);
@@ -211,19 +224,12 @@ int kkp_callBlock(lua_State *L)
     
     if (nresults > 0) {
         const char *typeDescription = [signature methodReturnType];
-        char type = kkp_removeProtocolEncodings(typeDescription);
-        if (type == @encode(id)[0] || type == @encode(Class)[0]) {
-            __unsafe_unretained id object = nil;
-            [invocation getReturnValue:&object];
-            kkp_toLuaObject(L, object);
-        } else {
-            NSUInteger size = 0;
-            NSGetSizeAndAlignment(typeDescription, &size, NULL);
-            void *buffer = malloc(size);
-            [invocation getReturnValue:buffer];
-            kkp_toLuaObjectWithType(L, typeDescription, buffer);
-            free(buffer);
-        }
+        NSUInteger size = 0;
+        NSGetSizeAndAlignment(typeDescription, &size, NULL);
+        void *buffer = malloc(size);
+        [invocation getReturnValue:buffer];
+        kkp_toLuaObjectWithBuffer(L, typeDescription, buffer);
+        free(buffer);
     }
     
     return nresults;
@@ -232,7 +238,7 @@ int kkp_callBlock(lua_State *L)
 /// lua 层调用 c 层
 /// 比如调用是这样的： self:view()，在 lua 语法糖中，self:view() == self.view(self)
 /// 所以 第一个参数是 self（userdata，如果是调用实例方法就是 实例 user data，如果是调用类方法就是 class userdata），而第一个 upvalue 则是之前捕获的 view 字符串
-int kkp_invoke(lua_State *L)
+int kkp_invoke_closure(lua_State *L)
 {
     return kkp_safeInLuaStack(L, ^int{
         KKPInstanceUserdata* instance = lua_touserdata(L, 1);
@@ -245,7 +251,7 @@ int kkp_invoke(lua_State *L)
             selectorName = [selectorName stringByReplacingOccurrencesOfString:KKP_STATIC_PREFIX withString:@""];
             
             SEL sel = NSSelectorFromString(selectorName);
-            NSMethodSignature  *signature = [klass instanceMethodSignatureForSelector:sel];
+            NSMethodSignature *signature = [klass instanceMethodSignatureForSelector:sel];
             if (signature) {
                 NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
                 invocation.target = instance->instance;
@@ -267,19 +273,12 @@ int kkp_invoke(lua_State *L)
                 
                 if (nresults > 0) {
                     const char *typeDescription = [signature methodReturnType];
-                    char type = kkp_removeProtocolEncodings(typeDescription);
-                    if (type == @encode(id)[0] || type == @encode(Class)[0]) {
-                        __unsafe_unretained id object = nil;
-                        [invocation getReturnValue:&object];
-                        kkp_toLuaObject(L, object);
-                    } else {
-                        NSUInteger size = 0;
-                        NSGetSizeAndAlignment(typeDescription, &size, NULL);
-                        void *buffer = malloc(size);
-                        [invocation getReturnValue:buffer];
-                        kkp_toLuaObjectWithType(L, typeDescription, buffer);
-                        free(buffer);
-                    }
+                    NSUInteger size = 0;
+                    NSGetSizeAndAlignment(typeDescription, &size, NULL);
+                    void *buffer = malloc(size);
+                    [invocation getReturnValue:buffer];
+                    kkp_toLuaObjectWithBuffer(L, typeDescription, buffer);
+                    free(buffer);
                 }
                 return nresults;
             } else {

@@ -1,5 +1,7 @@
+require "CustomTableViewController"
+
 -- 准备 hook 的类名
-_ENV = kkp_class("ViewController")
+_ENV = kkp_class{"ViewController"}
 
 -- 替换实例方法
 function doSomeThing()
@@ -19,6 +21,19 @@ function doSomeThing()
     -- 调用父类方法
     self:SUPERdoSomeThing()
 end
+
+function onClickGotoButton()
+    local controller = CustomTableViewController:alloc():init()
+    controller.aa = 10
+    print("lua create CustomTableViewController", controller)
+    self:navigationController():pushViewController_animated_(controller, true)
+    
+    local controller1 = CustomTableViewController:alloc():init()
+    controller1.aa = 10
+    print("lua create CustomTableViewController", controller1)
+    self:navigationController():pushViewController_animated_(controller1, true)
+end
+
 
 -- 替换静态方法
 function STATICprintHello()

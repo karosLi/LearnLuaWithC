@@ -10,4 +10,4 @@
 
 extern void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index);
 extern int kkp_toLuaObject(lua_State *L, id object);
-extern int kkp_toLuaObjectWithType(lua_State *L, const char * typeDescription, void *buffer);
+extern int kkp_toLuaObjectWithBuffer(lua_State *L, const char * typeDescription, void *buffer);

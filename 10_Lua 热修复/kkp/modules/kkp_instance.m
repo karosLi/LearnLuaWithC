@@ -29,6 +29,11 @@ void kkp_instance_pushUserdata(lua_State *L, id object)
 int kkp_instance_create_userdata(lua_State *L, id object)
 {
     return kkp_safeInLuaStack(L, ^int{
+        if (!object) {
+            lua_pushnil(L);
+            return 1;
+        }
+        
         kkp_instance_pushUserdata(L, object);
         
         KKPInstanceUserdata* instanceInTable = lua_touserdata(L, -1);// 转换栈顶数据到一个 实例 userdata 指针
@@ -106,14 +111,14 @@ static int LUserData_kkp_instance__index(lua_State *L)
                 Method superMethod = class_getInstanceMethod(superClass, sel);
                 IMP superMethodImp = method_getImplementation(superMethod);
                 char *typeDescription = (char *)method_getTypeEncoding(superMethod);
-                BOOL b = class_addMethod(klass, superSelector, superMethodImp, typeDescription);
-                assert(b);
+                // 如果是调用父类方法，就为当前类添加一个父类的实现
+                class_addMethod(klass, superSelector, superMethodImp, typeDescription);
                 return 0;
             });
         }
         
         // 捕获一个栈顶的值（此时是入参2 view 字符串，也就是 func name）作为 upvalue， 并压入一个闭包到栈顶
-        lua_pushcclosure(L, kkp_invoke, 1);
+        lua_pushcclosure(L, kkp_invoke_closure, 1);
         return 1;// 返回 闭包给到 lua 层，lua 层调用后，才会触发 kkp_invoke 这个函数
     }
     return 0;
@@ -161,6 +166,7 @@ static int LUserData_kkp_instance__call(lua_State *L)
     return 0;
 }
 
+/// 复活实例对应的 实例 user data
 static int LUserData_kkp_instance__gc(lua_State *L)
 {
     KKPInstanceUserdata* instance = lua_touserdata(L, -1);

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		7C3010A227A3C9BC008F8A5F /* kkp_runtime_helper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C3010A127A3C9BC008F8A5F /* kkp_runtime_helper.m */; };
 		7C30140027B216EB008F8A5F /* BaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C3013FF27B216EA008F8A5F /* BaseViewController.m */; };
+		7C30187827B3A992008F8A5F /* CustomTableViewController.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7C30187727B3A992008F8A5F /* CustomTableViewController.lua */; };
 		7C56D6712796A2C7007E2C56 /* test.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7C56D6702796A2C7007E2C56 /* test.lua */; };
 		7C76970527954178004F314D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C76970427954178004F314D /* AppDelegate.m */; };
 		7C76970827954178004F314D /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C76970727954178004F314D /* SceneDelegate.m */; };
@@ -70,6 +71,7 @@
 		7C3010A127A3C9BC008F8A5F /* kkp_runtime_helper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = kkp_runtime_helper.m; sourceTree = "<group>"; };
 		7C3013FE27B216EA008F8A5F /* BaseViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BaseViewController.h; sourceTree = "<group>"; };
 		7C3013FF27B216EA008F8A5F /* BaseViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BaseViewController.m; sourceTree = "<group>"; };
+		7C30187727B3A992008F8A5F /* CustomTableViewController.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = CustomTableViewController.lua; sourceTree = "<group>"; };
 		7C56D6702796A2C7007E2C56 /* test.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.lua; sourceTree = "<group>"; };
 		7C76970027954178004F314D /* LearnLua.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LearnLua.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C76970327954178004F314D /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -203,6 +205,7 @@
 			isa = PBXGroup;
 			children = (
 				7C56D6702796A2C7007E2C56 /* test.lua */,
+				7C30187727B3A992008F8A5F /* CustomTableViewController.lua */,
 			);
 			path = scripts;
 			sourceTree = "<group>";
@@ -463,6 +466,7 @@
 				7CE04E5A27A1658E00AA27E0 /* luac.lua in Resources */,
 				7CB7759C279FA0B60062CFE0 /* init.lua in Resources */,
 				7C76970E27954178004F314D /* Main.storyboard in Resources */,
+				7C30187827B3A992008F8A5F /* CustomTableViewController.lua in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,8 +1,11 @@
 local kkp_classN = require("kkp.class")
 
-function kkp_class(class_name)
+function kkp_class(options)
+    local class_name = options[1]
+    local super_class_name = options[2]
+
     -- 基于要 hook 的类名，创建 class user data
-    local class_userdata = kkp_classN.findUserData(class_name)
+    local class_userdata = kkp_classN(class_name, super_class_name)
 
     -- class 作为 key，这样在函数里就可以使用 class 关键字了，这里 class 不是变量，只是单纯的 key
     local scope = {class = class_userdata}

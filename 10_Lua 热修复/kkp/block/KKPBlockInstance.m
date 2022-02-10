@@ -77,7 +77,7 @@
                     struct S* s = (struct S*)args[idx+1];
                     kkp_toLuaObject(L, s->instance);
                 } else {
-                    kkp_toLuaObjectWithType(L, obj.UTF8String, args[idx+1]);
+                    kkp_toLuaObjectWithBuffer(L, obj.UTF8String, args[idx+1]);
                 }
             }];
             
