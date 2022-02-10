@@ -19,7 +19,7 @@ function doSomeThing()
     -- 调用原始方法
     self:ORIGdoSomeThing()
     -- 调用父类方法
-    self:SUPERdoSomeThing()
+    self.super:doSomeThing()
 end
 
 function onClickGotoButton()
@@ -27,11 +27,6 @@ function onClickGotoButton()
     controller.aa = 10
     print("lua create CustomTableViewController", controller)
     self:navigationController():pushViewController_animated_(controller, true)
-    
-    local controller1 = CustomTableViewController:alloc():init()
-    controller1.aa = 10
-    print("lua create CustomTableViewController", controller1)
-    self:navigationController():pushViewController_animated_(controller1, true)
 end
 
 

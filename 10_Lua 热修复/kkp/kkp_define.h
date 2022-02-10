@@ -12,11 +12,14 @@
 typedef struct _KKPInstanceUserdata {
     __weak id instance;// 如果是类用户数据，代表的是 class；如果是实例用户数据，代表的是 实例
     bool isClass;
+    bool isSuper;// 是否调用父类方法
     bool isBlock;
 } KKPInstanceUserdata;
 
 #define KKP_ENV_SCOPE @"_SCOPE" // 用于保存 lua 中的 _ENV 当前环境
 #define KKP_ENV_SCOPE_SELF @"self"// 用于在 lua 函数中，使用 self 关键字
+#define KKP_SUPER_KEYWORD @"super"
+#define KKP_ORIGIN_KEYWORD @"origin"
 
 #define KKP_ORIGIN_PREFIX @"ORIG"
 #define KKP_SUPER_PREFIX @"SUPER"

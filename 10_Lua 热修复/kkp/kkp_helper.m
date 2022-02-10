@@ -241,14 +241,30 @@ int kkp_callBlock(lua_State *L)
 int kkp_invoke_closure(lua_State *L)
 {
     return kkp_safeInLuaStack(L, ^int{
-        KKPInstanceUserdata* instance = lua_touserdata(L, 1);
+        KKPInstanceUserdata *instance = lua_touserdata(L, 1);
         if (instance && instance->instance) {
             Class klass = object_getClass(instance->instance);
             const char* func = lua_tostring(L, lua_upvalueindex(1));
             
+            NSString *selectorName;
+            selectorName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(func)];
             // May be you call class function user static prefix, need to be remove
-            NSString* selectorName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(func)];
             selectorName = [selectorName stringByReplacingOccurrencesOfString:KKP_STATIC_PREFIX withString:@""];
+            
+            if (instance->isSuper) {// 如果是调用父类方法，就需要为当前类添加一个父类方法实现
+                instance->isSuper = false;// 还原 super 到 false
+                NSString *superSelectorName = [NSString stringWithFormat:@"%@%@", KKP_SUPER_PREFIX, selectorName];
+                SEL superSelector = NSSelectorFromString(superSelectorName);
+                Class klass = object_getClass(instance->instance);
+                Class superClass = class_getSuperclass(klass);
+                // 获取父类的方法实现
+                Method superMethod = class_getInstanceMethod(superClass, NSSelectorFromString(selectorName));
+                IMP superMethodImp = method_getImplementation(superMethod);
+                char *typeDescription = (char *)method_getTypeEncoding(superMethod);
+                // 如果是调用父类方法，就为当前类添加一个父类的实现
+                class_addMethod(klass, superSelector, superMethodImp, typeDescription);
+                selectorName = superSelectorName;
+            }
             
             SEL sel = NSSelectorFromString(selectorName);
             NSMethodSignature *signature = [klass instanceMethodSignatureForSelector:sel];

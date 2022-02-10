@@ -80,48 +80,41 @@ int kkp_instance_create_userdata(lua_State *L, id object)
 /// 注意：此时还没有发生实际调用，只是为了寻找 view 这个属性对应的闭包函数
 static int LUserData_kkp_instance__index(lua_State *L)
 {
-    // 获取要检索的 key，此时的 key 也是函数名字，也有可能是 lua 里定义的属性名
-    const char* func = lua_tostring(L, -1);
-    if (func) {
-        /// 先获取 lua 里定义的属性值。比如 self.a
-        // 获取 实例 userdata 的关联表，并压栈
-        lua_getuservalue(L, -2);
-        // 复制 key，并压栈
-        lua_pushvalue(L, -2);
-        // 后去 key 对应的值，并放入栈顶
-        lua_rawget(L, -2);
-        if (!lua_isnil(L, -1)) {// 栈顶是否有值，有值就返回 lua 属性值
-            return 1;
-        } else {
-            // 恢复栈
-            lua_pop(L, 2);
+    return kkp_safeInLuaStack(L, ^int{
+        KKPInstanceUserdata *instanceUserData = luaL_checkudata(L, 1, KKP_INSTANCE_USER_DATA_META_TABLE);// 转换栈顶数据到一个 实例 userdata 指针
+        // 获取要检索的 key，此时的 key 也是函数名字，也有可能是 lua 里定义的属性名
+        const char* func = lua_tostring(L, 2);
+        if (func) {
+            /// 先获取 lua 里定义的属性值。比如 self.a
+            // 获取 实例 userdata 的关联表，并压栈
+            lua_getuservalue(L, 1);
+            // 复制 key，并压栈
+            lua_pushvalue(L, -2);
+            // 后去 key 对应的值，并放入栈顶
+            lua_rawget(L, -2);
+            if (!lua_isnil(L, -1)) {// 栈顶是否有值，有值就返回 lua 属性值
+                return 1;
+            } else {
+                // 恢复栈
+                lua_pop(L, 2);
+            }
+            
+            /// 再获取原生的函数闭包 self:view  获取的是一个闭包，self:view() 这个才是实际调用
+            NSString *selector = [NSString stringWithFormat:@"%s", func];
+            // if super
+            if ([selector isEqualToString:KKP_SUPER_KEYWORD]) {// 如果是父类调用，就设置临时设置 super 为 true，待实际调用完成时，需要还原成 false
+                instanceUserData->isSuper = true;
+                // super 实例 user data 压栈
+                lua_pushvalue(L, 1);
+                return 1;
+            }
+            
+            // 捕获一个栈顶的值（此时是入参2 view 字符串，也就是 func name）作为 upvalue， 并压入一个闭包到栈顶
+            lua_pushcclosure(L, kkp_invoke_closure, 1);
+            return 1;// 返回 闭包给到 lua 层，lua 层调用后，才会触发 kkp_invoke 这个函数
         }
-        
-        /// 再获取原生的函数闭包 self:view  获取的是一个闭包，self:view() 这个才是实际调用
-        NSString* selector = [NSString stringWithFormat:@"%s", func];
-        // if super
-        if ([selector hasPrefix:KKP_SUPER_PREFIX]) {
-            kkp_safeInLuaStack(L, ^int{
-                // make a super selector
-                SEL superSelector = NSSelectorFromString(selector);
-                SEL sel = NSSelectorFromString([selector substringFromIndex:[KKP_SUPER_PREFIX length]]);
-                KKPInstanceUserdata* instance = lua_touserdata(L, -2);
-                Class klass = object_getClass(instance->instance);
-                Class superClass = class_getSuperclass(klass);
-                Method superMethod = class_getInstanceMethod(superClass, sel);
-                IMP superMethodImp = method_getImplementation(superMethod);
-                char *typeDescription = (char *)method_getTypeEncoding(superMethod);
-                // 如果是调用父类方法，就为当前类添加一个父类的实现
-                class_addMethod(klass, superSelector, superMethodImp, typeDescription);
-                return 0;
-            });
-        }
-        
-        // 捕获一个栈顶的值（此时是入参2 view 字符串，也就是 func name）作为 upvalue， 并压入一个闭包到栈顶
-        lua_pushcclosure(L, kkp_invoke_closure, 1);
-        return 1;// 返回 闭包给到 lua 层，lua 层调用后，才会触发 kkp_invoke 这个函数
-    }
-    return 0;
+        return 0;
+    });
 }
 
 /// 用于保存 lua 定义的属性

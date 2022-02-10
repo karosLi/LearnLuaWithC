@@ -1,6 +1,7 @@
 _ENV = kkp_class{"CustomTableViewController", "UIViewController"}
 
 function init()
+    self.super.init()
     print("CustomTableViewController init", self)
     self.trends = {}
     self.aa = 0;
