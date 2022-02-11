@@ -8,10 +8,14 @@
 #import "ViewController.h"
 #import <objc/runtime.h>
 
-@interface ViewController ()
+@interface ViewController () {
+    NSInteger _aInteger;
+}
 
 @property(nonatomic, assign) NSInteger age;
 @property(nonatomic, strong) UIButton *gotoButton;
+
+@property (nonatomic) int index;
 
 @end
 
@@ -19,19 +23,22 @@
 
 - (instancetype)init {
     self = [super init];
-    
+    _aInteger = 0;
     return self;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-//    [self.navigationController pushViewController:[UIViewController new] animated:YES];
-    
     [self setup];
     [self doSomeThing:@"做饭"];
-//    [ViewController printHello];
     NSLog(@"ViewController 年龄 %zd", self.age);
+    
+    [self blockOneArg:^int(int i) {
+        return i;
+    }];
+    NSLog(@"ViewController blockOneArg 期望的 index 是 12，目前 index 是 %d", self.index);
+    NSLog(@"ViewController 私有变量 _aInteger %ld", _aInteger);
 }
 
 - (void)setup {
@@ -60,9 +67,10 @@
 }
 
 - (void)onClickGotoButton {
-//    self.navigationController
-    
-//    self.view
+}
+
+- (void)blockOneArg:(int(^)(int i))block {
+     self.index = block(11);
 }
 
 @end

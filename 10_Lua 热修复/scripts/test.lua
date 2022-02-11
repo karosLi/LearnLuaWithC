@@ -16,6 +16,9 @@ function doSomeThing_(thingName)
     -- 动态添加 设置/获取 原生 属性
     self:setSex_("男")
     print("获取 动态 原生 属性 sex", self:sex())
+    -- 设置/获取 原生 私有 变量
+    self:setIvar_withInteger_("_aInteger", 666)
+    print("获取 原生 私有变量 _aInteger", self:getIvarInteger_("_aInteger"))
     -- 调用实例方法
     print("print in lua", self:getHello())
     -- 调用当前类的静态方法
@@ -27,6 +30,7 @@ function doSomeThing_(thingName)
     self.super:doSomeThing_(thingName)
 end
 
+-- 添加新类
 function onClickGotoButton()
     local controller = CustomTableViewController:alloc():init()
     controller.aa = 10
@@ -34,6 +38,10 @@ function onClickGotoButton()
     self:navigationController():pushViewController_animated_(controller, true)
 end
 
+-- 替换带有 block 参数的实例方法
+function blockOneArg_(block)
+    self:setIndex_(block(12))
+end
 
 -- 替换静态方法
 function STATICprintHello()

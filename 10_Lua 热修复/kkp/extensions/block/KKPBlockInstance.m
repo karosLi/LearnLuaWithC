@@ -21,14 +21,22 @@
     return ^() {
         lua_State* L = kkp_currentLuaState();
         kkp_safeInLuaStack(L, ^int{
+            /// 获取 实例 user data 并压栈
             luaL_getmetatable(L, KKP_INSTANCE_USER_DATA_LIST_TABLE);
             lua_pushlightuserdata(L, (__bridge void *)(self));
             lua_rawget(L, -2);
             lua_remove(L, -2); // remove userdataTable
             
+            // 获取 实例 userdata 的关联表，并压栈
+            lua_getuservalue(L, -1);
+            // 压入key
+            lua_pushstring(L, "function");
+            // 获取 key 对应的 lua 函数，并压栈
+            lua_rawget(L, -2);
+            
             // get function
 //            lua_getfenv(L, -1);
-            lua_getfield(L, -1, "f");
+//            lua_getfield(L, -1, "f");
             
             if (!lua_isnil(L, -1) && lua_type(L, -1) == LUA_TFUNCTION) {
                 if(lua_pcall(L, 0, 0, 0) != 0){
@@ -85,7 +93,7 @@
             
             if (returnType == nil) {
                 if(lua_pcall(L, (int)paramNum, 0, 0) != 0){
-                    NSString* log = [NSString stringWithFormat:@"[SPA] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
+                    NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
                     NSLog(@"%@", log);
                     if (kkp_getSwizzleCallback()) {
                         kkp_getSwizzleCallback()(NO, log);
@@ -95,7 +103,7 @@
 
             } else {
                 if(lua_pcall(L, (int)paramNum, 1, 0) != 0){
-                NSString* log = [NSString stringWithFormat:@"[SPA] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
+                NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
                     NSLog(@"%@", log);
                     if (kkp_getSwizzleCallback()) {
                         kkp_getSwizzleCallback()(NO, log);

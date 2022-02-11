@@ -160,9 +160,10 @@ static int LUserData_kkp_instance__newIndex(lua_State *L)
     return 0;
 }
 
+/// 用于 lua 实际调用原生 block
 static int LUserData_kkp_instance__call(lua_State *L)
 {
-    KKPInstanceUserdata* instance = lua_touserdata(L, 1);
+    KKPInstanceUserdata *instance = lua_touserdata(L, 1);
     id object = instance->instance;
     if (kkp_isBlock(object)) {
         return kkp_callBlock(L);

@@ -220,6 +220,7 @@ int kkp_callBlock(lua_State *L)
         [invocation setArgument:pReturnValue atIndex:i];
     }
     
+    /// 调用 block 实现
     [invocation invoke];
     
     if (nresults > 0) {
@@ -340,7 +341,8 @@ int kkp_invoke_closure(lua_State *L)
                         return 0;
                     } else if (argCount == 0 && kkp_propKeyExists(propName)) {// 说明调用的是获取属性，属性 key 一定要存在，只有先调用 set 属性方法，才会存在 key
                         id value = objc_getAssociatedObject(instance->instance, kkp_propKey(propName));
-                        return kkp_toLuaObject(L, value);
+                        kkp_toLuaObject(L, value);
+                        return 1;
                     }
                 }
                 

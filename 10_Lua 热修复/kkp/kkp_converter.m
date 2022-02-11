@@ -61,7 +61,7 @@ static void *createOneKeyHoderObjectPtr(lua_State *L, const char type, id value)
         success = class_addIvar(klass, "key", size, log2(alingment), &type);
         
         if (!success) {
-            luaL_error(L, "[SPA] create %c number class failed !", type);
+            luaL_error(L, "[KKP] create %c number class failed !", type);
             return NULL;
         }
         
@@ -70,6 +70,7 @@ static void *createOneKeyHoderObjectPtr(lua_State *L, const char type, id value)
     id __autoreleasing object = [[klass alloc] init];
     [object setValue:value forKey:@"key"];
     void* p = (__bridge void *)object;
+    /// isa 指针 + 指针长度 得到就是 第一个 实例变量的地址
     p = p + sizeof(void *);
     return p;
 }
@@ -296,44 +297,56 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
                 NSMutableArray* argsType = [NSMutableArray array];
                 
                 KKPBlockInstance* instance = [[KKPBlockInstance alloc] init];
-                
-                kkp_safeInLuaStack(L, ^int{
-//                    lua_getfenv(L, index);
-                    
-                    // get return type
-                    lua_getfield(L, -1, "return_type");
-                    
-                    const char* return_type = lua_tostring(L, -1);
-                    if (return_type) {
-                        returnType = [NSString stringWithUTF8String:return_type];
-                    }
-                    // get params type
-                    lua_getfield(L, -2, "args_type");
-                    
-                    if (!lua_isnil(L, -1)) {
-                        lua_pushnil(L);
-                        while (lua_next(L, -2)) {
-                            int type = lua_type(L, -1);
-                            if (type == LUA_TSTRING) {
-                                const char * arg_type = lua_tostring(L, -1);
-                                if (arg_type) {
-                                    [argsType addObject:[NSString stringWithUTF8String:arg_type]];
-                                }
-                                lua_pop(L, 1);
-                            }
-                        }
-                    }
-                    
-                    return 0;
-                });
+//                kkp_stackDump(L);
+//                kkp_safeInLuaStack(L, ^int{
+////                    lua_getfenv(L, index);
+//
+//                    // get return type
+//                    lua_getfield(L, -1, "return_type");
+//
+//                    const char* return_type = lua_tostring(L, -1);
+//                    if (return_type) {
+//                        returnType = [NSString stringWithUTF8String:return_type];
+//                    }
+//                    // get params type
+//                    lua_getfield(L, -2, "args_type");
+//
+//                    if (!lua_isnil(L, -1)) {
+//                        lua_pushnil(L);
+//                        while (lua_next(L, -2)) {
+//                            int type = lua_type(L, -1);
+//                            if (type == LUA_TSTRING) {
+//                                const char * arg_type = lua_tostring(L, -1);
+//                                if (arg_type) {
+//                                    [argsType addObject:[NSString stringWithUTF8String:arg_type]];
+//                                }
+//                                lua_pop(L, 1);
+//                            }
+//                        }
+//                    }
+//
+//                    return 0;
+//                });
                 
                 kkp_instance_create_userdata(L, instance);
                 
-                // set lua function to env
-                lua_newtable(L);
-                lua_pushstring(L, "f");
+                /// 设置 lua 函数到 实例 user data 的 关联表 里
+                // 获取 实例 userdata 的关联表，并压栈
+                lua_getuservalue(L, -1);
+                // 压入key
+                lua_pushstring(L, "function");
+                // 把函数压栈
                 lua_pushvalue(L, index);
-                lua_settable(L, -3);
+                // 把函数保存到关联表里，相当于 associated_table["_SCOPE"] = scope
+                lua_rawset(L, -3);
+                // pop 关联表
+                lua_pop(L, 1);
+                
+//                // 设置 lua 函数到 新表里，然后把 新表 设置到 实例 user data 的 关联表 里
+//                lua_newtable(L);
+//                lua_pushstring(L, "f");
+//                lua_pushvalue(L, index);
+//                lua_settable(L, -3);
 //                lua_setfenv(L, -2);
                 
                 if (returnType.length == 0 && argsType.count == 0) {
