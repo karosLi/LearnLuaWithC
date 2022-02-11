@@ -328,12 +328,14 @@ int kkp_invoke_closure(lua_State *L)
                     }
                     
                     NSString *propName = selectorName;
+                    propName = [propName stringByReplacingOccurrencesOfString:@"set" withString:@""];
+                    propName = [propName stringByReplacingOccurrencesOfString:@":" withString:@""];
+                    propName = [propName lowercaseString];
+                    propName = [NSString stringWithFormat:@"%@_%@", NSStringFromClass(klass), propName];
                     if (argCount == 1 && [selectorName hasPrefix:@"set"]) {// 说明调用的是设置属性
                         void *argValue = kkp_toOCObject(L, "@", 2);
                         id value = *(__unsafe_unretained id *)argValue;
-                        propName = [propName stringByReplacingOccurrencesOfString:@"set" withString:@""];
-                        propName = [propName stringByReplacingOccurrencesOfString:@":" withString:@""];
-                        propName = [propName lowercaseString];
+                        
                         objc_setAssociatedObject(instance->instance, kkp_propKey(propName), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                         return 0;
                     } else if (argCount == 0 && kkp_propKeyExists(propName)) {// 说明调用的是获取属性，属性 key 一定要存在，只有先调用 set 属性方法，才会存在 key
