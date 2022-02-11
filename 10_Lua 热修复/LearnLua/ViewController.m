@@ -29,7 +29,7 @@
 //    [self.navigationController pushViewController:[UIViewController new] animated:YES];
     
     [self setup];
-    [self doSomeThing];
+    [self doSomeThing:@"做饭"];
 //    [ViewController printHello];
     NSLog(@"ViewController 年龄 %zd", self.age);
 }
@@ -43,8 +43,8 @@
     self.gotoButton.frame = CGRectMake(100, 200, 100, 40);
 }
 
-- (void)doSomeThing {
-    NSLog(@"ViewController 原始调用 doSomeThing");
+- (void)doSomeThing:(NSString *)thingName {
+    NSLog(@"ViewController 原始调用 doSomeThing %@", thingName);
 }
 
 - (NSString *)getHello {

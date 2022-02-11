@@ -160,7 +160,7 @@ int kkp_class_create_userdata(lua_State *L, const char *klass_name)
     });
 }
 
-/// 通过 hook oc 的 实例方法和类方法来调用 lua 函数
+/// 通过 hook oc 的 实例方法和类方法来调用 lua 函数，并把 lua 函数调用结果返回到原生
 static int kkp_class_callLuaFunction(lua_State *L, id self, SEL selector, NSInvocation *invocation)
 {
     return kkp_safeInLuaStack(L, ^int{
@@ -296,7 +296,7 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
             lua_pushstring(L, [KKP_ENV_SCOPE UTF8String]);
             // 把环境值压栈
             lua_pushvalue(L, 3);
-            // 把环境值保存到关联表里，相当于 associated_table["_scope"] = scope
+            // 把环境值保存到关联表里，相当于 associated_table["_SCOPE"] = scope
             lua_rawset(L, -3);
         } else if (lua_type(L, 3) == LUA_TFUNCTION) {// 只能 hook 函数
             KKPInstanceUserdata *userdata = lua_touserdata(L, 1);

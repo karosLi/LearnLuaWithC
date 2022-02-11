@@ -17,8 +17,8 @@
     [super viewDidLoad];
 }
 
-- (void)doSomeThing {
-    NSLog(@"BaseViewController 父类调用 doSomeThing");
+- (void)doSomeThing:(NSString *)thindName {
+    NSLog(@"BaseViewController 父类调用 doSomeThing %@", thindName);
 }
 
 @end

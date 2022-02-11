@@ -409,15 +409,26 @@ int kkp_toLuaObjectWithBuffer(lua_State *L, const char * typeDescription, void *
             lua_pushnil(L);
         } else if (type == _C_PTR) {// 返回值是 指针 类型
             lua_pushlightuserdata(L, *(void **)buffer);
-        } else if (type == @encode(bool)[0]) {// 返回值是 布尔 类型
+        }
+        
+        KKP_LUA_NUMBER_CONVERT(char)
+        KKP_LUA_NUMBER_CONVERT(unsigned char)
+        KKP_LUA_NUMBER_CONVERT(int)
+        KKP_LUA_NUMBER_CONVERT(short)
+        KKP_LUA_NUMBER_CONVERT(long)
+        KKP_LUA_NUMBER_CONVERT(long long)
+        KKP_LUA_NUMBER_CONVERT(unsigned int)
+        KKP_LUA_NUMBER_CONVERT(unsigned long)
+        KKP_LUA_NUMBER_CONVERT(unsigned long long)
+        KKP_LUA_NUMBER_CONVERT(float)
+        KKP_LUA_NUMBER_CONVERT(double)
+        
+        else if (type == _C_BOOL) {// 返回值是 布尔 类型
             lua_pushboolean(L, *(bool *)buffer);
-        } else if (type == @encode(char *)[0] || type == @encode(SEL)[0]) {// 返回值是 字符串/选择器 类型
+        } else if (type == _C_CHARPTR) {// 返回值是 字符串 类型
             lua_pushstring(L, *(char **)buffer);
-        } else if (type == @encode(char)[0]) {// 返回值是 字符 类型
-            char s[2];
-            s[0] = *(char *)buffer;
-            s[1] = '\0';
-            lua_pushstring(L, s);
+        } else if (type == _C_SEL) {// 返回值是 选择器 类型
+            lua_pushstring(L, sel_getName(*(SEL *)buffer));
         } else if (type == _C_ID) {// 返回值是 OC 对象 类型
             /**
              A bridged cast is a C-style cast annotated with one of three keywords:
@@ -434,24 +445,13 @@ int kkp_toLuaObjectWithBuffer(lua_State *L, const char * typeDescription, void *
              */
             
             id instance = *((__unsafe_unretained id *)buffer);
-            kkp_instance_create_userdata(L, instance);
+            kkp_toLuaObject(L, instance);
         } else if (type == _C_CLASS) {// 返回值是 class 类型
             id instance = *((__unsafe_unretained id *)buffer);
             kkp_class_create_userdata(L, NSStringFromClass(instance).UTF8String);
         } else if (type == _C_STRUCT_B) {// 返回值是 结构体 类型
             toLuaTableFromStruct(L, typeDescription, buffer);
         }
-        KKP_LUA_NUMBER_CONVERT(char)
-        KKP_LUA_NUMBER_CONVERT(unsigned char)
-        KKP_LUA_NUMBER_CONVERT(int)
-        KKP_LUA_NUMBER_CONVERT(short)
-        KKP_LUA_NUMBER_CONVERT(long)
-        KKP_LUA_NUMBER_CONVERT(long long)
-        KKP_LUA_NUMBER_CONVERT(unsigned int)
-        KKP_LUA_NUMBER_CONVERT(unsigned long)
-        KKP_LUA_NUMBER_CONVERT(unsigned long long)
-        KKP_LUA_NUMBER_CONVERT(float)
-        KKP_LUA_NUMBER_CONVERT(double)
         else {
             NSString* error = [NSString stringWithFormat:@"Unable to convert Obj-C type with type description '%s'", typeDescription];
             KKP_ERROR(L, error.UTF8String);

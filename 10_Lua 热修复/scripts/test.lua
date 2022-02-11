@@ -4,7 +4,9 @@ require "CustomTableViewController"
 _ENV = kkp_class{"ViewController"}
 
 -- 替换实例方法
-function doSomeThing()
+function doSomeThing_(thingName)
+    -- 打印原生入参
+    print("打印原生入参 thingName", thingName)
     -- 设置/获取 lua 属性
     self.aa = "hh"
     print("获取 lua 属性 aa", self.aa)
@@ -20,9 +22,9 @@ function doSomeThing()
     ViewController:printHello()
     self:view():setBackgroundColor_(UIColor:redColor())
     -- 调用原始方法
-    self.origin:doSomeThing()
+    self.origin:doSomeThing_(thingName)
     -- 调用父类方法
-    self.super:doSomeThing()
+    self.super:doSomeThing_(thingName)
 end
 
 function onClickGotoButton()
