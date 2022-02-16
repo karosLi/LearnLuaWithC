@@ -104,6 +104,9 @@ static void blockIMP(ffi_cif *cif, void *ret, void **args, void *userdata) {
     });
     
     convertReturnValue(returnType, return_buffer, ret);
+    if (return_buffer != NULL) {
+        free(return_buffer);
+    }
     return;
 }
 

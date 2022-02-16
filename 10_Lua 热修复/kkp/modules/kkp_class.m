@@ -111,6 +111,7 @@ static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL sel
                 void *pReturnValue = kkp_toOCObject(L, [signature methodReturnType], -1);
                 if (pReturnValue != NULL) {
                     [invocation setReturnValue:pReturnValue];
+                    free(pReturnValue);
                 }
             }
         } else {

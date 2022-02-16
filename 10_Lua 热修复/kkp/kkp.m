@@ -194,6 +194,9 @@ static int _log(lua_State *L)
                 kkp_getLogCallback()(@"null");
             }
         }
+        if (s != NULL) {
+            free(s);
+        }
         return 0;
     });
 }
@@ -208,6 +211,7 @@ static int toId(lua_State *L)
         struct S* s = kkp_toOCObject(L, "@", -1);
         if (s && s->instance) {
             kkp_instance_create_userdata(L, s->instance);
+            free(s);
             return 1;
         } else {
             KKP_ERROR(L, "the param type not support !");
@@ -241,6 +245,10 @@ static int _dispatch_after(lua_State *L)
     struct S* s = (struct S*)kkp_toOCObject(L, "@", -1);
     if (s && s->block) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(seconds * NSEC_PER_SEC)), dispatch_get_main_queue(), s->block);
+    }
+    
+    if (s != NULL) {
+        free(s);
     }
     return 0;
 }

@@ -209,6 +209,10 @@ int kkp_callBlock(lua_State *L)
         void *pReturnValue = kkp_toOCObject(L, typeDescription, -1);
         lua_pop(L, 1);
         [invocation setArgument:pReturnValue atIndex:i];
+        
+        if (pReturnValue != NULL) {
+            free(pReturnValue);
+        }
     }
     
     /// 调用 block 实现
@@ -296,6 +300,10 @@ int kkp_invoke_closure(lua_State *L)
                     } else {
                         [invocation setArgument:argValue atIndex:i];
                     }
+                    
+                    if (argValue != NULL) {
+                        free(argValue);
+                    }
                 }
                 [invocation invoke];
                 
@@ -329,6 +337,10 @@ int kkp_invoke_closure(lua_State *L)
                         
                         __unsafe_unretained id value;
                         value = (__bridge id)(*(void **)argValue);
+                        
+                        if (argValue != NULL) {
+                            free(argValue);
+                        }
                         
                         objc_setAssociatedObject(instance->instance, kkp_propKey(propName), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                         return 0;
