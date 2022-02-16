@@ -6,7 +6,7 @@
 //  Copyright © 2020 TianyuBing. All rights reserved.
 //
 
-#import "KKPBlockHelper.h"
+#import "KKPBlockWrapper.h"
 #import <JavaScriptCore/JavaScriptCore.h>
 #import <objc/message.h>
 #import "ffi.h"
@@ -17,7 +17,7 @@
 #import "kkp_instance.h"
 #import "kkp_converter.h"
 
-@interface KKPBlockHelper () {
+@interface KKPBlockWrapper () {
     ffi_cif *_cifPtr;
     ffi_type **_args;
     ffi_closure *_closure;
@@ -32,7 +32,7 @@
 
 @end
 
-@implementation KKPBlockHelper
+@implementation KKPBlockWrapper
 
 void copy_helper(struct KKPKitBlock *dst, struct KKPKitBlock *src) {
     // do not copy anything is this function! just retain if need.
@@ -44,7 +44,7 @@ void dispose_helper(struct KKPKitBlock *src) {
 }
 
 static void blockIMP(ffi_cif *cif, void *ret, void **args, void *userdata) {
-    KKPBlockHelper *userInfo = (__bridge KKPBlockHelper *)userdata;  // 不可以进行释放
+    KKPBlockWrapper *userInfo = (__bridge KKPBlockWrapper *)userdata;  // 不可以进行释放
     NSString *typeEncoding = userInfo.typeEncoding;
     NSMethodSignature *signature = [NSMethodSignature signatureWithObjCTypes:typeEncoding.UTF8String];
     const char * returnType = signature.methodReturnType;
@@ -97,7 +97,6 @@ static void blockIMP(ffi_cif *cif, void *ret, void **args, void *userdata) {
                 }
                 NSCAssert(NO, log);
             }
-            kkp_stackDump(L);
             return_buffer = kkp_toOCObject(L, returnType, -1);
         }
         

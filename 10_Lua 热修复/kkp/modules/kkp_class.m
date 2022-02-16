@@ -15,7 +15,7 @@
 #import "kkp_runtime_helper.h"
 #import "kkp_instance.h"
 #import "kkp_converter.h"
-#import "KKPBlockHelper.h"
+#import "KKPBlockWrapper.h"
 
 static int kkp_class_callLuaFunction(lua_State *L, id self, SEL selector, NSInvocation *invocation);
 static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL selector, NSInvocation *invocation);
@@ -456,7 +456,7 @@ static int LF_kkp_class_define_block(lua_State *L)
         }
         
         NSString *realTypeEncoding = kkp_create_real_signature(typeEncoding, true);
-        __unused __autoreleasing KKPBlockHelper *block = [[KKPBlockHelper alloc] initWithTypeEncoding:realTypeEncoding state:L funcIndex:1];
+        __unused __autoreleasing KKPBlockWrapper *block = [[KKPBlockWrapper alloc] initWithTypeEncoding:realTypeEncoding state:L funcIndex:1];
         return 1;
     });
 }

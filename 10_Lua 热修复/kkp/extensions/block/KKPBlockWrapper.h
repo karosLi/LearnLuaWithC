@@ -9,8 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "lua.h"
 
-NS_ASSUME_NONNULL_BEGIN
-
 typedef enum {
     // Set to true on blocks that have captures (and thus are not true
     // global blocks) but are known not to escape for various other
@@ -28,11 +26,12 @@ typedef enum {
 
 /// block 结构 https://blog.csdn.net/hengsf123456/article/details/116990585
 struct KKPKitBlock {
-    void *isa;
+    void *isa; // initialized to &_NSConcreteStackBlock or &_NSConcreteGlobalBlock
     int flags;
     int reserved;
-    void *invoke;
+    void (*invoke)(void *, ...);
     struct KKPKitBlockDescriptor *descriptor;
+    // imported variables
     void *wrapper;
 };
 
@@ -52,12 +51,12 @@ struct KKPKitBlockDescriptor {
     };
 };
 
-@class JSValue;
-@interface KKPBlockHelper : NSObject
+/// 用于包括 lua 函数
+@interface KKPBlockWrapper : NSObject
 - (id)initWithTypeEncoding:(NSString *)typeEncoding state:(lua_State *)state funcIndex:(int)funcIndex;
 
+/// hook oc block invoke 函数，并返回一个 block 指针
 - (void *)blockPtr;
 
 @end
 
-NS_ASSUME_NONNULL_END

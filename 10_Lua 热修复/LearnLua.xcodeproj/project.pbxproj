@@ -52,9 +52,7 @@
 		7C76979727954217004F314D /* ltm.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C76976627954217004F314D /* ltm.c */; };
 		7C76979827954217004F314D /* ldo.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C76976827954217004F314D /* ldo.c */; };
 		7C76979A2795455D004F314D /* luac.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C7697992795455D004F314D /* luac.c */; };
-		7C9DEBB0279FF0A70029B30D /* KKPDynamicBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C9DEBAF279FF0A70029B30D /* KKPDynamicBlock.m */; };
 		7C9DEBB3279FF0B60029B30D /* KKPBlockDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C9DEBB2279FF0B60029B30D /* KKPBlockDescription.m */; };
-		7C9DEBB6279FF0C70029B30D /* KKPBlockInstance.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C9DEBB5279FF0C70029B30D /* KKPBlockInstance.m */; };
 		7CB7759C279FA0B60062CFE0 /* init.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CB7759B279FA0B60062CFE0 /* init.lua */; };
 		7CB7759F279FA4350062CFE0 /* kkp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CB7759E279FA4350062CFE0 /* kkp.m */; };
 		7CB775A3279FDFE80062CFE0 /* kkp_helper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CB775A2279FDFE80062CFE0 /* kkp_helper.m */; };
@@ -64,7 +62,7 @@
 		7CD5867127B66E68000D8AED /* NSObject+KKPIvarAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CD5867027B66E68000D8AED /* NSObject+KKPIvarAccess.m */; };
 		7CD5867D27B66F00000D8AED /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CD5867C27B66F00000D8AED /* libffi.a */; };
 		7CD5868127B77597000D8AED /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CD5868027B77597000D8AED /* ExternalAccessory.framework */; };
-		7CD5868427B78F2A000D8AED /* KKPBlockHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CD5868327B78F2A000D8AED /* KKPBlockHelper.m */; };
+		7CD5868427B78F2A000D8AED /* KKPBlockWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CD5868327B78F2A000D8AED /* KKPBlockWrapper.m */; };
 		7CE04D3827A1329000AA27E0 /* kkpClass.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CE04D3727A1329000AA27E0 /* kkpClass.lua */; };
 		7CE04E5A27A1658E00AA27E0 /* luac.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CE04E5927A1658E00AA27E0 /* luac.lua */; };
 /* End PBXBuildFile section */
@@ -150,12 +148,8 @@
 		7C76976827954217004F314D /* ldo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ldo.c; sourceTree = "<group>"; };
 		7C76976927954217004F314D /* lundump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lundump.h; sourceTree = "<group>"; };
 		7C7697992795455D004F314D /* luac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = luac.c; sourceTree = "<group>"; };
-		7C9DEBAE279FF0A70029B30D /* KKPDynamicBlock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KKPDynamicBlock.h; sourceTree = "<group>"; };
-		7C9DEBAF279FF0A70029B30D /* KKPDynamicBlock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KKPDynamicBlock.m; sourceTree = "<group>"; };
 		7C9DEBB1279FF0B60029B30D /* KKPBlockDescription.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KKPBlockDescription.h; sourceTree = "<group>"; };
 		7C9DEBB2279FF0B60029B30D /* KKPBlockDescription.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KKPBlockDescription.m; sourceTree = "<group>"; };
-		7C9DEBB4279FF0C70029B30D /* KKPBlockInstance.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KKPBlockInstance.h; sourceTree = "<group>"; };
-		7C9DEBB5279FF0C70029B30D /* KKPBlockInstance.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KKPBlockInstance.m; sourceTree = "<group>"; };
 		7CB77594279F9F890062CFE0 /* compile-stdlib.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "compile-stdlib.sh"; sourceTree = "<group>"; };
 		7CB7759B279FA0B60062CFE0 /* init.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = init.lua; sourceTree = "<group>"; };
 		7CB7759D279FA4350062CFE0 /* kkp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kkp.h; sourceTree = "<group>"; };
@@ -183,8 +177,8 @@
 		7CD5867C27B66F00000D8AED /* libffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libffi.a; sourceTree = "<group>"; };
 		7CD5867E27B77597000D8AED /* LearnLua.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LearnLua.entitlements; sourceTree = "<group>"; };
 		7CD5868027B77597000D8AED /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
-		7CD5868227B78F2A000D8AED /* KKPBlockHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KKPBlockHelper.h; sourceTree = "<group>"; };
-		7CD5868327B78F2A000D8AED /* KKPBlockHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockHelper.m; sourceTree = "<group>"; };
+		7CD5868227B78F2A000D8AED /* KKPBlockWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KKPBlockWrapper.h; sourceTree = "<group>"; };
+		7CD5868327B78F2A000D8AED /* KKPBlockWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockWrapper.m; sourceTree = "<group>"; };
 		7CE04D3727A1329000AA27E0 /* kkpClass.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = kkpClass.lua; sourceTree = "<group>"; };
 		7CE04E5927A1658E00AA27E0 /* luac.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = luac.lua; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -384,14 +378,10 @@
 			isa = PBXGroup;
 			children = (
 				7C9DEB9D279FF06B0029B30D /* libffi */,
-				7CD5868227B78F2A000D8AED /* KKPBlockHelper.h */,
-				7CD5868327B78F2A000D8AED /* KKPBlockHelper.m */,
-				7C9DEBAE279FF0A70029B30D /* KKPDynamicBlock.h */,
-				7C9DEBAF279FF0A70029B30D /* KKPDynamicBlock.m */,
+				7CD5868227B78F2A000D8AED /* KKPBlockWrapper.h */,
+				7CD5868327B78F2A000D8AED /* KKPBlockWrapper.m */,
 				7C9DEBB1279FF0B60029B30D /* KKPBlockDescription.h */,
 				7C9DEBB2279FF0B60029B30D /* KKPBlockDescription.m */,
-				7C9DEBB4279FF0C70029B30D /* KKPBlockInstance.h */,
-				7C9DEBB5279FF0C70029B30D /* KKPBlockInstance.m */,
 			);
 			path = block;
 			sourceTree = "<group>";
@@ -559,7 +549,6 @@
 				7C76979127954217004F314D /* ltablib.c in Sources */,
 				7C76979327954217004F314D /* lbaselib.c in Sources */,
 				7C76978E27954217004F314D /* lmem.c in Sources */,
-				7C9DEBB6279FF0C70029B30D /* KKPBlockInstance.m in Sources */,
 				7C76978327954217004F314D /* lstring.c in Sources */,
 				7C76979227954217004F314D /* lapi.c in Sources */,
 				7C76978D27954217004F314D /* lutf8lib.c in Sources */,
@@ -576,12 +565,11 @@
 				7C76977727954217004F314D /* liolib.c in Sources */,
 				7C76977827954217004F314D /* lopcodes.c in Sources */,
 				7C76978827954217004F314D /* ldump.c in Sources */,
-				7C9DEBB0279FF0A70029B30D /* KKPDynamicBlock.m in Sources */,
 				7C76979827954217004F314D /* ldo.c in Sources */,
 				7CB775A3279FDFE80062CFE0 /* kkp_helper.m in Sources */,
 				7C76978927954217004F314D /* loslib.c in Sources */,
 				7C76977D27954217004F314D /* lvm.c in Sources */,
-				7CD5868427B78F2A000D8AED /* KKPBlockHelper.m in Sources */,
+				7CD5868427B78F2A000D8AED /* KKPBlockWrapper.m in Sources */,
 				7C76979627954217004F314D /* llex.c in Sources */,
 				7C76977927954217004F314D /* lstate.c in Sources */,
 				7C76971627954179004F314D /* main.m in Sources */,

@@ -14,7 +14,7 @@
 #import "kkp_helper.h"
 #import "kkp_class.h"
 #import "kkp_instance.h"
-#import "KKPBlockHelper.h"
+#import "KKPBlockWrapper.h"
 
 
 /// 根据 Class 字符串拼接的方法签名, 构造真实方法签名
@@ -312,8 +312,8 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
             {
                 KKPInstanceUserdata *userdata = lua_touserdata(L, index);
                 if (userdata && userdata->instance) {
-                    if ([userdata->instance isKindOfClass:KKPBlockHelper.class]) {
-                        instance = (__bridge id)((KKPBlockHelper *)userdata->instance).blockPtr;
+                    if ([userdata->instance isKindOfClass:KKPBlockWrapper.class]) {
+                        instance = (__bridge id)((KKPBlockWrapper *)userdata->instance).blockPtr;
                     } else {
                         instance = userdata->instance;
                     }
@@ -325,45 +325,6 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
             }
             case LUA_TLIGHTUSERDATA: {
                 instance = (__bridge id)lua_touserdata(L, -1);
-                break;
-            }
-            case LUA_TFUNCTION:
-            {
-                /// 用于把 lua 里定义的 kkp_block 函数转换成 oc block (block 里面包裹着 lua 函数) 指针，并返回给原生调用
-                
-                __block NSString *typeEncoding = nil;
-                kkp_safeInLuaStack(L, ^int{
-                    // 获取 lua 函数的关联表
-                    lua_getuservalue(L, index);
-                    // 获取返回类型
-                    lua_rawgetp(L, -1, "type_encoding");
-                    const char* type_encoding = lua_tostring(L, -1);
-                    if (type_encoding) {
-                        typeEncoding = [NSString stringWithUTF8String:type_encoding];
-                    }
-
-                    return 0;
-                });
-//
-//                NSString *realTypeEncoding = kkp_create_real_signature(typeEncoding, true);
-//                KKPBlockHelper *block = [[KKPBlockHelper alloc] initWithTypeEncoding:realTypeEncoding];
-//                /// 给 KKPBlockInstance 创建一个对应的 实例 user data
-//                /// 目的是把 lua 函数设置到 实例 user data 的关联表里，当原生拿到 oc block 在实际调用时会调用到 包裹的 lua 函数，而 lua 函数的获取就靠下面的设置了
-//                kkp_instance_create_userdata(L, block);
-//
-//                /// 设置 lua 函数到 实例 user data 的 关联表 里
-//                // 获取 实例 userdata 的关联表，并压栈
-//                lua_getuservalue(L, -1);
-//                // 压入key
-//                lua_pushstring(L, "f");
-//                // 把函数压栈
-//                lua_pushvalue(L, 1);
-//                // 把函数保存到关联表里，相当于 associated_table["f"] = lua 函数
-//                lua_rawset(L, -3);
-//                // pop 关联表
-//                lua_pop(L, 1);
-//
-//                instance = (__bridge id)block.blockPtr;
                 break;
             }
             default:
@@ -452,7 +413,7 @@ int kkp_toLuaObject(lua_State *L, id object)
                 kkp_toLuaObject(L, obj);
                 lua_settable(L, -3);
             }];
-        } else if ([object isKindOfClass:[KKPBlockHelper class]]) {
+        } else if ([object isKindOfClass:[KKPBlockWrapper class]]) {
             kkp_instance_pushUserdata(L, object);
             if (lua_isnil(L, -1)) {
                 luaL_error(L, "Could not get userdata associated with KKPBlockHelper");

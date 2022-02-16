@@ -6,6 +6,7 @@
 //
 
 #import "KKPBlockDescription.h"
+#import "KKPBlockWrapper.h"
 
 @implementation KKPBlockDescription
 
@@ -14,16 +15,16 @@
     if (self = [super init]) {
         _block = block;
         
-        struct CTBlockLiteral *blockRef = (__bridge struct CTBlockLiteral *)block;
-        _flags = blockRef->flags;
+        struct KKPKitBlock *blockRef = (__bridge struct KKPKitBlock *)block;
+        KKPKit_BLOCK_FLAGS flags = blockRef->flags;
         _size = blockRef->descriptor->size;
         
-        if (_flags & CTBlockDescriptionFlagsHasSignature) {
+        if (flags & KKPKit_BLOCK_HAS_SIGNATURE) {
             void *signatureLocation = blockRef->descriptor;
             signatureLocation += sizeof(unsigned long int);
             signatureLocation += sizeof(unsigned long int);
             
-            if (_flags & CTBlockDescriptionFlagsHasCopyDispose) {
+            if (flags & KKPKit_BLOCK_HAS_COPY_DISPOSE) {
                 signatureLocation += sizeof(void(*)(void *dst, void *src));
                 signatureLocation += sizeof(void (*)(void *src));
             }

@@ -40,12 +40,7 @@
     NSLog(@"ViewController blockOneArg 期望的 index 是 12，目前 index 是 %d", self.index);
     NSLog(@"ViewController 私有变量 _aInteger %ld", _aInteger);
     
-//    [self blockReturnVoidWithVoid]();
-    
-    
-    
-    
-    BOOL bflag = [self blockReturnBoolWithString](@"xxx");
+    NSString *value = [self blockReturnBoolWithString](@"xxx");
     NSLog(@"");
 }
 
@@ -83,14 +78,9 @@
 }
 
 /// lua 脚本 hook 这个方法，并由 lua 返回 一个 oc block
-- (void(^)(void))blockReturnVoidWithVoid {
-    return nil;
-}
-
-/// lua 脚本 hook 这个方法，并由 lua 返回 一个 oc block
-- (BOOL(^)(NSString *))blockReturnBoolWithString {
+- (NSString *(^)(NSString *))blockReturnBoolWithString {
     return ^(NSString *arg1){
-        return NO;
+        return @"hh";
     };
 }
 
