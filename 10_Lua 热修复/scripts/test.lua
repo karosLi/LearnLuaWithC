@@ -1,4 +1,4 @@
--- require "CustomTableViewController"
+require "CustomTableViewController"
 
 -- 准备 hook 的类名
 _ENV = kkp_class{"ViewController"}
@@ -32,10 +32,10 @@ end
 
 -- 添加新类
 function onClickGotoButton()
-    -- local controller = CustomTableViewController:alloc():init()
-    -- controller.aa = 10
-    -- print("lua create CustomTableViewController", controller)
-    -- self:navigationController():pushViewController_animated_(controller, true)
+    local controller = CustomTableViewController:alloc():init()
+    controller.aa = 10
+    print("lua create CustomTableViewController", controller)
+    self:navigationController():pushViewController_animated_(controller, true)
 end
 
 -- hook 带有 oc block 参数的实例方法

@@ -163,22 +163,29 @@ int kkp_class_create_userdata(lua_State *L, const char *klass_name)
 }
 
 /// 通过 hook oc 的 实例方法和类方法来调用 lua 函数，并把 lua 函数调用结果返回到原生
-static int kkp_class_callLuaFunction(lua_State *L, id self, SEL selector, NSInvocation *invocation)
+static int kkp_class_callLuaFunction(lua_State *L, __unsafe_unretained id assignSlf, SEL selector, NSInvocation *invocation)
 {
     return kkp_safeInLuaStack(L, ^int{
-        NSMethodSignature *signature = [self methodSignatureForSelector:selector];
+        id slf = assignSlf;
+        
+        NSMethodSignature *signature = [slf methodSignatureForSelector:selector];
         int nargs = (int)[signature numberOfArguments] - 2;// 减 2 的目的，减去 self 和 _cmd 这个参数，因为 self 会作为环境 _ENV 的环境变量而存在，而 _cmd 也是不需要的
         int nresults = [signature methodReturnLength] ? 1 : 0;
         // 获取 class list table 并压栈
         luaL_getmetatable(L, KKP_CLASS_USER_DATA_LIST_TABLE);
         // in case self KVO ,object_getClassName(self) get wrong class
         // 从 class list table 获取指定名称的 userdata
-        lua_getfield(L, -1, [NSStringFromClass([self class]) UTF8String]);
+        lua_getfield(L, -1, [NSStringFromClass([slf class]) UTF8String]);
         // 获取 class userdata 的关联表，并压栈
         lua_getuservalue(L, -1);
         
+        BOOL deallocFlag = NO;
+        if ([NSStringFromSelector(selector) isEqualToString:@"dealloc"]) {// 是否是实例对象释放了
+            deallocFlag = YES;
+        }
+        
         // 获取关联表上 selector 对应的 lua 函数，并压栈
-        if ([self class] == self) {// 说明是类方法调用
+        if ([slf class] == slf) {// 说明是类方法调用
             /// 类方法调用不需要设置什么，因为在定义时，已经设置了 class 关键字了
             NSString* staticSelectorName = [NSString stringWithFormat:@"%@%s", KKP_STATIC_PREFIX, sel_getName(selector)];
             lua_getfield(L, -1, kkp_toLuaFuncName(staticSelectorName.UTF8String));
@@ -198,7 +205,13 @@ static int kkp_class_callLuaFunction(lua_State *L, id self, SEL selector, NSInvo
             // 压入 key
             lua_pushstring(L, [KKP_ENV_SCOPE_SELF UTF8String]);
             // 创建一个 oc 对象对应的 实例 userdata，并压栈，目的是把 实例 userdata 作为 lua 函数的第一个参数，也就是 self
-            kkp_instance_create_userdata(L, self);
+            
+            if (deallocFlag) {// 如果实例对象已经释放了话，就直接把实例 user data 压栈
+                kkp_instance_pushUserdata(L, slf);
+            } else {
+                kkp_instance_create_userdata(L, slf);
+            }
+            
             // 给环境设置 _scope[self] = 实例 user data
             lua_rawset(L, -3);
             
@@ -234,6 +247,17 @@ static int kkp_class_callLuaFunction(lua_State *L, id self, SEL selector, NSInvo
             }
             NSCAssert(NO, log);
         }
+        
+        if (deallocFlag) {// 调用完 lua dealloc 后，需要继续调用 oc 实例对象的 dealloc
+            slf = nil;
+            Class instClass = object_getClass(assignSlf);
+            NSString *originSelectorName = [NSString stringWithFormat:@"%@%@", KKP_ORIGIN_PREFIX, NSStringFromSelector(selector)];
+            
+            Method deallocMethod = class_getInstanceMethod(instClass, NSSelectorFromString(originSelectorName));
+            void (*originalDealloc)(__unsafe_unretained id, SEL) = (__typeof__(originalDealloc))method_getImplementation(deallocMethod);
+            originalDealloc(assignSlf, NSSelectorFromString(@"dealloc"));
+        }
+        
         return nresults;
     });
 }
