@@ -41,7 +41,7 @@
     NSLog(@"ViewController 私有变量 _aInteger %ld", _aInteger);
     
     NSString *value = [self blockReturnBoolWithString](@"xxx");
-    NSLog(@"");
+    NSLog(@"ViewController blockReturnBoolWithString 调用结果 %@", value);
 }
 
 - (void)setup {

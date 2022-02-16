@@ -193,7 +193,7 @@ static int toLuaTableFromStruct(lua_State *L, const char * typeDescription, void
 #define KKP_TO_NUMBER_CONVERT(T) else if (type[0] == @encode(T)[0]) { value = malloc(sizeof(T)); *((T *)value) = (T)lua_tonumber(L, index); }
 void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
 {
-    void *value = nil;
+    void *value = NULL;
     const char *type = kkp_removeProtocolEncodings(typeDescription);
     
     if (type[0] == _C_VOID) {
@@ -254,16 +254,33 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
             case LUA_TNONE:
                 instance = nil;
             case LUA_TBOOLEAN: {
-                BOOL value = lua_toboolean(L, index);
-                instance = [NSValue valueWithBytes:&value objCType:@encode(bool)];
+                BOOL flag = lua_toboolean(L, index);
+                instance = [NSValue valueWithBytes:&flag objCType:@encode(bool)];
+                
+                if (instance) {
+                    __autoreleasing id temp = instance;
+                    *(void **)value = (__bridge void *)temp;
+                }
                 break;
             }
             case LUA_TNUMBER:
                 instance = [NSNumber numberWithDouble:lua_tonumber(L, index)];
+                
+                if (instance) {
+                    __autoreleasing id temp = instance;
+                    *(void **)value = (__bridge void *)temp;
+                }
                 break;
             case LUA_TSTRING:
             {
                 instance = [NSString stringWithUTF8String:lua_tostring(L, index)];
+                
+                if (instance) {
+                    // 对于创建的 OC 对象，如果不引用下，在返回的时候就会被释放掉了。所以这里用 __autoreleasing 修饰下，让他在下个循环释放
+                    
+                    __autoreleasing id temp = instance;
+                    *(void **)value = (__bridge void *)temp;
+                }
                 break;
             }
             case LUA_TTABLE:
@@ -276,12 +293,11 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
                     if (lua_type(L, -2) != LUA_TNUMBER) {
                         dictionary = YES;
                         lua_pop(L, 2); // pop key and value off the stack
-                    }
-                    else {
+                    } else {
                         lua_pop(L, 1);
                     }
                 }
-                                    
+                
                 if (dictionary) {
                     instance = [NSMutableDictionary dictionary];
                     
@@ -292,8 +308,7 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
                         [instance setObject:object forKey:key];
                         lua_pop(L, 1); // Pop off the value
                     }
-                }
-                else {
+                } else {
                     instance = [NSMutableArray array];
                     
                     lua_pushnil(L);  /* first key */
@@ -304,8 +319,13 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
                         lua_pop(L, 1);
                     }
                 }
-                  
+                
                 lua_pop(L, 1); // Pop the table reference off
+                
+                if (instance) {
+                    __autoreleasing id temp = instance;
+                    *(void **)value = (__bridge void *)temp;
+                }
                 break;
             }
             case LUA_TUSERDATA:
@@ -321,22 +341,29 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
                     instance = nil;
                 }
                 
+                if (instance) {
+                    // 不是创建的对象，没必要增加引用
+                    __unsafe_unretained id temp = instance;
+                    *(void **)value = (__bridge void *)temp;
+                }
                 break;
             }
             case LUA_TLIGHTUSERDATA: {
                 instance = (__bridge id)lua_touserdata(L, -1);
+                
+                if (instance) {
+                    __unsafe_unretained id temp = instance;
+                    *(void **)value = (__bridge void *)temp;
+                }
                 break;
             }
             default:
             {
+                free(value);
                 NSString *error = [NSString stringWithFormat:@"Can't convert %s to obj-c.", luaL_typename(L, index)];
                 KKP_ERROR(L, error.UTF8String);
                 return NULL;
             }
-        }
-        
-        if (instance) {
-            *(__autoreleasing id *)value = instance;
         }
     } else if (type[0] == _C_STRUCT_B) {
         return toStruct(L, typeDescription, index);
@@ -374,8 +401,7 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
             default:
                 if (lua_islightuserdata(L, index)) {
                     pointer = lua_touserdata(L, index);
-                }
-                else {
+                } else {
                     free(value);
                     luaL_error(L, "Converstion from %s to Objective-c not implemented.", typeDescription);
                 }
@@ -413,13 +439,7 @@ int kkp_toLuaObject(lua_State *L, id object)
                 kkp_toLuaObject(L, obj);
                 lua_settable(L, -3);
             }];
-        } else if ([object isKindOfClass:[KKPBlockWrapper class]]) {
-            kkp_instance_pushUserdata(L, object);
-            if (lua_isnil(L, -1)) {
-                luaL_error(L, "Could not get userdata associated with KKPBlockHelper");
-            }
-            lua_getfield(L, -1, "f");
-        }else {
+        } else {
             kkp_instance_create_userdata(L, object);
         }
         return 1;
@@ -429,6 +449,7 @@ int kkp_toLuaObject(lua_State *L, id object)
 #define NUMBER_TO_KKP_CONVERT(T) else if (type[0] == @encode(T)[0]) { lua_pushnumber(L, *(T *)buffer); }
 int kkp_toLuaObjectWithBuffer(lua_State *L, const char * typeDescription, void *buffer)
 {
+    // buffer 是指针的指针
     return kkp_safeInLuaStack(L, ^int{
         const char * type = kkp_removeProtocolEncodings(typeDescription);
         
@@ -472,11 +493,16 @@ int kkp_toLuaObjectWithBuffer(lua_State *L, const char * typeDescription, void *
              __bridge_transfer 或 CFBridgingRelease 传递一个非Objective-C 指针到 Objective-C 指针并移交持有权给ARC. ARC负责释放对象.
              
              */
+
+            // id instance = *((__unsafe_unretained id *)buffer); 这种写法也可以
+            __unsafe_unretained id instance;
+            instance = (__bridge id)(*(void **)buffer);
             
-            id instance = *((__unsafe_unretained id *)buffer);
             kkp_toLuaObject(L, instance);
         } else if (type[0] == _C_CLASS) {// 返回值是 class 类型
-            id instance = *((__unsafe_unretained id *)buffer);
+            __unsafe_unretained id instance;
+            instance = (__bridge id)(*(void **)buffer);
+            
             kkp_class_create_userdata(L, NSStringFromClass(instance).UTF8String);
         } else if (type[0] == _C_STRUCT_B) {// 返回值是 结构体 类型
             toLuaTableFromStruct(L, typeDescription, buffer);

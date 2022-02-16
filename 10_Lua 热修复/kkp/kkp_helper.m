@@ -326,7 +326,9 @@ int kkp_invoke_closure(lua_State *L)
                     propName = [NSString stringWithFormat:@"%@_%@", NSStringFromClass(klass), propName];
                     if (argCount == 1 && [selectorName hasPrefix:@"set"]) {// 说明调用的是设置属性
                         void *argValue = kkp_toOCObject(L, "@", 2);
-                        id value = *(__unsafe_unretained id *)argValue;
+                        
+                        __unsafe_unretained id value;
+                        value = (__bridge id)(*(void **)argValue);
                         
                         objc_setAssociatedObject(instance->instance, kkp_propKey(propName), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                         return 0;
