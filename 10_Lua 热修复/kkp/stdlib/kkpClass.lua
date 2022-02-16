@@ -1,7 +1,9 @@
 local kkp_classN = require("kkp.class")
 
 function kkp_class(options)
+    -- 类名，字符串
     local class_name = options[1]
+    -- 父类名，字符串
     local super_class_name = options[2]
 
     -- 基于要 hook 的类名，创建 class user data
@@ -32,4 +34,9 @@ function kkp_class(options)
     class_userdata._SCOPE = scope
     
     return scope
+end
+
+-- 定义一个 原生 block，arg1 是 lua 函数，arg2 是 返回类型，arg3 是参数类型
+function kkp_block(func, type_encoding)
+    return kkp_classN.defineBlock(func, type_encoding)
 end

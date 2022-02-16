@@ -27,7 +27,7 @@ extern int kkp_performLocked(kkp_lua_lock_safe_block_t block);
 
 extern void kkp_stackDump(lua_State *L);
 
-extern char kkp_removeProtocolEncodings(const char *typeDescription);
+extern const char* kkp_removeProtocolEncodings(const char *typeDescription);
 
 extern const char* kkp_toObjcSel(const char *luaFuncName);
 

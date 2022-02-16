@@ -83,6 +83,9 @@ void kkp_stackDump(lua_State *L) {
         const char* typeName = lua_typename(L, type);
         printf("%d/%d: type=%s", positive, negative, typeName);
         switch (type) {
+            case LUA_TBOOLEAN:
+                printf(" value=%d", lua_toboolean(L, positive));
+                break;
             case LUA_TNUMBER:
                 printf(" value=%f", lua_tonumber(L, positive));
                 break;
@@ -111,33 +114,21 @@ void kkp_stackDump(lua_State *L) {
 }
 
 /// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
-char kkp_removeProtocolEncodings(const char *typeDescription)
+const char* kkp_removeProtocolEncodings(const char *typeDescription)
 {
-    char type = typeDescription[0];
-    switch (type) {
+    switch (typeDescription[0]) {
         case KKP_PROTOCOL_TYPE_CONST:
         case KKP_PROTOCOL_TYPE_INOUT:
         case KKP_PROTOCOL_TYPE_OUT:
         case KKP_PROTOCOL_TYPE_BYCOPY:
         case KKP_PROTOCOL_TYPE_BYREF:
         case KKP_PROTOCOL_TYPE_ONEWAY:
-            type = typeDescription[1];
+            return &typeDescription[1];
+            break;
+        default:
+            return typeDescription;
             break;
     }
-    if (type == _C_PTR) {
-        type = @encode(long)[0];
-    } else if (type == 'l') {
-        #if __LP64__
-        type = 'q';
-        #endif
-    } else if (type == 'g') {
-        if (sizeof(CGFloat) == sizeof(double)) {
-            type = 'd';
-        } else {
-            type = 'f';
-        }
-    }
-    return type;
 }
 
 /// lua 函数名转成 oc 函数名时规则

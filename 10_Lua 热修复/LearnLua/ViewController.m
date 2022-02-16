@@ -39,6 +39,14 @@
     }];
     NSLog(@"ViewController blockOneArg 期望的 index 是 12，目前 index 是 %d", self.index);
     NSLog(@"ViewController 私有变量 _aInteger %ld", _aInteger);
+    
+//    [self blockReturnVoidWithVoid]();
+    
+    
+    
+    
+    BOOL bflag = [self blockReturnBoolWithString](@"xxx");
+    NSLog(@"");
 }
 
 - (void)setup {
@@ -69,8 +77,21 @@
 - (void)onClickGotoButton {
 }
 
+/// lua 脚本 hook 这个方法
 - (void)blockOneArg:(int(^)(int i))block {
      self.index = block(11);
+}
+
+/// lua 脚本 hook 这个方法，并由 lua 返回 一个 oc block
+- (void(^)(void))blockReturnVoidWithVoid {
+    return nil;
+}
+
+/// lua 脚本 hook 这个方法，并由 lua 返回 一个 oc block
+- (BOOL(^)(NSString *))blockReturnBoolWithString {
+    return ^(NSString *arg1){
+        return NO;
+    };
 }
 
 @end

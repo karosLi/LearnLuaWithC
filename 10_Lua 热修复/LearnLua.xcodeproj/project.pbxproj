@@ -63,6 +63,8 @@
 		7CB775AD279FE3B60062CFE0 /* kkp_instance.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CB775AC279FE3B60062CFE0 /* kkp_instance.m */; };
 		7CD5867127B66E68000D8AED /* NSObject+KKPIvarAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CD5867027B66E68000D8AED /* NSObject+KKPIvarAccess.m */; };
 		7CD5867D27B66F00000D8AED /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CD5867C27B66F00000D8AED /* libffi.a */; };
+		7CD5868127B77597000D8AED /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CD5868027B77597000D8AED /* ExternalAccessory.framework */; };
+		7CD5868427B78F2A000D8AED /* KKPBlockHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CD5868327B78F2A000D8AED /* KKPBlockHelper.m */; };
 		7CE04D3827A1329000AA27E0 /* kkpClass.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CE04D3727A1329000AA27E0 /* kkpClass.lua */; };
 		7CE04E5A27A1658E00AA27E0 /* luac.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CE04E5927A1658E00AA27E0 /* luac.lua */; };
 /* End PBXBuildFile section */
@@ -179,6 +181,10 @@
 		7CD5867A27B66F00000D8AED /* ffi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi.h; sourceTree = "<group>"; };
 		7CD5867B27B66F00000D8AED /* ffi_arm64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_arm64.h; sourceTree = "<group>"; };
 		7CD5867C27B66F00000D8AED /* libffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libffi.a; sourceTree = "<group>"; };
+		7CD5867E27B77597000D8AED /* LearnLua.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LearnLua.entitlements; sourceTree = "<group>"; };
+		7CD5868027B77597000D8AED /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
+		7CD5868227B78F2A000D8AED /* KKPBlockHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KKPBlockHelper.h; sourceTree = "<group>"; };
+		7CD5868327B78F2A000D8AED /* KKPBlockHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockHelper.m; sourceTree = "<group>"; };
 		7CE04D3727A1329000AA27E0 /* kkpClass.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = kkpClass.lua; sourceTree = "<group>"; };
 		7CE04E5927A1658E00AA27E0 /* luac.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = luac.lua; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -188,6 +194,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7CD5868127B77597000D8AED /* ExternalAccessory.framework in Frameworks */,
 				7CD5867D27B66F00000D8AED /* libffi.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -222,6 +229,7 @@
 				7C56D66F2796A298007E2C56 /* scripts */,
 				7C76970227954178004F314D /* LearnLua */,
 				7C76970127954178004F314D /* Products */,
+				7CD5867F27B77597000D8AED /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -236,6 +244,7 @@
 		7C76970227954178004F314D /* LearnLua */ = {
 			isa = PBXGroup;
 			children = (
+				7CD5867E27B77597000D8AED /* LearnLua.entitlements */,
 				7C76970327954178004F314D /* AppDelegate.h */,
 				7C76970427954178004F314D /* AppDelegate.m */,
 				7C76970627954178004F314D /* SceneDelegate.h */,
@@ -375,6 +384,8 @@
 			isa = PBXGroup;
 			children = (
 				7C9DEB9D279FF06B0029B30D /* libffi */,
+				7CD5868227B78F2A000D8AED /* KKPBlockHelper.h */,
+				7CD5868327B78F2A000D8AED /* KKPBlockHelper.m */,
 				7C9DEBAE279FF0A70029B30D /* KKPDynamicBlock.h */,
 				7C9DEBAF279FF0A70029B30D /* KKPDynamicBlock.m */,
 				7C9DEBB1279FF0B60029B30D /* KKPBlockDescription.h */,
@@ -424,6 +435,14 @@
 				7CD5867B27B66F00000D8AED /* ffi_arm64.h */,
 			);
 			path = ffi;
+			sourceTree = "<group>";
+		};
+		7CD5867F27B77597000D8AED /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7CD5868027B77597000D8AED /* ExternalAccessory.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -562,6 +581,7 @@
 				7CB775A3279FDFE80062CFE0 /* kkp_helper.m in Sources */,
 				7C76978927954217004F314D /* loslib.c in Sources */,
 				7C76977D27954217004F314D /* lvm.c in Sources */,
+				7CD5868427B78F2A000D8AED /* KKPBlockHelper.m in Sources */,
 				7C76979627954217004F314D /* llex.c in Sources */,
 				7C76977927954217004F314D /* lstate.c in Sources */,
 				7C76971627954179004F314D /* main.m in Sources */,
@@ -713,6 +733,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = LearnLua/LearnLua.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7M2A8Q929Y;
@@ -752,6 +773,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = LearnLua/LearnLua.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7M2A8Q929Y;

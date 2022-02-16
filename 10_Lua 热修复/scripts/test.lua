@@ -1,4 +1,4 @@
-require "CustomTableViewController"
+-- require "CustomTableViewController"
 
 -- 准备 hook 的类名
 _ENV = kkp_class{"ViewController"}
@@ -32,15 +32,27 @@ end
 
 -- 添加新类
 function onClickGotoButton()
-    local controller = CustomTableViewController:alloc():init()
-    controller.aa = 10
-    print("lua create CustomTableViewController", controller)
-    self:navigationController():pushViewController_animated_(controller, true)
+    -- local controller = CustomTableViewController:alloc():init()
+    -- controller.aa = 10
+    -- print("lua create CustomTableViewController", controller)
+    -- self:navigationController():pushViewController_animated_(controller, true)
 end
 
--- 替换带有 block 参数的实例方法
-function blockOneArg_(block)
-    self:setIndex_(block(12))
+-- 替换带有 oc block 参数的实例方法
+-- function blockOneArg_(block)
+--     self:setIndex_(block(12))
+-- end
+
+-- 替换返回值是 oc block 的实例方法
+-- function blockReturnVoidWithVoid()
+--     -- 返回一个 oc block 到原生，原生可以调用这个 oc block
+--     return kkp_block(function() print("原生调用 lua 提供的 oc block") end)
+-- end
+
+-- 替换返回值是 oc block 的实例方法，block 带参数和返回值
+function blockReturnBoolWithString()
+    -- 返回一个 oc block 到原生，原生可以调用这个 oc block
+    return kkp_block(function(string) print("原生调用 lua 提供的 oc block 参数是", string) return true end, "BOOL,NSString*")
 end
 
 -- 替换静态方法

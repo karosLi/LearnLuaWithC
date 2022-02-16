@@ -232,7 +232,7 @@ static void dynamicClosureFunc(ffi_cif *cif, void *ret, void **args, void *userd
             *(float *)ret = *(float *)retPtr;
         }
     } else {
-        NSLog(@"[SpaDynamicBlock] not support return type %@", dy.retType);
+        NSLog(@"[KKPDynamicBlock] not support return type %@", dy.retType);
     }
 }
 

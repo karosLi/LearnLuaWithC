@@ -15,6 +15,7 @@
 #import "kkp_runtime_helper.h"
 #import "kkp_instance.h"
 #import "kkp_converter.h"
+#import "KKPBlockHelper.h"
 
 static int kkp_class_callLuaFunction(lua_State *L, id self, SEL selector, NSInvocation *invocation);
 static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL selector, NSInvocation *invocation);
@@ -341,7 +342,7 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
                     
                     /// 配置类型描述
                     size_t typeDescriptionSize = 3 + argCount;// 前三个是 返回类型，self 和 :，后面都是参数了。比如 @@: 表示返回类型是对象，self 和 sel
-                    typeDescription = calloc(typeDescriptionSize + 1, sizeof(char));
+                    typeDescription = malloc(typeDescriptionSize * sizeof(char));
                     memset(typeDescription, '@', typeDescriptionSize);// 设置每个字符都是 @
                     typeDescription[2] = ':'; // 设置第三个字符是 :
                     
@@ -438,6 +439,28 @@ static int LF_kkp_class_recoverMethod(lua_State *L)
     return 0;
 }
 
+/// 定义一个 oc block，用于把 lua 函数转成一个 oc block 做的前置工作，主要是先保存 lua 函数的 返回和参数类型
+/// arg1 是 lua 函数，arg2 是 返回类型，arg3 是参数类型(一个 lua table  数组，可选)
+static int LF_kkp_class_define_block(lua_State *L)
+{
+    return kkp_safeInLuaStack(L, ^int{
+        if (!lua_isfunction(L, 1)) {
+            NSString* error = @"define block failed: get lua function failed";
+            KKP_ERROR(L, error);
+        }
+        
+        NSString *typeEncoding = @"void,void";
+        const char* type_encoding = lua_tostring(L, 2);
+        if (type_encoding) {
+            typeEncoding = [NSString stringWithUTF8String:type_encoding];
+        }
+        
+        NSString *realTypeEncoding = kkp_create_real_signature(typeEncoding, true);
+        __unused __autoreleasing KKPBlockHelper *block = [[KKPBlockHelper alloc] initWithTypeEncoding:realTypeEncoding state:L funcIndex:1];
+        return 1;
+    });
+}
+
 /// 查找一个 OC 类，并创建 OC 类的 class user data
 static int LM_kkp_class__index(lua_State *L)
 {
@@ -483,6 +506,7 @@ static int LM_kkp_class__call(lua_State *L)
 static const struct luaL_Reg Methods[] = {
     {"findUserData", LF_kkp_class_find_userData},
     {"recoverMethod", LF_kkp_class_recoverMethod},
+    {"defineBlock", LF_kkp_class_define_block},
     {NULL, NULL}
 };
 
