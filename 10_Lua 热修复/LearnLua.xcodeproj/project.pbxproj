@@ -179,6 +179,7 @@
 		7CD5868027B77597000D8AED /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
 		7CD5868227B78F2A000D8AED /* KKPBlockWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KKPBlockWrapper.h; sourceTree = "<group>"; };
 		7CD5868327B78F2A000D8AED /* KKPBlockWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockWrapper.m; sourceTree = "<group>"; };
+		7CD58E9327BD213C000D8AED /* ProtocolLoader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProtocolLoader.h; sourceTree = "<group>"; };
 		7CE04D3727A1329000AA27E0 /* kkpClass.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = kkpClass.lua; sourceTree = "<group>"; };
 		7CE04E5927A1658E00AA27E0 /* luac.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = luac.lua; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -238,6 +239,7 @@
 		7C76970227954178004F314D /* LearnLua */ = {
 			isa = PBXGroup;
 			children = (
+				7CD58E9327BD213C000D8AED /* ProtocolLoader.h */,
 				7CD5867E27B77597000D8AED /* LearnLua.entitlements */,
 				7C76970327954178004F314D /* AppDelegate.h */,
 				7C76970427954178004F314D /* AppDelegate.m */,

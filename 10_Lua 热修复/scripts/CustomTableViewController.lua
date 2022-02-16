@@ -1,4 +1,4 @@
-_ENV = kkp_class{"CustomTableViewController", "UIViewController"}
+_ENV = kkp_class{"CustomTableViewController", "UIViewController", protocols={"UITableViewDelegate"}}
 
 function init()
     self.super.init()
