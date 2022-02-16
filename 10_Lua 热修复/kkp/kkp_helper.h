@@ -41,7 +41,11 @@ extern bool kkp_isBlock(id object);
 
 extern bool kkp_isAllocMethod(const char *methodName);
 
+extern int kkp_callLuaFunction(lua_State *L, __unsafe_unretained id assignSlf, SEL selector, NSInvocation *invocation);
+
 extern int kkp_callBlock(lua_State *L);
+
+extern int kkp_alloc_closure(lua_State *L);
 
 extern int kkp_invoke_closure(lua_State *L);
 
