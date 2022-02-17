@@ -67,13 +67,13 @@ BOOL kkp_runtime_isReplaceByKKP(Class klass, SEL sel) {
     return [klass instancesRespondToSelector:originSelector];
 }
 
-NSString *kkp_runtime_methodTypesInProtocol(NSString *protocolName, NSString *selectorName, BOOL isInstanceMethod, BOOL isRequired)
+NSString *kkp_runtime_methodTypesInProtocol(Protocol *protocol, NSString *selectorName, BOOL isInstanceMethod, BOOL isRequired)
 {
-    Protocol *protocol = objc_getProtocol([kkp_trim(protocolName) cStringUsingEncoding:NSUTF8StringEncoding]);
     unsigned int selCount = 0;
     struct objc_method_description *methods = protocol_copyMethodDescriptionList(protocol, isRequired, isInstanceMethod, &selCount);
     for (int i = 0; i < selCount; i ++) {
-        if ([selectorName isEqualToString:NSStringFromSelector(methods[i].name)]) {
+        NSString *methodSelectorName = NSStringFromSelector(methods[i].name);
+        if ([selectorName isEqualToString:methodSelectorName]) {
             NSString *types = [NSString stringWithUTF8String:methods[i].types];
             free(methods);
             return types;

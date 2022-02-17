@@ -211,13 +211,15 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
                 const char* func = lua_tostring(L, 2);
                 Class klass = userdata->instance;
                 Class metaClass = object_getClass(klass);
-                char *typeDescription = nil;
+                BOOL isInstanceMethod = YES;// 是否是实例对象方法
+                const char *typeDescription = nil;
                 
                 NSString *selectorName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(func)];
                 SEL sel = NSSelectorFromString(selectorName);
                 if ([selectorName hasPrefix:KKP_STATIC_PREFIX]) {// lua 脚本里如果方法名是以 STATIC 为前缀，说明一个静态方法，此时就需要找到 OC 类的元类
                     sel = NSSelectorFromString([selectorName substringFromIndex:[KKP_STATIC_PREFIX length]]);
                     klass = metaClass;
+                    isInstanceMethod = NO;
                 }
                 
                 if (class_respondsToSelector(klass, sel)) {// 能响应就替换方法
@@ -225,28 +227,44 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
                     kkp_class_overrideMethod(klass, sel, NULL);
                 } else {// 否则添加新方法
                     /// 添加新方法之前，需要先确定方法的签名。可以通过遍历 class 的协议列表来找到方法签名
-                    
-                    
-                    
-                    
-                    
-                    /// 计算参数个数，通过偏离 : 符号来确定个数
-                    int argCount = 0;
-                    const char *match = selectorName.UTF8String;
-                    while ((match = strchr(match, ':'))) {
-                        match += 1; // Skip past the matched char
-                        argCount++;
+                    BOOL foundSignature = NO;
+                    uint count;
+                    __unsafe_unretained Protocol **protocols = class_copyProtocolList(klass, &count);
+                    for (int i = 0; i < count; i++) {
+                        Protocol *protocol = protocols[i];
+                        NSString *types = kkp_runtime_methodTypesInProtocol(protocol, selectorName, isInstanceMethod, YES);
+                        if (!types) types = kkp_runtime_methodTypesInProtocol(protocol, selectorName, isInstanceMethod, NO);
+                        if (types) {
+                            typeDescription = types.UTF8String;
+                            foundSignature = YES;
+                            break;
+                        }
+                    }
+                    if (protocols != NULL) {
+                        free(protocols);
                     }
                     
-                    /// 配置类型描述
-                    size_t typeDescriptionSize = 3 + argCount;// 前三个是 返回类型，self 和 :，后面都是参数了。比如 @@: 表示返回类型是对象，self 和 sel
-                    typeDescription = malloc(typeDescriptionSize * sizeof(char));
-                    memset(typeDescription, '@', typeDescriptionSize);// 设置每个字符都是 @
-                    typeDescription[2] = ':'; // 设置第三个字符是 :
+                    /// 如果没有找到，就设置默认方法签名
+                    if (!foundSignature) {
+                        /// 计算参数个数，通过偏离 : 符号来确定个数
+                        int argCount = 0;
+                        const char *match = selectorName.UTF8String;
+                        while ((match = strchr(match, ':'))) {
+                            match += 1; // Skip past the matched char
+                            argCount++;
+                        }
+                        
+                        // 前三个是 返回类型，self 和 :，后面都是参数了。比如 @@: 表示返回类型是对象，self 和 sel
+                        NSMutableString *typeDescStr = [@"@@:" mutableCopy];
+                        for (int i = 0; i < argCount; i ++) {
+                            [typeDescStr appendString:@"@"];
+                        }
+                        
+                        typeDescription = typeDescStr.UTF8String;
+                    }
                     
                     /// 添加方法
                     kkp_class_overrideMethod(klass, sel, typeDescription);
-                    free(typeDescription);
                 }
                 
                 // 获取 class userdata 的关联表，并压栈

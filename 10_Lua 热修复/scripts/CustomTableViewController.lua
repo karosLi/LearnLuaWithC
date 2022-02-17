@@ -1,4 +1,4 @@
-_ENV = kkp_class{"CustomTableViewController", "UIViewController", protocols={"UITableViewDelegate"}}
+_ENV = kkp_class{"CustomTableViewController", "UIViewController", protocols={"UITableViewDataSource"}}
 
 function init()
     self.super.init()
@@ -14,6 +14,17 @@ function viewDidLoad()
     self:view():setBackgroundColor_(UIColor:blueColor())
 end
 
+function refreshView()
+    print("CustomTableViewController refreshView", self.aa)
+end
+
 function dealloc()
     print("CustomTableViewController dalloc")
 end
+
+-- DataSource
+-------------
+function numberOfSectionsInTableView_(tableView)
+  return 1
+end
+
