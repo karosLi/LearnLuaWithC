@@ -224,6 +224,12 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
                     /// 替换方法
                     kkp_class_overrideMethod(klass, sel, NULL);
                 } else {// 否则添加新方法
+                    /// 添加新方法之前，需要先确定方法的签名。可以通过遍历 class 的协议列表来找到方法签名
+                    
+                    
+                    
+                    
+                    
                     /// 计算参数个数，通过偏离 : 符号来确定个数
                     int argCount = 0;
                     const char *match = selectorName.UTF8String;
@@ -303,42 +309,6 @@ static int LF_kkp_class_find_userData(lua_State *L)
 {
     const char* klass_name = lua_tostring(L, 1);
     return kkp_class_create_userdata(L, klass_name);
-}
-
-/// 给 class user data 对应的 class 添加协议，添加协议的目的，是为了给类添加新方法时可以找到方法签名的依据
-/// arg1 是 class user data，arg2 是 lua table 数组
-static int LF_kkp_class_add_protocols(lua_State *L)
-{
-    return kkp_safeInLuaStack(L, ^int{
-        KKPInstanceUserdata *instanceUserdata = (KKPInstanceUserdata *)luaL_checkudata(L, 1, KKP_CLASS_USER_DATA_META_TABLE);
-        
-        if (!instanceUserdata->isClass) {
-            NSString *error = @"Can only set a protocol on a class (You are trying to set one on an instance)";
-            KKP_ERROR(L, error);
-            return 0;
-        }
-        
-        if (!lua_istable(L, 2)) {
-            NSString *error = @"Can only receive a table as protocol list";
-            KKP_ERROR(L, error);
-            return 0;
-        }
-        
-        lua_pushnil(L);  // 压入一个key，nil 表示准备遍历一个 table 数组
-        while (lua_next(L, 2)) {// 遍历 table 数组，并把键值压栈。2 表示表的位置
-            const char *protocolName = luaL_checkstring(L, -1);
-            NSString *trimProtolName = kkp_trim([NSString stringWithUTF8String:protocolName]);
-            Protocol *protocol = objc_getProtocol(trimProtolName.UTF8String);
-            if (!protocol) {
-                NSString *error = [NSString stringWithFormat:@"Could not find protocol named '%@'\nHint: Sometimes the runtime cannot automatically find a protocol. Try adding it (via xCode) to the file ProtocolLoader.h", trimProtolName];
-                KKP_ERROR(L, error);
-            }
-            class_addProtocol(instanceUserdata->instance, protocol);
-            lua_pop(L, 1);
-        }
-        
-        return 0;
-    });
 }
 
 static int LF_kkp_class_recoverMethod(lua_State *L)
@@ -428,12 +398,27 @@ static int LM_kkp_class__call(lua_State *L)
         objc_registerClassPair(klass);
     }
     
+    /// 添加协议的目的，是为了给类添加新方法时可以找到方法签名的依据
+    if (lua_istable(L, 4)) {
+        lua_pushnil(L);  // 压入一个key，nil 表示准备遍历一个 table 数组
+        while (lua_next(L, 4)) {// 遍历 table 数组，并把键值压栈。2 表示表的位置
+            const char *protocolName = luaL_checkstring(L, -1);
+            NSString *trimProtolName = kkp_trim([NSString stringWithUTF8String:protocolName]);
+            Protocol *protocol = objc_getProtocol(trimProtolName.UTF8String);
+            if (!protocol) {
+                NSString *error = [NSString stringWithFormat:@"Could not find protocol named '%@'\nHint: Sometimes the runtime cannot automatically find a protocol. Try adding it (via xCode) to the file ProtocolLoader.h", trimProtolName];
+                KKP_ERROR(L, error);
+            }
+            class_addProtocol(klass, protocol);
+            lua_pop(L, 1);
+        }
+    }
+    
     return kkp_class_create_userdata(L, className);
 }
 
 static const struct luaL_Reg Methods[] = {
     {"findUserData", LF_kkp_class_find_userData},
-    {"addProtocols", LF_kkp_class_add_protocols},
     {"recoverMethod", LF_kkp_class_recoverMethod},
     {"defineBlock", LF_kkp_class_define_block},
     {NULL, NULL}

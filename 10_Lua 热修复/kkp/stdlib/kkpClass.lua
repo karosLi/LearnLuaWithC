@@ -5,17 +5,16 @@ function kkp_class(options)
     local class_name = options[1]
     -- 父类名，字符串
     local super_class_name = options[2]
-
-    -- 基于要 hook 的类名，创建 class user data
-    local class_userdata = kkp_classN(class_name, super_class_name)
     
-    -- 添加协议
+    -- 判断协议合理性
     if options.protocols then
         if type(options.protocols) ~= "table" then options.protocols = {options.protocols} end
         if #options.protocols == 0 then error("\nEmpty protocol table for class " .. className .. ".\n Make sure you are defining your protocols with a string and not a variable. \n ex. protocols = {\"UITableViewDelegate\"}\n\n") end
         
-        kkp_classN.addProtocols(class_userdata, options.protocols)
     end
+
+    -- 基于要 hook 的类名，创建 class user data
+    local class_userdata = kkp_classN(class_name, super_class_name, options.protocols)
 
     -- class 作为 key，这样在函数里就可以使用 class 关键字了，这里 class 不是变量，只是单纯的 key
     local scope = {class = class_userdata}
