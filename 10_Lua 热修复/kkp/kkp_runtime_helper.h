@@ -18,3 +18,5 @@ extern IMP kkp_runtime_getMsgForwardIMP(Class kClass, SEL selector);
 extern SEL kkp_runtime_originForSelector(SEL sel);
 
 extern BOOL kkp_runtime_isReplaceByKKP(Class klass, SEL sel);
+
+extern NSString *kkp_runtime_methodTypesInProtocol(NSString *protocolName, NSString *selectorName, BOOL isInstanceMethod, BOOL isRequired);

@@ -35,11 +35,11 @@ extern char* kkp_toObjcPropertySel(const char *prop);
 
 extern const char* kkp_toLuaFuncName(const char *objcSel);
 
-extern SEL kkp_originForSelector(SEL sel);
-
-extern bool kkp_isBlock(id object);
+extern NSString *kkp_trim(NSString *string);
 
 extern bool kkp_isAllocMethod(const char *methodName);
+
+extern bool kkp_isBlock(id object);
 
 extern int kkp_callLuaFunction(lua_State *L, __unsafe_unretained id assignSlf, SEL selector, NSInvocation *invocation);
 

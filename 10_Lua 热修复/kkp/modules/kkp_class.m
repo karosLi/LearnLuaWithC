@@ -319,8 +319,8 @@ static int LF_kkp_class_find_userData(lua_State *L)
     return kkp_class_create_userdata(L, klass_name);
 }
 
-/// 定义一个 oc block，用于把 lua 函数转成一个 oc block 做的前置工作，主要是先保存 lua 函数的 返回和参数类型
-/// arg1 是 lua 函数，arg2 是 返回类型，arg3 是参数类型(一个 lua table  数组，可选)
+/// 给 class user data 对应的 class 添加协议，添加协议的目的，是为了给类添加新方法时可以找到方法签名的依据
+/// arg1 是 class user data，arg2 是 lua table 数组
 static int LF_kkp_class_add_protocols(lua_State *L)
 {
     return kkp_safeInLuaStack(L, ^int{
@@ -341,9 +341,10 @@ static int LF_kkp_class_add_protocols(lua_State *L)
         lua_pushnil(L);  // 压入一个key，nil 表示准备遍历一个 table 数组
         while (lua_next(L, 2)) {// 遍历 table 数组，并把键值压栈。2 表示表的位置
             const char *protocolName = luaL_checkstring(L, -1);
-            Protocol *protocol = objc_getProtocol(protocolName);
+            NSString *trimProtolName = kkp_trim([NSString stringWithUTF8String:protocolName]);
+            Protocol *protocol = objc_getProtocol(trimProtolName.UTF8String);
             if (!protocol) {
-                NSString *error = [NSString stringWithFormat:@"Could not find protocol named '%s'\nHint: Sometimes the runtime cannot automatically find a protocol. Try adding it (via xCode) to the file ProtocolLoader.h", protocolName];
+                NSString *error = [NSString stringWithFormat:@"Could not find protocol named '%@'\nHint: Sometimes the runtime cannot automatically find a protocol. Try adding it (via xCode) to the file ProtocolLoader.h", trimProtolName];
                 KKP_ERROR(L, error);
             }
             class_addProtocol(instanceUserdata->instance, protocol);

@@ -7,6 +7,7 @@
 
 #import "kkp_runtime_helper.h"
 #import "kkp_define.h"
+#import "kkp_helper.h"
 
 void kkp_runtime_swizzleForwardInvocation(Class klass, IMP imp)
 {
@@ -64,4 +65,20 @@ SEL kkp_runtime_originForSelector(SEL sel)
 BOOL kkp_runtime_isReplaceByKKP(Class klass, SEL sel) {
     SEL originSelector = kkp_runtime_originForSelector(sel);
     return [klass instancesRespondToSelector:originSelector];
+}
+
+NSString *kkp_runtime_methodTypesInProtocol(NSString *protocolName, NSString *selectorName, BOOL isInstanceMethod, BOOL isRequired)
+{
+    Protocol *protocol = objc_getProtocol([kkp_trim(protocolName) cStringUsingEncoding:NSUTF8StringEncoding]);
+    unsigned int selCount = 0;
+    struct objc_method_description *methods = protocol_copyMethodDescriptionList(protocol, isRequired, isInstanceMethod, &selCount);
+    for (int i = 0; i < selCount; i ++) {
+        if ([selectorName isEqualToString:NSStringFromSelector(methods[i].name)]) {
+            NSString *types = [NSString stringWithUTF8String:methods[i].types];
+            free(methods);
+            return types;
+        }
+    }
+    free(methods);
+    return nil;
 }

@@ -177,6 +177,11 @@ const char* kkp_toLuaFuncName(const char *objcSel)
     return s.UTF8String;
 }
 
+NSString *kkp_trim(NSString *string)
+{
+    return [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+}
+
 bool kkp_isAllocMethod(const char *methodName) {
     if (strncmp(methodName, "alloc", 5) == 0) {
         if (methodName[5] == '\0') return true; // It's just an alloc
