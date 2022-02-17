@@ -213,31 +213,17 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
                 Class metaClass = object_getClass(klass);
                 char *typeDescription = nil;
                 
-                BOOL canBeReplace = NO;
                 NSString *selectorName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(func)];
-                
                 SEL sel = NSSelectorFromString(selectorName);
-                if ([selectorName hasPrefix:KKP_STATIC_PREFIX]) {// lua 脚本里如果方法名是以 STATIC 为前缀，说明一个静态方法，此时就需要找到 OC 里的元类
+                if ([selectorName hasPrefix:KKP_STATIC_PREFIX]) {// lua 脚本里如果方法名是以 STATIC 为前缀，说明一个静态方法，此时就需要找到 OC 类的元类
                     sel = NSSelectorFromString([selectorName substringFromIndex:[KKP_STATIC_PREFIX length]]);
-                    if ([metaClass instancesRespondToSelector:sel]) {
-                        klass = metaClass;
-                        canBeReplace = YES;
-                    }
-                } else {
-                    if ([klass instancesRespondToSelector:sel]) {
-                        canBeReplace = YES;
-                    } else {
-                        if ([metaClass instancesRespondToSelector:sel]) {
-                            klass = metaClass;
-                            canBeReplace = YES;
-                        }
-                    }
+                    klass = metaClass;
                 }
                 
-                if (canBeReplace) {// 替换方法
+                if (class_respondsToSelector(klass, sel)) {// 能响应就替换方法
                     /// 替换方法
                     kkp_class_overrideMethod(klass, sel, NULL);
-                } else {// 添加新方法
+                } else {// 否则添加新方法
                     /// 计算参数个数，通过偏离 : 符号来确定个数
                     int argCount = 0;
                     const char *match = selectorName.UTF8String;
@@ -387,7 +373,7 @@ static int LF_kkp_class_define_block(lua_State *L)
 {
     return kkp_safeInLuaStack(L, ^int{
         if (!lua_isfunction(L, 1)) {
-            NSString* error = @"define block failed: get lua function failed";
+            NSString* error = @"Can not get lua function when define block";
             KKP_ERROR(L, error);
         }
         
