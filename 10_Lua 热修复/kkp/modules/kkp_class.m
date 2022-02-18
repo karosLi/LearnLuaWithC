@@ -423,36 +423,43 @@ static int LF_kkp_class_define_block(lua_State *L)
 }
 
 /// 定义一个 oc protocl，
-/// arg1 是 协议名，arg2 是 方法声明的 table 字典
+/// arg1 是 协议名，arg2 是 实例方法声明的 table 字典，arg3 是 类方法声明的 table 字典
 static int LF_kkp_class_define_protocol(lua_State *L)
 {
     return kkp_safeInLuaStack(L, ^int{
         // 协议名
         const char *protocolName = luaL_checkstring(L, 1);
         
-        if (!lua_istable(L, 2)) {
-            NSString* error = @"Can not get lua table when define protocol";
-            KKP_ERROR(L, error);
-        }
-        
         Protocol* newprotocol = objc_allocateProtocol(protocolName);
         if (newprotocol) {
-            lua_pushnil(L);  // 压入一个key，nil 表示按序号遍历一个 table 数组
-            while (lua_next(L, 2)) {// 遍历 table 数组，并把键值压栈。2 表示表的位置
-                NSString *methodName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(luaL_checkstring(L, -2))];
-                NSString *methodEncoding = [NSString stringWithUTF8String:luaL_checkstring(L, -1)];
-                
-                BOOL isInstanceMethod = YES;// 是否是实例对象方法
-                if ([methodName hasPrefix:KKP_STATIC_PREFIX]) {// lua 脚本里如果方法名是以 STATIC 为前缀，说明一个静态方法，此时就需要表明是为协议添加一个静态方法
-                    methodName = [methodName substringFromIndex:[KKP_STATIC_PREFIX length]];
-                    isInstanceMethod = NO;
+            if (lua_istable(L, 2)) {// 实例方法声明的 table 字典
+                lua_pushnil(L);  // 压入一个key，nil 表示按序号遍历一个 table 数组
+                while (lua_next(L, 2)) {// 遍历 table 数组，并把键值压栈。2 表示表的位置
+                    NSString *methodName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(luaL_checkstring(L, -2))];
+                    NSString *methodEncoding = [NSString stringWithUTF8String:luaL_checkstring(L, -1)];
+                    
+                    BOOL isInstanceMethod = YES;// 是否是实例对象方法
+                    NSString *realMethodEncoding = kkp_create_real_signature(methodEncoding, false);
+                    SEL sel = NSSelectorFromString(methodName);
+                    const char* type = [realMethodEncoding UTF8String];
+                    protocol_addMethodDescription(newprotocol, sel, type, YES, isInstanceMethod);
+                    lua_pop(L, 1);
                 }
-                
-                NSString *realMethodEncoding = kkp_create_real_signature(methodEncoding, false);
-                SEL sel = NSSelectorFromString(methodName);
-                const char* type = [realMethodEncoding UTF8String];
-                protocol_addMethodDescription(newprotocol, sel, type, YES, isInstanceMethod);
-                lua_pop(L, 1);
+            }
+            
+            if (lua_istable(L, 3)) {// 类方法声明的 table 字典
+                lua_pushnil(L);  // 压入一个key，nil 表示按序号遍历一个 table 数组
+                while (lua_next(L, 3)) {// 遍历 table 数组，并把键值压栈。3 表示表的位置
+                    NSString *methodName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(luaL_checkstring(L, -2))];
+                    NSString *methodEncoding = [NSString stringWithUTF8String:luaL_checkstring(L, -1)];
+                    
+                    BOOL isInstanceMethod = NO;
+                    NSString *realMethodEncoding = kkp_create_real_signature(methodEncoding, false);
+                    SEL sel = NSSelectorFromString(methodName);
+                    const char* type = [realMethodEncoding UTF8String];
+                    protocol_addMethodDescription(newprotocol, sel, type, YES, isInstanceMethod);
+                    lua_pop(L, 1);
+                }
             }
             
             objc_registerProtocol(newprotocol);

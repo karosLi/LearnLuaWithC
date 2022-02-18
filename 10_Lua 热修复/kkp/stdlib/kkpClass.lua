@@ -1,6 +1,17 @@
 local kkp_classN = require("kkp.class")
 
-function kkp_class(options)
+-- 定义一个 原生 block，arg1 是 lua 函数，arg2 方法签名
+function kkp_block(func, type_encoding)
+    return kkp_classN.defineBlock(func, type_encoding)
+end
+
+-- 定义一个 原生 协议，arg1 是 协议名，arg2 是 实例方法声明的 table 字典，arg2 是 类方法声明的 table 字典
+function kkp_protocol(protocol_name, protocol_instance_function_table, protocol_class_function_table)
+    return kkp_classN.defineProtocol(protocol_name, protocol_instance_function_table, protocol_class_function_table)
+end
+
+-- 定义一个 类，用于替换原生 类，或者添加一个 新类
+function kkp_class(options, instance_function, class_function)
     -- 类名，字符串
     local class_name = options[1]
     -- 父类名，字符串
@@ -40,15 +51,24 @@ function kkp_class(options)
     -- 把环境保存到 class_userdata 里，方便原生在调用 lua 函数时，给 scope 添加 self 关键字
     class_userdata._SCOPE = scope
     
-    return scope
-end
-
--- 定义一个 原生 block，arg1 是 lua 函数，arg2 是 返回类型，arg3 是参数类型
-function kkp_block(func, type_encoding)
-    return kkp_classN.defineBlock(func, type_encoding)
-end
-
--- 定义一个 原生 协议，arg1 是 协议名，arg2 是 方法声明的 table 字典
-function kkp_protocol(protocol_name, protocol_function_table)
-    return kkp_classN.defineProtocol(protocol_name, protocol_function_table)
+    -- 安装需要替换或者新增的实例方法
+    if (instance_function) then
+        instance_function(scope)
+    end
+    
+    -- 安装需要替换或者新增的类方法
+    if (class_function) then
+        local class_scope = {}
+        setmetatable(class_scope, {
+            -- 如果是替换类方法，需要追加 STATIC key 作为前缀
+            __newindex = function(class_scope, key, value)
+                local class_func_key = "STATIC"..key
+                scope[class_func_key] = value
+            end,
+            -- 如果是查找方法，还是从 scope 里找
+            __index = scope
+        })
+    
+        class_function(class_scope)
+    end
 end
