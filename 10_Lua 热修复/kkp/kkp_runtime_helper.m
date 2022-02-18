@@ -62,11 +62,6 @@ SEL kkp_runtime_originForSelector(SEL sel)
     return NSSelectorFromString([KKP_ORIGIN_PREFIX stringByAppendingFormat:@"%@", NSStringFromSelector(sel)]);
 }
 
-BOOL kkp_runtime_isReplaceByKKP(Class klass, SEL sel) {
-    SEL originSelector = kkp_runtime_originForSelector(sel);
-    return [klass instancesRespondToSelector:originSelector];
-}
-
 NSString *kkp_runtime_methodTypesInProtocol(Protocol *protocol, NSString *selectorName, BOOL isInstanceMethod, BOOL isRequired)
 {
     unsigned int selCount = 0;

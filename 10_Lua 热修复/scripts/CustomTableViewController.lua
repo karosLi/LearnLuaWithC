@@ -1,8 +1,13 @@
-_ENV = kkp_class{"CustomTableViewController", "UIViewController", protocols={"UITableViewDataSource"}}
+kkp_protocol("CustomTableViewProtocol", {
+    refreshView = "void,void",
+    STATICrefreshData_ = "void,NSDictionary*"
+})
+
+_ENV = kkp_class({"CustomTableViewController", "UIViewController", protocols={"CustomTableViewProtocol", "UITableViewDataSource"}})
 
 function init()
     self.super.init()
-    print("CustomTableViewController init", self)
+    print("【LUA】CustomTableViewController init", self)
     self.trends = {}
     self.aa = 0;
     
@@ -10,16 +15,25 @@ function init()
 end
 
 function viewDidLoad()
-    print("CustomTableViewController viewDidLoad", self.aa)
+    print("【LUA】CustomTableViewController viewDidLoad", self.aa)
     self:view():setBackgroundColor_(UIColor:blueColor())
+    
+    CustomTableViewController:refreshData_({key = "value", key1 = "value1"})
 end
 
 function refreshView()
-    print("CustomTableViewController refreshView", self.aa)
+    print("【LUA】CustomTableViewController refreshView", self.aa)
+end
+
+function STATICrefreshData_(data)
+    print("【LUA】CustomTableViewController STATICrefreshData", data)
+    for k,v in pairs(data) do
+        print("【LUA】CustomTableViewController STATICrefreshData", k, v)
+    end
 end
 
 function dealloc()
-    print("CustomTableViewController dalloc")
+    print("【LUA】CustomTableViewController dalloc")
 end
 
 -- DataSource

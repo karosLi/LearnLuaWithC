@@ -32,16 +32,16 @@
     
     [self setup];
     [self doSomeThing:@"做饭"];
-    NSLog(@"ViewController 年龄 %zd", self.age);
+    NSLog(@"【原生】ViewController 年龄 %zd", self.age);
     
     [self blockOneArg:^int(int i) {
         return i;
     }];
-    NSLog(@"ViewController blockOneArg 期望的 index 是 12，目前 index 是 %d", self.index);
-    NSLog(@"ViewController 私有变量 _aInteger %ld", _aInteger);
+    NSLog(@"【原生】ViewController blockOneArg 期望的 index 是 12，目前 index 是 %d", self.index);
+    NSLog(@"【原生】ViewController 私有变量 _aInteger %ld", _aInteger);
     
     NSString *value = [self blockReturnBoolWithString](@"xxx");
-    NSLog(@"ViewController blockReturnBoolWithString 调用结果 %@", value);
+    NSLog(@"【原生】ViewController blockReturnBoolWithString 调用结果 %@", value);
 }
 
 - (void)setup {
@@ -54,7 +54,7 @@
 }
 
 - (void)doSomeThing:(NSString *)thingName {
-    NSLog(@"ViewController 原始调用 doSomeThing %@", thingName);
+    NSLog(@"【原生】ViewController 原始调用 doSomeThing %@", thingName);
 }
 
 - (NSString *)getHello {
@@ -62,11 +62,11 @@
 }
 
 + (void)printHello {
-    NSLog(@"ViewController print in OC %@", @"Hello World!");
+    NSLog(@"【原生】ViewController print in OC %@", @"Hello World!");
 }
 
 + (void)testStatic {
-    NSLog(@"ViewController testStatic in OC %@", @"testStatic");
+    NSLog(@"【原生】ViewController testStatic in OC %@", @"testStatic");
 }
 
 - (void)onClickGotoButton {

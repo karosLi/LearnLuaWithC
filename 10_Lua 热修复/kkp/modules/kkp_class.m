@@ -17,12 +17,51 @@
 #import "kkp_converter.h"
 #import "KKPBlockWrapper.h"
 
+/// 用于记录替换过的方法
+@interface KKPClassMethodReplaceRecord : NSObject
+@property(nonatomic, copy) NSString *className;
+@property(nonatomic, copy) NSString *selecotorName;
+@property(nonatomic, assign) BOOL isInstanceMethod;
+@property(nonatomic, assign) BOOL isReplaceMethod;
+@end
+@implementation KKPClassMethodReplaceRecord
+@end
+
+/// 用于记录替换过的方法
+static NSMutableDictionary *_KKPOverrideMethods = nil;
+static void kkp_class_recordOverideMethods(Class cls, NSString *selectorName, KKPClassMethodReplaceRecord *record)
+{
+    if (!_KKPOverrideMethods) {
+        _KKPOverrideMethods = [[NSMutableDictionary alloc] init];
+    }
+    if (!_KKPOverrideMethods[cls]) {
+        _KKPOverrideMethods[(id<NSCopying>)cls] = [[NSMutableDictionary<NSString *, KKPClassMethodReplaceRecord*> alloc] init];
+    }
+    
+    _KKPOverrideMethods[cls][selectorName] = record;
+}
+
+static BOOL kkp_class_isReplaceByKKP(Class cls, NSString *selectorName)
+{
+    if (_KKPOverrideMethods) {
+        if (_KKPOverrideMethods[cls]) {
+            if ([selectorName isEqualToString:@"refreshData:"]) {
+                NSLog(@"");
+            }
+            return _KKPOverrideMethods[cls][selectorName] ? YES : NO;
+        }
+    }
+    
+    return NO;
+}
+
 #pragma mark - 运行时方法替换
+/// 实例方法调用时，self 是 实例。类方法调用时，self 是 类
 static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL selector, NSInvocation *invocation)
 {
     lua_State* L = kkp_currentLuaState();
     kkp_safeInLuaStack(L, ^int{
-        if (kkp_runtime_isReplaceByKKP(object_getClass(self), invocation.selector)) {// selector 是否已经被替换了
+        if (kkp_class_isReplaceByKKP(object_getClass(self), NSStringFromSelector(invocation.selector))) {// selector 是否已经被替换了
             int nresults = kkp_callLuaFunction(L, self, invocation.selector, invocation);
             if (nresults > 0) {
                 NSMethodSignature *signature = [self methodSignatureForSelector:invocation.selector];
@@ -33,6 +72,7 @@ static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL sel
                 }
             }
         } else {
+            // 调用原始消息转发方法
             SEL origin_selector = NSSelectorFromString(KKP_ORIGIN_FORWARD_INVOCATION_SELECTOR_NAME);
             ((void(*)(id, SEL, id))objc_msgSend)(self, origin_selector, invocation);
         }
@@ -40,15 +80,8 @@ static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL sel
     });
 }
 
-static NSMutableArray * kkp_class_replacedClassMethods() {
-    static NSMutableArray *class2method = nil;
-    if (class2method == nil) {
-        class2method = [NSMutableArray array];
-    }
-    return class2method;
-}
-
-static void kkp_class_overrideMethod(Class klass, SEL sel, const char *typeDescription)
+/// 重写方法，当 klass 是类时则替换实例方法。当 klass 是元类时，替换类方法
+static void kkp_class_overrideMethod(Class klass, SEL sel, BOOL isInstanceMethod, const char *typeDescription)
 {
     if (klass == nil || sel == nil) {
         return;
@@ -62,21 +95,32 @@ static void kkp_class_overrideMethod(Class klass, SEL sel, const char *typeDescr
     /// 给类添加自定义的 forwardInvocation 方法实现，并替换掉旧的 forwardInvocation 方法
     kkp_runtime_swizzleForwardInvocation(klass, (IMP)__KKP_ARE_BEING_CALLED__);
     
-    /// 如果类能响应入参方法，就给类添加一个原始方法，方便被 hook 的方法内部调用原始的方法
-    if (class_respondsToSelector(klass, sel)) {
+    BOOL isReplaceMethod = YES;
+    if (class_respondsToSelector(klass, sel)) {// 替换方法
         IMP originalImp = class_getMethodImplementation(klass, sel);
         SEL originSelector = kkp_runtime_originForSelector(sel);
-        if(!class_respondsToSelector(klass, originSelector)) {
+        // 给类添加一个原始方法，方便被 hook 的方法内部调用原始的方法
+        if (!class_respondsToSelector(klass, originSelector)) {
             class_addMethod(klass, originSelector, originalImp, typeDescription);
         }
+        
+        /// 把要 hook 的方法实现，直接替换成 _objc_msgForward，意味着 hook 的方法在调用时，直接走消息转发流程，不用经过 method list 查找流程
+        /// 如果方法存在就替换，否则就是添加
+        class_replaceMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, sel), typeDescription);
+    } else {// 添加新方法（添加不存在方法，不管是现有类还是新创建的类）
+        isReplaceMethod = NO;
+        /// 把要 hook 的方法实现，直接替换成 _objc_msgForward，意味着 hook 的方法在调用时，直接走消息转发流程，不用经过 method list 查找流程
+        /// 如果方法存在就替换，否则就是添加
+        class_replaceMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, sel), typeDescription);
     }
     
-    /// 把要 hook 的方法实现，直接替换成 _objc_msgForward，意味着 hook 的方法在调用时，直接走消息转发流程，不用经过 method list 查找流程
-    /// 如果方法存在就替换，否则就是添加
-    class_replaceMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, sel), typeDescription);
-    
     /// 把已经替换的方法记录下
-    [kkp_class_replacedClassMethods() addObject:@{@"class":NSStringFromClass(klass), @"sel":NSStringFromSelector(sel)}];
+    KKPClassMethodReplaceRecord *record = [KKPClassMethodReplaceRecord new];
+    record.className = NSStringFromClass(klass);
+    record.selecotorName = NSStringFromSelector(sel);
+    record.isInstanceMethod = isInstanceMethod;
+    record.isReplaceMethod = isReplaceMethod;
+    kkp_class_recordOverideMethods(klass, NSStringFromSelector(sel), record);
 }
 
 static bool kkp_class_recoverMethod(const char* class_name, const char* selector_name)
@@ -217,19 +261,20 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
                 NSString *selectorName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(func)];
                 SEL sel = NSSelectorFromString(selectorName);
                 if ([selectorName hasPrefix:KKP_STATIC_PREFIX]) {// lua 脚本里如果方法名是以 STATIC 为前缀，说明一个静态方法，此时就需要找到 OC 类的元类
-                    sel = NSSelectorFromString([selectorName substringFromIndex:[KKP_STATIC_PREFIX length]]);
+                    selectorName = [selectorName substringFromIndex:[KKP_STATIC_PREFIX length]];
+                    sel = NSSelectorFromString(selectorName);
                     klass = metaClass;
                     isInstanceMethod = NO;
                 }
                 
                 if (class_respondsToSelector(klass, sel)) {// 能响应就替换方法
                     /// 替换方法
-                    kkp_class_overrideMethod(klass, sel, NULL);
+                    kkp_class_overrideMethod(klass, sel, isInstanceMethod, NULL);
                 } else {// 否则添加新方法
                     /// 添加新方法之前，需要先确定方法的签名。可以通过遍历 class 的协议列表来找到方法签名
                     BOOL foundSignature = NO;
                     uint count;
-                    __unsafe_unretained Protocol **protocols = class_copyProtocolList(klass, &count);
+                    __unsafe_unretained Protocol **protocols = class_copyProtocolList(userdata->instance, &count);
                     for (int i = 0; i < count; i++) {
                         Protocol *protocol = protocols[i];
                         NSString *types = kkp_runtime_methodTypesInProtocol(protocol, selectorName, isInstanceMethod, YES);
@@ -264,7 +309,7 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
                     }
                     
                     /// 添加方法
-                    kkp_class_overrideMethod(klass, sel, typeDescription);
+                    kkp_class_overrideMethod(klass, sel, isInstanceMethod, typeDescription);
                 }
                 
                 // 获取 class userdata 的关联表，并压栈
@@ -338,18 +383,18 @@ static int LF_kkp_class_recoverMethod(lua_State *L)
     bool r =  kkp_class_recoverMethod(class_name, selector_name);
     if (r) {
         __block NSMutableIndexSet* indexes = [NSMutableIndexSet indexSet];
-        [kkp_class_replacedClassMethods() enumerateObjectsUsingBlock:^(NSDictionary* obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSString* klass = obj[@"class"];
-            NSString* sel = obj[@"sel"];
-            if (strcmp(klass.UTF8String, class_name) == 0
-                && strcmp(sel.UTF8String, selector_name) == 0) {
-                [indexes addIndex:idx];
-                *stop = YES;
-            }
-        }];
-        if (index > 0) {
-            [kkp_class_replacedClassMethods() removeObjectsAtIndexes:indexes];
-        }
+//        [kkp_class_replacedClassMethods() enumerateObjectsUsingBlock:^(NSDictionary* obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//            NSString* klass = obj[@"class"];
+//            NSString* sel = obj[@"sel"];
+//            if (strcmp(klass.UTF8String, class_name) == 0
+//                && strcmp(sel.UTF8String, selector_name) == 0) {
+//                [indexes addIndex:idx];
+//                *stop = YES;
+//            }
+//        }];
+//        if (index > 0) {
+//            [kkp_class_replacedClassMethods() removeObjectsAtIndexes:indexes];
+//        }
     }
     
     return 0;
@@ -374,6 +419,46 @@ static int LF_kkp_class_define_block(lua_State *L)
         NSString *realTypeEncoding = kkp_create_real_signature(typeEncoding, true);
         __unused __autoreleasing KKPBlockWrapper *block = [[KKPBlockWrapper alloc] initWithTypeEncoding:realTypeEncoding state:L funcIndex:1];
         return 1;
+    });
+}
+
+/// 定义一个 oc protocl，
+/// arg1 是 协议名，arg2 是 方法声明的 table 字典
+static int LF_kkp_class_define_protocol(lua_State *L)
+{
+    return kkp_safeInLuaStack(L, ^int{
+        // 协议名
+        const char *protocolName = luaL_checkstring(L, 1);
+        
+        if (!lua_istable(L, 2)) {
+            NSString* error = @"Can not get lua table when define protocol";
+            KKP_ERROR(L, error);
+        }
+        
+        Protocol* newprotocol = objc_allocateProtocol(protocolName);
+        if (newprotocol) {
+            lua_pushnil(L);  // 压入一个key，nil 表示按序号遍历一个 table 数组
+            while (lua_next(L, 2)) {// 遍历 table 数组，并把键值压栈。2 表示表的位置
+                NSString *methodName = [NSString stringWithFormat:@"%s", kkp_toObjcSel(luaL_checkstring(L, -2))];
+                NSString *methodEncoding = [NSString stringWithUTF8String:luaL_checkstring(L, -1)];
+                
+                BOOL isInstanceMethod = YES;// 是否是实例对象方法
+                if ([methodName hasPrefix:KKP_STATIC_PREFIX]) {// lua 脚本里如果方法名是以 STATIC 为前缀，说明一个静态方法，此时就需要表明是为协议添加一个静态方法
+                    methodName = [methodName substringFromIndex:[KKP_STATIC_PREFIX length]];
+                    isInstanceMethod = NO;
+                }
+                
+                NSString *realMethodEncoding = kkp_create_real_signature(methodEncoding, false);
+                SEL sel = NSSelectorFromString(methodName);
+                const char* type = [realMethodEncoding UTF8String];
+                protocol_addMethodDescription(newprotocol, sel, type, YES, isInstanceMethod);
+                lua_pop(L, 1);
+            }
+            
+            objc_registerProtocol(newprotocol);
+        }
+        
+        return 0;
     });
 }
 
@@ -418,7 +503,7 @@ static int LM_kkp_class__call(lua_State *L)
     
     /// 添加协议的目的，是为了给类添加新方法时可以找到方法签名的依据
     if (lua_istable(L, 4)) {
-        lua_pushnil(L);  // 压入一个key，nil 表示准备遍历一个 table 数组
+        lua_pushnil(L);  // 压入一个key，nil 表示按序号遍历一个 table 数组
         while (lua_next(L, 4)) {// 遍历 table 数组，并把键值压栈。2 表示表的位置
             const char *protocolName = luaL_checkstring(L, -1);
             NSString *trimProtolName = kkp_trim([NSString stringWithUTF8String:protocolName]);
@@ -439,6 +524,7 @@ static const struct luaL_Reg Methods[] = {
     {"findUserData", LF_kkp_class_find_userData},
     {"recoverMethod", LF_kkp_class_recoverMethod},
     {"defineBlock", LF_kkp_class_define_block},
+    {"defineProtocol", LF_kkp_class_define_protocol},
     {NULL, NULL}
 };
 
@@ -450,12 +536,12 @@ static const struct luaL_Reg MetaMethods[] = {
 
 LUAMOD_API int luaopen_kkp_class(lua_State *L)
 {
-    [kkp_class_replacedClassMethods() enumerateObjectsUsingBlock:^(NSDictionary* obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSString* klass = obj[@"class"];
-        NSString* sel = obj[@"sel"];
-        kkp_class_recoverMethod(klass.UTF8String, sel.UTF8String);
-    }];
-    [kkp_class_replacedClassMethods() removeAllObjects];
+//    [kkp_class_replacedClassMethods() enumerateObjectsUsingBlock:^(NSDictionary* obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        NSString* klass = obj[@"class"];
+//        NSString* sel = obj[@"sel"];
+//        kkp_class_recoverMethod(klass.UTF8String, sel.UTF8String);
+//    }];
+//    [kkp_class_replacedClassMethods() removeAllObjects];
     
     /// 创建 class user data 元表，并添加元方法
     luaL_newmetatable(L, KKP_CLASS_USER_DATA_META_TABLE);// 新建元表用于存放元方法

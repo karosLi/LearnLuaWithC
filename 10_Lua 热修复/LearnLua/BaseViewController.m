@@ -18,7 +18,7 @@
 }
 
 - (void)doSomeThing:(NSString *)thindName {
-    NSLog(@"BaseViewController 父类调用 doSomeThing %@", thindName);
+    NSLog(@"【原生】BaseViewController 父类调用 doSomeThing %@", thindName);
 }
 
 @end

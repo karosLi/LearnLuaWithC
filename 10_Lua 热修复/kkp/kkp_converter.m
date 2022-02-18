@@ -303,10 +303,24 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
                     
                     lua_pushnil(L);  /* first key */
                     while (lua_next(L, -2)) {
-                        id key = (__bridge id)kkp_toOCObject(L, "@", -2);
-                        id object = (__bridge id)kkp_toOCObject(L, "@", -1);
+                        void *keyArg = kkp_toOCObject(L, "@", -2);
+                        __unsafe_unretained id key;
+                        key = (__bridge id)(*(void **)keyArg);
+                        
+                        void *valueArg = kkp_toOCObject(L, "@", -1);
+                        __unsafe_unretained id object;
+                        object = (__bridge id)(*(void **)valueArg);
+                        
                         [instance setObject:object forKey:key];
                         lua_pop(L, 1); // Pop off the value
+                        
+                        if (keyArg != NULL) {
+                            free(keyArg);
+                        }
+                        
+                        if (valueArg != NULL) {
+                            free(valueArg);
+                        }
                     }
                 } else {
                     instance = [NSMutableArray array];
@@ -314,9 +328,17 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
                     lua_pushnil(L);  /* first key */
                     while (lua_next(L, -2)) {
                         int index = lua_tonumber(L, -2) - 1;
-                        id object = (__bridge id)kkp_toOCObject(L, "@", -1);
+                        
+                        void *valueArg = kkp_toOCObject(L, "@", -1);
+                        __unsafe_unretained id object;
+                        object = (__bridge id)(*(void **)valueArg);
+                        
                         [instance insertObject:object atIndex:index];
                         lua_pop(L, 1);
+                        
+                        if (valueArg != NULL) {
+                            free(valueArg);
+                        }
                     }
                 }
                 

@@ -267,9 +267,9 @@ int kkp_callLuaFunction(lua_State *L, __unsafe_unretained id assignSlf, SEL sele
         }
         
         // 获取关联表上 selector 对应的 lua 函数，并压栈
-        if ([slf class] == slf) {// 说明是类方法调用
+        if ([slf class] == slf) {// 说明是类方法调用，slf 是 class
             /// 类方法调用不需要设置什么，因为在定义时，已经设置了 class 关键字了
-            NSString* staticSelectorName = [NSString stringWithFormat:@"%@%s", KKP_STATIC_PREFIX, sel_getName(selector)];
+            NSString *staticSelectorName = [NSString stringWithFormat:@"%@%s", KKP_STATIC_PREFIX, sel_getName(selector)];
             lua_getfield(L, -1, kkp_toLuaFuncName(staticSelectorName.UTF8String));
             
             if (lua_isnil(L, -1)) {
@@ -321,7 +321,7 @@ int kkp_callLuaFunction(lua_State *L, __unsafe_unretained id assignSlf, SEL sele
         }
         
         // 栈上有了 lua 函数，self 参数，和其他参数后，就可以调用 lua 函数了
-        if(lua_pcall(L, nargs, nresults, 0) != 0){
+        if (lua_pcall(L, nargs, nresults, 0) != 0){
             NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
             NSLog(@"%@", log);
             if (kkp_getSwizzleCallback()) {
@@ -434,6 +434,7 @@ int kkp_invoke_closure(lua_State *L)
                         free(argValue);
                     }
                 }
+                /// 如果调用的方法被替换了，invoke 会触发 __KKP_ARE_BEING_CALLED__ 调用
                 [invocation invoke];
                 
                 if (nresults > 0) {
