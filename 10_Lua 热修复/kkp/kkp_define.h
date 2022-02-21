@@ -22,9 +22,9 @@ typedef struct _KKPInstanceUserdata {
 #define KKP_SUPER_KEYWORD @"super"// 用于在 lua 函数中，使用 self.super 关键字，比如：self.super:doSomething()
 #define KKP_ORIGIN_KEYWORD @"origin" // 用于在 lua 函数中，使用 self.origin 关键字，比如：self.origin:doSomething()
 
-#define KKP_ORIGIN_PREFIX @"ORIG" // 用于方法替换时，给原方法添加前缀
-#define KKP_SUPER_PREFIX @"SUPER"
-#define KKP_STATIC_PREFIX @"STATIC"
+#define KKP_ORIGIN_PREFIX @"KKPORIG" // 用于方法替换时，给原方法添加前缀
+#define KKP_SUPER_PREFIX @"KKPSUPER"
+#define KKP_STATIC_PREFIX @"KKPSTATIC"
 #define KKP_ORIGIN_FORWARD_INVOCATION_SELECTOR_NAME @"__kkp_origin_forwardInvocation:"
 
 

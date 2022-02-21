@@ -62,7 +62,7 @@ function kkp_class(options, instance_function, class_function)
         setmetatable(class_scope, {
             -- 如果是替换类方法，需要追加 STATIC key 作为前缀
             __newindex = function(class_scope, key, value)
-                local class_func_key = "STATIC"..key
+                local class_func_key = "KKPSTATIC"..key
                 scope[class_func_key] = value
             end,
             -- 如果是查找方法，还是从 scope 里找

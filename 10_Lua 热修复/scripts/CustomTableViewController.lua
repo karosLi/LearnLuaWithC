@@ -27,13 +27,6 @@ function(_ENV)
         print("【LUA】CustomTableViewController refreshView", self.aa)
     end
 
-    function STATICrefreshData_(data)
-        print("【LUA】CustomTableViewController STATICrefreshData", data)
-        for k,v in pairs(data) do
-            print("【LUA】CustomTableViewController STATICrefreshData", k, v)
-        end
-    end
-
     function dealloc()
         print("【LUA】CustomTableViewController dalloc")
     end
@@ -47,7 +40,12 @@ function(_ENV)
 end,
 function(_ENV)
 
-
+    function refreshData_(data)
+        print("【LUA】CustomTableViewController STATICrefreshData", data)
+        for k,v in pairs(data) do
+            print("【LUA】CustomTableViewController STATICrefreshData", k, v)
+        end
+    end
 
 end)
 
