@@ -171,7 +171,7 @@ static int LUserData_kkp_instance__call(lua_State *L)
     return 0;
 }
 
-/// 复活实例对应的 实例 user data
+/// 实例 user data 即将被回收，所以需要重新创建新的 实例 user data
 static int LUserData_kkp_instance__gc(lua_State *L)
 {
     KKPInstanceUserdata* instance = lua_touserdata(L, -1);
