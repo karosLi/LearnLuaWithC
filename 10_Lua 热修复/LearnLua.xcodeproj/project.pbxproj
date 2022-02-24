@@ -65,6 +65,8 @@
 		7CD5868427B78F2A000D8AED /* KKPBlockWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CD5868327B78F2A000D8AED /* KKPBlockWrapper.m */; };
 		7CE04D3827A1329000AA27E0 /* kkpClass.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CE04D3727A1329000AA27E0 /* kkpClass.lua */; };
 		7CE04E5A27A1658E00AA27E0 /* luac.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CE04E5927A1658E00AA27E0 /* luac.lua */; };
+		7CF9B60C27C5D17B007DB181 /* kkpStruct.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CF9B60B27C5D17A007DB181 /* kkpStruct.lua */; };
+		7CF9B60F27C5D1D8007DB181 /* kkp_struct.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CF9B60E27C5D1D8007DB181 /* kkp_struct.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -182,6 +184,9 @@
 		7CD58E9327BD213C000D8AED /* ProtocolLoader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProtocolLoader.h; sourceTree = "<group>"; };
 		7CE04D3727A1329000AA27E0 /* kkpClass.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = kkpClass.lua; sourceTree = "<group>"; };
 		7CE04E5927A1658E00AA27E0 /* luac.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = luac.lua; sourceTree = "<group>"; };
+		7CF9B60B27C5D17A007DB181 /* kkpStruct.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = kkpStruct.lua; sourceTree = "<group>"; };
+		7CF9B60D27C5D1D8007DB181 /* kkp_struct.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kkp_struct.h; sourceTree = "<group>"; };
+		7CF9B60E27C5D1D8007DB181 /* kkp_struct.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = kkp_struct.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +209,8 @@
 				7CB775A9279FE3990062CFE0 /* kkp_class.m */,
 				7CB775AB279FE3B60062CFE0 /* kkp_instance.h */,
 				7CB775AC279FE3B60062CFE0 /* kkp_instance.m */,
+				7CF9B60D27C5D1D8007DB181 /* kkp_struct.h */,
+				7CF9B60E27C5D1D8007DB181 /* kkp_struct.m */,
 			);
 			path = modules;
 			sourceTree = "<group>";
@@ -363,6 +370,7 @@
 			children = (
 				7CB7759B279FA0B60062CFE0 /* init.lua */,
 				7CE04D3727A1329000AA27E0 /* kkpClass.lua */,
+				7CF9B60B27C5D17A007DB181 /* kkpStruct.lua */,
 			);
 			path = stdlib;
 			sourceTree = "<group>";
@@ -503,6 +511,7 @@
 				7CB7759C279FA0B60062CFE0 /* init.lua in Resources */,
 				7C76970E27954178004F314D /* Main.storyboard in Resources */,
 				7C30187827B3A992008F8A5F /* CustomTableViewController.lua in Resources */,
+				7CF9B60C27C5D17B007DB181 /* kkpStruct.lua in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -554,6 +563,7 @@
 				7C76978327954217004F314D /* lstring.c in Sources */,
 				7C76979227954217004F314D /* lapi.c in Sources */,
 				7C76978D27954217004F314D /* lutf8lib.c in Sources */,
+				7CF9B60F27C5D1D8007DB181 /* kkp_struct.m in Sources */,
 				7C76979427954217004F314D /* ldebug.c in Sources */,
 				7C76977B27954217004F314D /* lmathlib.c in Sources */,
 				7C76979527954217004F314D /* lparser.c in Sources */,

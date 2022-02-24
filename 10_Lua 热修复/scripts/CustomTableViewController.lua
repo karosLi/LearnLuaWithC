@@ -13,6 +13,13 @@ function(_ENV)
         self.trends = {}
         self.aa = 1111;
         
+        local size = CGSize({width = 22.0, height = 33.0})
+        local copySize = size:copy()
+        size.width = 45.0
+        print("【LUA】CGSize", size.width)
+        size.height = 56.0
+        print("【LUA】CGSize", size)
+        print("【LUA】copy CGSize", copySize)
         return self
     end
 

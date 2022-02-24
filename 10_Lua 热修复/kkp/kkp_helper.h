@@ -49,6 +49,5 @@ extern int kkp_alloc_closure(lua_State *L);
 
 extern int kkp_invoke_closure(lua_State *L);
 
-extern NSArray* kkp_parseStructFromTypeDescription(NSString *typeDes);
 
 

@@ -84,4 +84,8 @@
     };
 }
 
+- (CGSize)getViewSize {
+    return self.view.frame.size;
+}
+
 @end

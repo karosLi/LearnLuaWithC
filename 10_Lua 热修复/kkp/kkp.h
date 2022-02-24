@@ -9,7 +9,7 @@
 #import "lua.h"
 
 #define KKP_VERSION 0.01
-#define KKP @"kkp"
+#define KKP "kkp"
 
 typedef void (*kkp_CLibFunction) (lua_State *L);
 typedef void (^kkp_log_block_t)(NSString *log);

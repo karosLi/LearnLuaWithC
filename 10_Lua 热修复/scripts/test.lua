@@ -44,7 +44,8 @@ function(_ENV)
         self:setIvar_withInteger_("_aInteger", 666)
         print("【LUA】获取 原生 私有变量 _aInteger", self:getIvarInteger_("_aInteger"))
         -- 调用实例方法
-        print("【LUA】print in lua", self:getHello())
+        print("【LUA】print in lua getHello ", self:getHello())
+        print("【LUA】print in lua getViewSize", self:getViewSize())
         -- 调用当前类的静态方法
         ViewController:printHello()
         self:view():setBackgroundColor_(UIColor:redColor())
@@ -71,6 +72,11 @@ function(_ENV)
     function blockReturnBoolWithString()
         -- 把 lua 函数包装成一个 oc block，原生在实际调用 oc block 时，会触发包裹的 lua 函数代码
         return kkp_block(function(string) print("【LUA】原生调用 lua 提供的 oc block 参数是", string) return "哈哈" end, "NSString*,NSString*")
+    end
+    
+    -- hook 返回值是 结构体 实例方法
+    function getViewSize()
+        return CGSize({width=55,height=66})
     end
 
 end,

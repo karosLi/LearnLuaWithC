@@ -13,9 +13,8 @@
 #import "kkp_helper.h"
 #import "kkp_class.h"
 #import "kkp_instance.h"
+#import "kkp_struct.h"
 #import "kkp_converter.h"
-
-#define KKP "kkp" // kkp lua module
 
 LUALIB_API void kkp_open_libs(lua_State *L);
 
@@ -286,6 +285,7 @@ static const luaL_Reg kkp_libs[] = {
     {KKP, luaopen_kkp},
     {KKP_CLASS, luaopen_kkp_class},
     {KKP_INSTANCE, luaopen_kkp_instance},
+    {KKP_STRUCT, luaopen_kkp_struct},
     {NULL, NULL}
 };
 

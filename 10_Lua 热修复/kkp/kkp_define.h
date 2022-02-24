@@ -17,6 +17,15 @@ typedef struct _KKPInstanceUserdata {
     bool isBlock;
 } KKPInstanceUserdata;
 
+/// 自定义用户数据，结构体会用到
+typedef struct _KKPStructUserdata {
+    void *data;// 实际数据，里面存储的数据根据 typeDescription 来决定
+    size_t size;// 数据总大小
+    char *name;// lua定义的结构体名字，比如 "CGSize"
+    char *types;// lua定义的结构体签名，比如 "dd"
+    char *keys;// lua定义的结构体签名，比如 "width,height"
+} KKPStructUserdata;
+
 #define KKP_ENV_SCOPE @"_SCOPE" // 用于保存 lua 中的 _ENV 当前环境
 #define KKP_ENV_SCOPE_SELF @"self"// 用于在 lua 函数中，使用 self 关键字
 #define KKP_SUPER_KEYWORD @"super"// 用于在 lua 函数中，使用 self.super 关键字，比如：self.super:doSomething()

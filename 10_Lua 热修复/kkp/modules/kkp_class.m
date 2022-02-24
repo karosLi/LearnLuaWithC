@@ -416,7 +416,7 @@ static int LF_kkp_class_define_block(lua_State *L)
             typeEncoding = [NSString stringWithUTF8String:type_encoding];
         }
         
-        NSString *realTypeEncoding = kkp_create_real_signature(typeEncoding, true);
+        NSString *realTypeEncoding = kkp_create_real_method_signature(typeEncoding, true);
         __unused __autoreleasing KKPBlockWrapper *block = [[KKPBlockWrapper alloc] initWithTypeEncoding:realTypeEncoding state:L funcIndex:1];
         return 1;
     });
@@ -439,7 +439,7 @@ static int LF_kkp_class_define_protocol(lua_State *L)
                     NSString *methodEncoding = [NSString stringWithUTF8String:luaL_checkstring(L, -1)];
                     
                     BOOL isInstanceMethod = YES;// 是否是实例对象方法
-                    NSString *realMethodEncoding = kkp_create_real_signature(methodEncoding, false);
+                    NSString *realMethodEncoding = kkp_create_real_method_signature(methodEncoding, false);
                     SEL sel = NSSelectorFromString(methodName);
                     const char* type = [realMethodEncoding UTF8String];
                     protocol_addMethodDescription(newprotocol, sel, type, YES, isInstanceMethod);
@@ -454,7 +454,7 @@ static int LF_kkp_class_define_protocol(lua_State *L)
                     NSString *methodEncoding = [NSString stringWithUTF8String:luaL_checkstring(L, -1)];
                     
                     BOOL isInstanceMethod = NO;
-                    NSString *realMethodEncoding = kkp_create_real_signature(methodEncoding, false);
+                    NSString *realMethodEncoding = kkp_create_real_method_signature(methodEncoding, false);
                     SEL sel = NSSelectorFromString(methodName);
                     const char* type = [realMethodEncoding UTF8String];
                     protocol_addMethodDescription(newprotocol, sel, type, YES, isInstanceMethod);
