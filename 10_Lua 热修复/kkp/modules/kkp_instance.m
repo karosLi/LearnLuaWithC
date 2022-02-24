@@ -181,11 +181,28 @@ static int LUserData_kkp_instance__gc(lua_State *L)
     return 0;
 }
 
+static int LUserData_kkp_instance__tostring(lua_State *L) {
+    KKPInstanceUserdata *instanceUserdata = (KKPInstanceUserdata *)luaL_checkudata(L, 1, KKP_INSTANCE_USER_DATA_META_TABLE);
+    lua_pushstring(L, [[NSString stringWithFormat:@"(%p => %p) %@", instanceUserdata, instanceUserdata->instance, instanceUserdata->instance] UTF8String]);
+    
+    return 1;
+}
+
+static int LUserData_kkp_instance__eq(lua_State *L) {
+    KKPInstanceUserdata *o1 = (KKPInstanceUserdata *)luaL_checkudata(L, 1, KKP_INSTANCE_USER_DATA_META_TABLE);
+    KKPInstanceUserdata *o2 = (KKPInstanceUserdata *)luaL_checkudata(L, 1, KKP_INSTANCE_USER_DATA_META_TABLE);
+    
+    lua_pushboolean(L, [o1->instance isEqual:o2->instance]);
+    return 1;
+}
+
 static const struct luaL_Reg UserDataMetaMethods[] = {
     {"__index", LUserData_kkp_instance__index},
     {"__newindex", LUserData_kkp_instance__newIndex},
     {"__call", LUserData_kkp_instance__call},
     {"__gc", LUserData_kkp_instance__gc},
+    {"__tostring", LUserData_kkp_instance__tostring},
+    {"__eq", LUserData_kkp_instance__eq},
     {NULL, NULL}
 };
 
