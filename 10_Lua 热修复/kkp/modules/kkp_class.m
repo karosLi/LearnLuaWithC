@@ -384,10 +384,14 @@ static const struct luaL_Reg UserDataMetaMethods[] = {
 };
 
 #pragma mark - class 模块提供的API
-/// 查找一个 OC class user data，找不到就创建
+/// 查找一个 OC class user data
 static int LF_kkp_class_find_userData(lua_State *L)
 {
     const char* klass_name = lua_tostring(L, 1);
+    Class klass = objc_getClass(klass_name);
+    if (klass == nil) {
+        return 0;// 没有结果返回，在 lua 中做条件判断时，会返回 false
+    }
     return kkp_class_create_userdata(L, klass_name);
 }
 
@@ -435,6 +439,8 @@ static int LF_kkp_class_define_block(lua_State *L)
         
         NSString *realTypeEncoding = kkp_create_real_method_signature(typeEncoding, true);
         __unused __autoreleasing KKPBlockWrapper *block = [[KKPBlockWrapper alloc] initWithTypeEncoding:realTypeEncoding state:L funcIndex:1];
+        void * ptr = [block blockPtr];
+        lua_pushlightuserdata(L, ptr);
         return 1;
     });
 }

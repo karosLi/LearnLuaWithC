@@ -52,6 +52,15 @@
 		7C76979727954217004F314D /* ltm.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C76976627954217004F314D /* ltm.c */; };
 		7C76979827954217004F314D /* ldo.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C76976827954217004F314D /* ldo.c */; };
 		7C76979A2795455D004F314D /* luac.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C7697992795455D004F314D /* luac.c */; };
+		7C8A90CD27C8C07C003E3EEF /* tolua_map.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90C327C8C07C003E3EEF /* tolua_map.c */; };
+		7C8A90CE27C8C07C003E3EEF /* tolua_event.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90C427C8C07C003E3EEF /* tolua_event.c */; };
+		7C8A90CF27C8C07C003E3EEF /* tolua_to.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90C527C8C07C003E3EEF /* tolua_to.c */; };
+		7C8A90D027C8C07C003E3EEF /* tolua_is.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90C627C8C07C003E3EEF /* tolua_is.c */; };
+		7C8A90D327C8C07C003E3EEF /* tolua_push.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90CC27C8C07C003E3EEF /* tolua_push.c */; };
+		7C8A90D627C8C88C003E3EEF /* kkp_capi.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90D527C8C88C003E3EEF /* kkp_capi.m */; };
+		7C8A90D827C8CBD5003E3EEF /* dispatch_lua.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90D727C8CBD5003E3EEF /* dispatch_lua.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		7C8A90DD27C8CD2F003E3EEF /* kkp_global_config.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90DC27C8CD2F003E3EEF /* kkp_global_config.m */; };
+		7C8A90E027C8D3D3003E3EEF /* kkp_global_util.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90DF27C8D3D3003E3EEF /* kkp_global_util.m */; };
 		7C9DEBB3279FF0B60029B30D /* KKPBlockDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C9DEBB2279FF0B60029B30D /* KKPBlockDescription.m */; };
 		7CB7759C279FA0B60062CFE0 /* init.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CB7759B279FA0B60062CFE0 /* init.lua */; };
 		7CB7759F279FA4350062CFE0 /* kkp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CB7759E279FA4350062CFE0 /* kkp.m */; };
@@ -150,6 +159,20 @@
 		7C76976827954217004F314D /* ldo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ldo.c; sourceTree = "<group>"; };
 		7C76976927954217004F314D /* lundump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lundump.h; sourceTree = "<group>"; };
 		7C7697992795455D004F314D /* luac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = luac.c; sourceTree = "<group>"; };
+		7C8A90C327C8C07C003E3EEF /* tolua_map.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tolua_map.c; sourceTree = "<group>"; };
+		7C8A90C427C8C07C003E3EEF /* tolua_event.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tolua_event.c; sourceTree = "<group>"; };
+		7C8A90C527C8C07C003E3EEF /* tolua_to.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tolua_to.c; sourceTree = "<group>"; };
+		7C8A90C627C8C07C003E3EEF /* tolua_is.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tolua_is.c; sourceTree = "<group>"; };
+		7C8A90C727C8C07C003E3EEF /* tolua_event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tolua_event.h; sourceTree = "<group>"; };
+		7C8A90CB27C8C07C003E3EEF /* tolua++.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "tolua++.h"; sourceTree = "<group>"; };
+		7C8A90CC27C8C07C003E3EEF /* tolua_push.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tolua_push.c; sourceTree = "<group>"; };
+		7C8A90D427C8C88C003E3EEF /* kkp_capi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kkp_capi.h; sourceTree = "<group>"; };
+		7C8A90D527C8C88C003E3EEF /* kkp_capi.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = kkp_capi.m; sourceTree = "<group>"; };
+		7C8A90D727C8CBD5003E3EEF /* dispatch_lua.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = dispatch_lua.m; sourceTree = "<group>"; };
+		7C8A90DB27C8CD2F003E3EEF /* kkp_global_config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kkp_global_config.h; sourceTree = "<group>"; };
+		7C8A90DC27C8CD2F003E3EEF /* kkp_global_config.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = kkp_global_config.m; sourceTree = "<group>"; };
+		7C8A90DE27C8D3D3003E3EEF /* kkp_global_util.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kkp_global_util.h; sourceTree = "<group>"; };
+		7C8A90DF27C8D3D3003E3EEF /* kkp_global_util.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = kkp_global_util.m; sourceTree = "<group>"; };
 		7C9DEBB1279FF0B60029B30D /* KKPBlockDescription.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KKPBlockDescription.h; sourceTree = "<group>"; };
 		7C9DEBB2279FF0B60029B30D /* KKPBlockDescription.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KKPBlockDescription.m; sourceTree = "<group>"; };
 		7CB77594279F9F890062CFE0 /* compile-stdlib.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "compile-stdlib.sh"; sourceTree = "<group>"; };
@@ -265,6 +288,50 @@
 			path = LearnLua;
 			sourceTree = "<group>";
 		};
+		7C8A90C127C8C07C003E3EEF /* capi */ = {
+			isa = PBXGroup;
+			children = (
+				7C8A90C227C8C07C003E3EEF /* tolua++ */,
+				7C8A90D427C8C88C003E3EEF /* kkp_capi.h */,
+				7C8A90D527C8C88C003E3EEF /* kkp_capi.m */,
+			);
+			path = capi;
+			sourceTree = "<group>";
+		};
+		7C8A90C227C8C07C003E3EEF /* tolua++ */ = {
+			isa = PBXGroup;
+			children = (
+				7C8A90C827C8C07C003E3EEF /* bind */,
+				7C8A90C327C8C07C003E3EEF /* tolua_map.c */,
+				7C8A90C727C8C07C003E3EEF /* tolua_event.h */,
+				7C8A90C427C8C07C003E3EEF /* tolua_event.c */,
+				7C8A90C527C8C07C003E3EEF /* tolua_to.c */,
+				7C8A90C627C8C07C003E3EEF /* tolua_is.c */,
+				7C8A90CC27C8C07C003E3EEF /* tolua_push.c */,
+				7C8A90CB27C8C07C003E3EEF /* tolua++.h */,
+			);
+			path = "tolua++";
+			sourceTree = "<group>";
+		};
+		7C8A90C827C8C07C003E3EEF /* bind */ = {
+			isa = PBXGroup;
+			children = (
+				7C8A90D727C8CBD5003E3EEF /* dispatch_lua.m */,
+			);
+			path = bind;
+			sourceTree = "<group>";
+		};
+		7C8A90D927C8CCFD003E3EEF /* global-function */ = {
+			isa = PBXGroup;
+			children = (
+				7C8A90DB27C8CD2F003E3EEF /* kkp_global_config.h */,
+				7C8A90DC27C8CD2F003E3EEF /* kkp_global_config.m */,
+				7C8A90DE27C8D3D3003E3EEF /* kkp_global_util.h */,
+				7C8A90DF27C8D3D3003E3EEF /* kkp_global_util.m */,
+			);
+			path = "global-function";
+			sourceTree = "<group>";
+		};
 		7C9DEB9D279FF06B0029B30D /* libffi */ = {
 			isa = PBXGroup;
 			children = (
@@ -281,6 +348,7 @@
 				7CB7758F279F9DED0062CFE0 /* build-scripts */,
 				7CB7758E279F9DE30062CFE0 /* stdlib */,
 				7CB7758D279F9D720062CFE0 /* lua */,
+				7C8A90D927C8CCFD003E3EEF /* global-function */,
 				7C3010A327A3C9EF008F8A5F /* modules */,
 				7CB7759D279FA4350062CFE0 /* kkp.h */,
 				7CB7759E279FA4350062CFE0 /* kkp.m */,
@@ -299,12 +367,12 @@
 		7CB7758D279F9D720062CFE0 /* lua */ = {
 			isa = PBXGroup;
 			children = (
+				7C76972E27954217004F314D /* luaconf.h */,
 				7C76973E27954217004F314D /* lua.c */,
 				7C7697992795455D004F314D /* luac.c */,
 				7C76972B27954217004F314D /* lauxlib.c */,
 				7C76972C27954217004F314D /* lmem.h */,
 				7C76972D27954217004F314D /* llimits.h */,
-				7C76972E27954217004F314D /* luaconf.h */,
 				7C76972F27954217004F314D /* lzio.h */,
 				7C76973027954217004F314D /* lgc.h */,
 				7C76973127954217004F314D /* liolib.c */,
@@ -399,6 +467,7 @@
 		7CD5866D27B66E2A000D8AED /* extensions */ = {
 			isa = PBXGroup;
 			children = (
+				7C8A90C127C8C07C003E3EEF /* capi */,
 				7CD5866E27B66E54000D8AED /* ivar */,
 				7CB775AE279FEF9F0062CFE0 /* block */,
 			);
@@ -548,6 +617,7 @@
 				7C9DEBB3279FF0B60029B30D /* KKPBlockDescription.m in Sources */,
 				7C76977C27954217004F314D /* loadlib.c in Sources */,
 				7C76978427954217004F314D /* lundump.c in Sources */,
+				7C8A90DD27C8CD2F003E3EEF /* kkp_global_config.m in Sources */,
 				7C76977E27954217004F314D /* lfunc.c in Sources */,
 				7C3010A227A3C9BC008F8A5F /* kkp_runtime_helper.m in Sources */,
 				7C76978C27954217004F314D /* ldblib.c in Sources */,
@@ -560,13 +630,16 @@
 				7C76979127954217004F314D /* ltablib.c in Sources */,
 				7C76979327954217004F314D /* lbaselib.c in Sources */,
 				7C76978E27954217004F314D /* lmem.c in Sources */,
+				7C8A90D827C8CBD5003E3EEF /* dispatch_lua.m in Sources */,
 				7C76978327954217004F314D /* lstring.c in Sources */,
 				7C76979227954217004F314D /* lapi.c in Sources */,
 				7C76978D27954217004F314D /* lutf8lib.c in Sources */,
 				7CF9B60F27C5D1D8007DB181 /* kkp_struct.m in Sources */,
 				7C76979427954217004F314D /* ldebug.c in Sources */,
+				7C8A90D027C8C07C003E3EEF /* tolua_is.c in Sources */,
 				7C76977B27954217004F314D /* lmathlib.c in Sources */,
 				7C76979527954217004F314D /* lparser.c in Sources */,
+				7C8A90D327C8C07C003E3EEF /* tolua_push.c in Sources */,
 				7C76979A2795455D004F314D /* luac.c in Sources */,
 				7C30140027B216EB008F8A5F /* BaseViewController.m in Sources */,
 				7C76978127954217004F314D /* lua.c in Sources */,
@@ -575,17 +648,22 @@
 				7CB775AA279FE3990062CFE0 /* kkp_class.m in Sources */,
 				7C76978A27954217004F314D /* lgc.c in Sources */,
 				7C76977727954217004F314D /* liolib.c in Sources */,
+				7C8A90E027C8D3D3003E3EEF /* kkp_global_util.m in Sources */,
 				7C76977827954217004F314D /* lopcodes.c in Sources */,
 				7C76978827954217004F314D /* ldump.c in Sources */,
 				7C76979827954217004F314D /* ldo.c in Sources */,
 				7CB775A3279FDFE80062CFE0 /* kkp_helper.m in Sources */,
+				7C8A90D627C8C88C003E3EEF /* kkp_capi.m in Sources */,
 				7C76978927954217004F314D /* loslib.c in Sources */,
+				7C8A90CF27C8C07C003E3EEF /* tolua_to.c in Sources */,
+				7C8A90CD27C8C07C003E3EEF /* tolua_map.c in Sources */,
 				7C76977D27954217004F314D /* lvm.c in Sources */,
 				7CD5868427B78F2A000D8AED /* KKPBlockWrapper.m in Sources */,
 				7C76979627954217004F314D /* llex.c in Sources */,
 				7C76977927954217004F314D /* lstate.c in Sources */,
 				7C76971627954179004F314D /* main.m in Sources */,
 				7CB7759F279FA4350062CFE0 /* kkp.m in Sources */,
+				7C8A90CE27C8C07C003E3EEF /* tolua_event.c in Sources */,
 				7C76978F27954217004F314D /* lcorolib.c in Sources */,
 				7C76970827954178004F314D /* SceneDelegate.m in Sources */,
 				7C76977627954217004F314D /* lauxlib.c in Sources */,

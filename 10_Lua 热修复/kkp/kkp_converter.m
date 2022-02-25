@@ -211,7 +211,7 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
     const char *type = kkp_removeProtocolEncodings(typeDescription);
     
     if (type[0] == _C_VOID) {
-        *((int *)value) = 0;
+        return NULL;
     } else if (type[0] == _C_BOOL) {
         value = malloc(sizeof(BOOL));
         *((BOOL *)value) = (BOOL)( lua_isstring(L, index) ? lua_tostring(L, index)[0] : lua_toboolean(L, index));
@@ -371,11 +371,7 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
             {
                 KKPInstanceUserdata *userdata = lua_touserdata(L, index);
                 if (userdata && userdata->instance) {
-                    if ([userdata->instance isKindOfClass:KKPBlockWrapper.class]) {
-                        instance = (__bridge id)((KKPBlockWrapper *)userdata->instance).blockPtr;
-                    } else {
-                        instance = userdata->instance;
-                    }
+                    instance = userdata->instance;
                 } else {
                     instance = nil;
                 }
@@ -390,6 +386,8 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
             case LUA_TLIGHTUSERDATA: {
                 instance = (__bridge id)lua_touserdata(L, -1);
                 
+                /// 目前 block 指针会走这里
+                /// [block blockPtr]
                 if (instance) {
                     __unsafe_unretained id temp = instance;
                     *(void **)value = (__bridge void *)temp;

@@ -15,7 +15,11 @@
 #import "kkp_instance.h"
 #import "kkp_struct.h"
 #import "kkp_converter.h"
+#import "kkp_global_config.h"
+#import "kkp_global_util.h"
 
+static void kkp_setup(void);
+static void kkp_addGlobals(lua_State *L);
 LUALIB_API void kkp_open_libs(lua_State *L);
 
 #pragma mark - 状态机
@@ -79,29 +83,6 @@ static int kkp_panic(lua_State *L) {
 
 #pragma mark - 启动 kkp 相关
 
-/// 安装 lua c 标准库 和 kkp c 库
-void kkp_setup(void)
-{
-    // 切换到应用主bundle目录，为了 lua 可以寻找到 lua 脚本
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    [fileManager changeCurrentDirectoryPath:[[NSBundle mainBundle] bundlePath]];
-    
-    // 创建状态机
-    lua_State *L = kkp_currentLuaState();
-    // 设置错误处理函数
-    lua_atpanic(L, kkp_panic);
-    // 打开 lua c 标准库
-    luaL_openlibs(L);
-    
-    // 打开 kkp c 标准库
-    kkp_open_libs(L);
-    
-    // 添加全局变量
-    
-    // 启动GC
-    
-}
-
 /// 启动 kkp
 void kkp_start(kkp_CLibFunction extensionCLibFunction)
 {
@@ -126,6 +107,87 @@ void kkp_start(kkp_CLibFunction extensionCLibFunction)
         printf("opening kkp lua stdlib failed: %s\n", lua_tostring(L,-1));
         return;
     }
+}
+
+/// 安装 lua c 标准库 和 kkp c 库
+static void kkp_setup(void)
+{
+    // 切换到应用主bundle目录，为了 lua 可以寻找到 lua 脚本
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    [fileManager changeCurrentDirectoryPath:[[NSBundle mainBundle] bundlePath]];
+    
+    // 创建状态机
+    lua_State *L = kkp_currentLuaState();
+    // 设置错误处理函数
+    lua_atpanic(L, kkp_panic);
+    // 打开 lua c 标准库
+    luaL_openlibs(L);
+    
+    // 打开 kkp c 标准库
+    kkp_open_libs(L);
+    
+    // 添加全局变量
+    kkp_addGlobals(L);
+    
+    // 启动GC
+    
+}
+
+/// 添加全局 lua 函数
+static void kkp_addGlobals(lua_State *L)
+{
+    lua_getglobal(L, KKP);
+    if (lua_isnil(L, -1)) {
+        lua_pop(L, 1); // 弹出 nil
+        lua_newtable(L);
+        lua_pushvalue(L, -1);// 把新表拷贝并压栈
+        lua_setglobal(L, KKP);
+    }
+    
+    /// 设置 kkp.version 版本号
+    lua_pushnumber(L, KKP_VERSION);
+    lua_setfield(L, -2, "version");
+    
+    /// 设置 kkp.setConfig() 函数
+    /// 比如： kkp.setConfig({openBindOCFunction="true", mobdebug="true"}
+    lua_pushcfunction(L, kkp_global_setConfig);
+    lua_setfield(L, -2, "setConfig");
+    
+    /// 设置 kkp.isNull() 函数
+    lua_pushcfunction(L, kkp_global_isNull);
+    lua_setfield(L, -2, "isNull");
+    
+    /// 设置 kkp.root() 函数
+    lua_pushcfunction(L, kkp_global_root);
+    lua_setfield(L, -2, "root");
+
+    /// 设置 kkp.print() 函数
+    lua_pushcfunction(L, kkp_global_print);
+    lua_setfield(L, -2, "print");
+    
+    /// 设置 kkp.exit() 函数
+    lua_pushcfunction(L, kkp_global_exitApp);
+    lua_setfield(L, -2, "exit");
+    
+    /// 设置 kkp.appVersion 版本号
+    lua_pushstring(L, [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"] UTF8String]);
+    lua_setfield(L, -2, "appVersion");
+    
+    /// 设置全局 NSDocumentDirectory
+    lua_pushstring(L, [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0] UTF8String]);
+    lua_setglobal(L, "NSDocumentDirectory");
+    
+    /// 设置全局 NSLibraryDirectory
+    lua_pushstring(L, [[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0] UTF8String]);
+    lua_setglobal(L, "NSLibraryDirectory");
+    
+    /// 设置全局 NSCacheDirectory
+    NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    lua_pushstring(L, [cachePath UTF8String]);
+    lua_setglobal(L, "NSCacheDirectory");
+
+    NSError *error = nil;
+    [[NSFileManager defaultManager] createDirectoryAtPath:cachePath withIntermediateDirectories:YES attributes: nil error:&error];
 }
 
 #pragma mark - 运行 lua 脚本相关
@@ -176,101 +238,7 @@ void kkp_runLuaByteCode(NSData *data, NSString *name)
 
 #pragma mark - 模块相关方法
 
-static int _log(lua_State *L)
-{
-    return kkp_safeInLuaStack(L, ^int{
-        struct S
-        {
-            id instance;
-        };
-        struct S* s = kkp_toOCObject(L, "@", -1);
-        if (s && s->instance) {
-            if (kkp_getLogCallback()) {
-                kkp_getLogCallback()([NSString stringWithFormat:@"%@", s->instance]);
-            }
-        } else {
-            if (kkp_getLogCallback()) {
-                kkp_getLogCallback()(@"null");
-            }
-        }
-        if (s != NULL) {
-            free(s);
-        }
-        return 0;
-    });
-}
-
-static int toId(lua_State *L)
-{
-    return kkp_safeInLuaStack(L, ^int{
-        struct S
-        {
-            id instance;
-        };
-        struct S* s = kkp_toOCObject(L, "@", -1);
-        if (s && s->instance) {
-            kkp_instance_create_userdata(L, s->instance);
-            free(s);
-            return 1;
-        } else {
-            KKP_ERROR(L, "the param type not support !");
-        }
-        return 0;
-    });
-}
-
-static int toLuaString(lua_State *L)
-{
-    return kkp_safeInLuaStack(L, ^int{
-        KKPInstanceUserdata* instance = lua_touserdata(L, -1);
-        if (instance->instance) {
-            lua_pushstring(L, [instance->instance description].UTF8String);
-            return 1;
-        } else {
-            KKP_ERROR(L, "the param type not support !");
-        }
-        return 0;
-    });
-}
-
-static int _dispatch_after(lua_State *L)
-{
-    int seconds = lua_tonumber(L, 2);
-    struct S
-    {
-        id block;
-    };
-    
-    struct S* s = (struct S*)kkp_toOCObject(L, "@", -1);
-    if (s && s->block) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(seconds * NSEC_PER_SEC)), dispatch_get_main_queue(), s->block);
-    }
-    
-    if (s != NULL) {
-        free(s);
-    }
-    return 0;
-}
-
-static int _isNull(lua_State *L){
-    return kkp_safeInLuaStack(L, ^int{
-        void **ud = (void **)lua_touserdata(L, -1);
-        if (ud == NULL || *ud == NULL) {
-            lua_pushboolean(L, 1);
-            return 1;
-        } else {
-            lua_pushboolean(L, 0);
-            return 1;
-        }
-    });
-}
-
 static const struct luaL_Reg Methods[] = {
-    {"log", _log},
-    {"toId", toId},
-    {"toLuaString", toLuaString},
-    {"dispatch_after", _dispatch_after},
-    {"isNull",_isNull},
     {NULL, NULL}
 };
 

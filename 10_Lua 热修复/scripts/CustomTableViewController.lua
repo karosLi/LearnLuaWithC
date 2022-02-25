@@ -1,3 +1,5 @@
+kkp.setConfig({openBindOCFunction=true})
+
 kkp_protocol("CustomTableViewProtocol", {
     refreshView = "void,void",
 },{
@@ -28,6 +30,10 @@ function(_ENV)
         self:view():setBackgroundColor_(UIColor:blueColor())
         
         CustomTableViewController:refreshData_({key = "value", key1 = "value1"})
+        
+        dispatch_after(dispatch_time(0, 1 * 1000000000), dispatch_get_main_queue(), kkp_block(function()
+            print("【LUA】dispatch_after 回调")
+        end, "void,void"))
     end
 
     function refreshView()
