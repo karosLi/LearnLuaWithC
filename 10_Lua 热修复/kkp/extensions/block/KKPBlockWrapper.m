@@ -79,23 +79,9 @@ static void blockIMP(ffi_cif *cif, void *ret, void **args, void *userdata) {
         NSUInteger paramNum = signature.numberOfArguments - 1;
         
         if (returnType == nil) {
-            if(lua_pcall(L, (int)paramNum, 0, 0) != 0){
-                NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
-                NSLog(@"%@", log);
-                if (kkp_getLuaRuntimeHandler()) {
-                    kkp_getLuaRuntimeHandler()(log);
-                }
-                NSCAssert(NO, log);
-            }
+            kkp_pcall(L, (int)paramNum, 0);
         } else {
-            if (lua_pcall(L, (int)paramNum, 1, 0) != 0){
-                NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
-                NSLog(@"%@", log);
-                if (kkp_getLuaRuntimeHandler()) {
-                    kkp_getLuaRuntimeHandler()(log);
-                }
-                NSCAssert(NO, log);
-            }
+            kkp_pcall(L, (int)paramNum, 1);
             return_buffer = kkp_toOCObject(L, returnType, -1);
         }
         

@@ -60,11 +60,13 @@ KKPLuaRuntimeHanlder kkp_getLuaRuntimeHandler(void)
 
 /// 错误处理函数
 static int kkp_panic(lua_State *L) {
-    NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
+    NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n\n%s", lua_tostring(L, -1), kkp_getLuaStackTrace(L)];
+    
     if (kkp_getLuaRuntimeHandler()) {
         kkp_getLuaRuntimeHandler()(log);
+    } else {
+        KKP_ERROR(L, log);
     }
-    printf("[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1));
     return 0;
 }
 
@@ -182,7 +184,7 @@ void kkp_postRunLuaError(int result)
 {
     lua_State *L = kkp_currentLuaState();
     if (result != 0) {
-        NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: opening kkp scripts failed (%s)\n", lua_tostring(L, -1)];
+        NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: opening kkp scripts failed (%s)\n \n%s", lua_tostring(L, -1), kkp_getLuaStackTrace(L)];
         if (kkp_getLuaRuntimeHandler()) {
             kkp_getLuaRuntimeHandler()(log);
         }

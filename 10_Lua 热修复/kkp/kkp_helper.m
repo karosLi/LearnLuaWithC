@@ -105,6 +105,10 @@ void kkp_stackDump(lua_State *L) {
                 if (lua_isuserdata(L, positive)) {
                     printf(" C:%p", lua_touserdata(L, positive));
                 }
+            case LUA_TLIGHTUSERDATA:
+                if (lua_isuserdata(L, positive)) {
+                    printf(" Light C:%p", lua_touserdata(L, positive));
+                }
             case LUA_TTABLE:
                 if (lua_istable(L, positive)) {
                     printf("\nvalue=\n{\n");
@@ -116,6 +120,30 @@ void kkp_stackDump(lua_State *L) {
         printf("\n");
     }
     printf("------------ kkp_stackDump end ------------\n\n");
+}
+
+/// 获取 lua 调用堆栈
+const char* kkp_getLuaStackTrace(lua_State *L) {
+    luaL_traceback(L, L, "", 1);
+    lua_tostring(L, -1);
+    return lua_tostring(L, -1);
+}
+
+/// 调用 lua 代码块
+int kkp_pcall(lua_State *L, int argumentCount, int returnCount) {
+    int result = lua_pcall(L, argumentCount, returnCount, 0);
+    
+    if (result != 0) {
+        NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n\n%s", lua_tostring(L, -1), kkp_getLuaStackTrace(L)];
+        
+        if (kkp_getLuaRuntimeHandler()) {
+            kkp_getLuaRuntimeHandler()(log);
+        } else {
+            KKP_ERROR(L, log);
+        }
+    }
+    
+    return result;
 }
 
 /// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
@@ -321,14 +349,7 @@ int kkp_callLuaFunction(lua_State *L, __unsafe_unretained id assignSlf, SEL sele
         }
         
         // 栈上有了 lua 函数，self 参数，和其他参数后，就可以调用 lua 函数了
-        if (lua_pcall(L, nargs, nresults, 0) != 0){
-            NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
-            NSLog(@"%@", log);
-            if (kkp_getLuaRuntimeHandler()) {
-                kkp_getLuaRuntimeHandler()(log);
-            }
-            NSCAssert(NO, log);
-        }
+        kkp_pcall(L, nargs, nresults);
         
         if (deallocFlag) {// 调用完 lua dealloc 后，需要继续调用 oc 实例对象的 dealloc
             slf = nil;
