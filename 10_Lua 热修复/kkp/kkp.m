@@ -73,11 +73,11 @@ kkp_complete_block_t kkp_getCompleteCallback(void)
 
 /// 错误处理函数
 static int kkp_panic(lua_State *L) {
-    NSString* log = [NSString stringWithFormat:@"[SPA] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
+    NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
     if (kkp_getCompleteCallback()) {
         kkp_getCompleteCallback()(NO, log);
     }
-    printf("[SPA] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1));
+    printf("[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1));
     return 0;
 }
 
