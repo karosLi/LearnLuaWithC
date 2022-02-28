@@ -26,6 +26,10 @@ end)
 -- 准备 hook 的类名
 kkp_class({"ViewController"},
 function(_ENV)
+    function viewDidLoad()
+        self.origin:viewDidLoad()
+        -- print("dddd",debug.traceback())
+    end
 
     -- hook 实例方法
     function doSomeThing_(thingName)

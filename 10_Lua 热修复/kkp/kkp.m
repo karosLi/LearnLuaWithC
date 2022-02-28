@@ -60,13 +60,17 @@ KKPLuaRuntimeHanlder kkp_getLuaRuntimeHandler(void)
 
 /// 错误处理函数
 static int kkp_panic(lua_State *L) {
-    NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n\n%s", lua_tostring(L, -1), kkp_getLuaStackTrace(L)];
+    NSString *log = [NSString stringWithFormat:@"%s\n", lua_tostring(L, -1)];
     
     if (kkp_getLuaRuntimeHandler()) {
         kkp_getLuaRuntimeHandler()(log);
-    } else {
-        KKP_ERROR(L, log);
     }
+    
+    printf("%s\n", log.UTF8String);
+    lua_pop(L, 1);
+    
+    /// 长跳转后，不会走 return 语句，可以防止 abort，因为这里的目的只是想统一记录，不是想崩溃
+    longjmp(kkp_jbuf, 1);
     return 0;
 }
 
@@ -90,10 +94,7 @@ void kkp_start(KKPCLibFunction extensionCLibFunction)
     size_t stdlibSize = sizeof(stdlib);
     if (luaL_loadbuffer(L, stdlib, stdlibSize, "loading kkp lua stdlib") || lua_pcall(L, 0, LUA_MULTRET, 0)) {
         NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: opening kkp lua stdlib failed: %s\n", lua_tostring(L, -1)];
-        if (kkp_getLuaRuntimeHandler()) {
-            kkp_getLuaRuntimeHandler()(log);
-        }
-        printf("opening kkp lua stdlib failed: %s\n", lua_tostring(L,-1));
+        KKP_ERROR(L, log.UTF8String);
         return;
     }
 }
@@ -180,28 +181,12 @@ static void kkp_addGlobals(lua_State *L)
 }
 
 #pragma mark - 运行 lua 脚本相关
-void kkp_postRunLuaError(int result)
-{
-    lua_State *L = kkp_currentLuaState();
-    if (result != 0) {
-        NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: opening kkp scripts failed (%s)\n \n%s", lua_tostring(L, -1), kkp_getLuaStackTrace(L)];
-        if (kkp_getLuaRuntimeHandler()) {
-            kkp_getLuaRuntimeHandler()(log);
-        }
-        printf("opening kkp scripts failed: %s\n", lua_tostring(L,-1));
-    } else if (kkp_getLogHandler()){
-        NSString *successLog = @"[KKP] SUCCESS: lua do string success";
-        kkp_getLogHandler()(successLog);
-    }
-}
 
 void kkp_runLuaString(const char *script)
 {
     lua_State *L = kkp_currentLuaState();
     kkp_safeInLuaStack(L, ^int{
-        int result = luaL_dostring(L, script);
-        kkp_postRunLuaError(result);
-        return 0;
+        return kkp_dostring(L, script);
     });
 }
 
@@ -209,9 +194,7 @@ void kkp_runLuaFile(const char *fname)
 {
     lua_State *L = kkp_currentLuaState();
     kkp_safeInLuaStack(L, ^int{
-        int result = luaL_dofile(L, fname);
-        kkp_postRunLuaError(result);
-        return 0;
+        return kkp_dofile(L, fname);
     });
 }
 
@@ -219,9 +202,7 @@ void kkp_runLuaByteCode(NSData *data, NSString *name)
 {
     lua_State *L = kkp_currentLuaState();
     kkp_safeInLuaStack(L, ^int{
-        int result = (luaL_loadbuffer(L, [data bytes], data.length, [name cStringUsingEncoding:NSUTF8StringEncoding]) || lua_pcall(L, 0, LUA_MULTRET, 0));
-        kkp_postRunLuaError(result);
-        return 0;
+        return kkp_dobuffer(L, data, name.UTF8String);
     });
 }
 
