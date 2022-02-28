@@ -32,50 +32,37 @@ lua_State *kkp_currentLuaState(void) {
 }
 
 #pragma mark - 日志相关
-static kkp_log_block_t log_callback;
+static KKPLogHandler kkp_log_handler;
 /// 设置日志回调
-void kkp_setLogCallback(kkp_log_block_t callback)
+void kkp_setLogHandler(KKPLogHandler handler)
 {
-    log_callback = callback;
+    kkp_log_handler = handler;
 }
 
 /// 获取日志回调
-kkp_log_block_t kkp_getLogCallback(void)
+KKPLogHandler kkp_getLogHandler(void)
 {
-    return log_callback;
+    return kkp_log_handler;
 }
 
-static kkp_complete_block_t swizzle_callback;
-/// 设置方法交换的回调
-void kkp_setSwizzleCallback(kkp_complete_block_t callback)
+static KKPLuaRuntimeHanlder kkp_lua_runtime_handler;
+/// 设置 lua runtime 处理器
+void kkp_setLuaRuntimeHandler(KKPLuaRuntimeHanlder handler)
 {
-    swizzle_callback = callback;
+    kkp_lua_runtime_handler = handler;
 }
 
-/// 获取方法交换的回调
-kkp_complete_block_t kkp_getSwizzleCallback(void)
+/// 获取 lua runtime  处理器
+KKPLuaRuntimeHanlder kkp_getLuaRuntimeHandler(void)
 {
-    return swizzle_callback;
-}
-
-static kkp_complete_block_t complete_callback;
-/// 设置完成回调
-void kkp_setCompleteCallback(kkp_complete_block_t callback)
-{
-    complete_callback = callback;
-}
-
-/// 获取完成回调
-kkp_complete_block_t kkp_getCompleteCallback(void)
-{
-    return complete_callback;
+    return kkp_lua_runtime_handler;
 }
 
 /// 错误处理函数
 static int kkp_panic(lua_State *L) {
-    NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
-    if (kkp_getCompleteCallback()) {
-        kkp_getCompleteCallback()(NO, log);
+    NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
+    if (kkp_getLuaRuntimeHandler()) {
+        kkp_getLuaRuntimeHandler()(log);
     }
     printf("[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1));
     return 0;
@@ -84,7 +71,7 @@ static int kkp_panic(lua_State *L) {
 #pragma mark - 启动 kkp 相关
 
 /// 启动 kkp
-void kkp_start(kkp_CLibFunction extensionCLibFunction)
+void kkp_start(KKPCLibFunction extensionCLibFunction)
 {
     // 安装 lua c 标准库 和 kkp c 库
     kkp_setup();
@@ -100,9 +87,9 @@ void kkp_start(kkp_CLibFunction extensionCLibFunction)
     char stdlib[] = KKP_STDLIB;// 编译好的字节码，字节码减少了编译过程，能更快加载；如果修改了 stdlib 里的 lua 文件，就需要重新 build，重新生成新的字节码
     size_t stdlibSize = sizeof(stdlib);
     if (luaL_loadbuffer(L, stdlib, stdlibSize, "loading kkp lua stdlib") || lua_pcall(L, 0, LUA_MULTRET, 0)) {
-        NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: opening kkp lua stdlib failed: %s\n", lua_tostring(L, -1)];
-        if (kkp_getCompleteCallback()) {
-            kkp_getCompleteCallback()(NO, log);
+        NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: opening kkp lua stdlib failed: %s\n", lua_tostring(L, -1)];
+        if (kkp_getLuaRuntimeHandler()) {
+            kkp_getLuaRuntimeHandler()(log);
         }
         printf("opening kkp lua stdlib failed: %s\n", lua_tostring(L,-1));
         return;
@@ -195,14 +182,14 @@ void kkp_postRunLuaError(int result)
 {
     lua_State *L = kkp_currentLuaState();
     if (result != 0) {
-        NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: opening kkp scripts failed (%s)\n", lua_tostring(L, -1)];
-        if (kkp_getCompleteCallback()) {
-            kkp_getCompleteCallback()(NO, log);
+        NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: opening kkp scripts failed (%s)\n", lua_tostring(L, -1)];
+        if (kkp_getLuaRuntimeHandler()) {
+            kkp_getLuaRuntimeHandler()(log);
         }
         printf("opening kkp scripts failed: %s\n", lua_tostring(L,-1));
-    } else if(kkp_getCompleteCallback()){
+    } else if (kkp_getLogHandler()){
         NSString *successLog = @"[KKP] SUCCESS: lua do string success";
-        kkp_getCompleteCallback()(YES, successLog);
+        kkp_getLogHandler()(successLog);
     }
 }
 

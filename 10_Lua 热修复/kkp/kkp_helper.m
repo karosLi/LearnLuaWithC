@@ -324,8 +324,8 @@ int kkp_callLuaFunction(lua_State *L, __unsafe_unretained id assignSlf, SEL sele
         if (lua_pcall(L, nargs, nresults, 0) != 0){
             NSString* log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
             NSLog(@"%@", log);
-            if (kkp_getSwizzleCallback()) {
-                kkp_getSwizzleCallback()(NO, log);
+            if (kkp_getLuaRuntimeHandler()) {
+                kkp_getLuaRuntimeHandler()(log);
             }
             NSCAssert(NO, log);
         }
