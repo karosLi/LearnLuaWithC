@@ -482,6 +482,8 @@ int kkp_toLuaObject(lua_State *L, id object)
                 lua_settable(L, -3);
             }];
         } else {
+            /// oc block 或者其他 oc 对象都会走这里去创建 实例 user data
+            /// 如果是 block 话，创建出来的 block user data 在 lua 脚本里可以通过 block_user_data() 的形式，来触发 LUserData_kkp_instance__call 调用，然后通过 kkp_callBlock 来调用实际 oc block
             kkp_instance_create_userdata(L, object);
         }
         return 1;

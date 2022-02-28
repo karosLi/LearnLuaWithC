@@ -439,7 +439,8 @@ static int LF_kkp_class_define_block(lua_State *L)
         
         NSString *realTypeEncoding = kkp_create_real_method_signature(typeEncoding, true);
         KKPBlockWrapper *block = [[KKPBlockWrapper alloc] initWithTypeEncoding:realTypeEncoding state:L funcIndex:1];
-        void * ptr = [block blockPtr];
+        void *ptr = [block blockPtr];
+        // 把 block 指针压栈
         lua_pushlightuserdata(L, ptr);
         return 1;
     });

@@ -16,13 +16,6 @@ function(_ENV)
     function viewDidLoad()
         print("【LUA】Custom1TableViewController viewDidLoad", self.aa)
         self:view():setBackgroundColor_(UIColor:greenColor())
-        
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(),
-            kkp_block(
-                function()
-                    print("dispatch_after hhhh");
-                end, "void,void")
-        )
     end
     
     function dealloc()
