@@ -10,6 +10,7 @@
 #import <objc/runtime.h>
 #import <malloc/malloc.h>
 #import "lauxlib.h"
+#import "kkp.h"
 #import "kkp_define.h"
 #import "kkp_helper.h"
 #import "kkp_class.h"
@@ -190,12 +191,12 @@ int kkp_createStructUserDataWithBuffer(lua_State *L, const char * typeDescriptio
         
         NSDictionary *structDefine = kkp_struct_registeredStructs()[structName];
         if (!structDefine) {
-            KKP_ERROR(L, "Must register struct type in lua before using");
+            KKP_ERROR(L, @"Must register struct type in lua before using");
         }
         NSString *keys = structDefine[@"keys"];
         kkp_struct_create_userdata(L, structName.UTF8String, typeString.UTF8String, keys.UTF8String, buffer);
     } else {
-        KKP_ERROR(L, "Parsing struct type description failed");
+        KKP_ERROR(L, @"Parsing struct type description failed");
     }
     
     return 1;
@@ -398,7 +399,7 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
             {
                 free(value);
                 NSString *error = [NSString stringWithFormat:@"Can't convert %s to obj-c.", luaL_typename(L, index)];
-                KKP_ERROR(L, error.UTF8String);
+                KKP_ERROR(L, error);
                 return NULL;
             }
         }
@@ -433,7 +434,7 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
                         break;
                     default: {
                         NSString *error = [NSString stringWithFormat:@"Can't convert %s to KKPInstanceUserdata.", luaL_typename(L, index)];
-                        KKP_ERROR(L, error.UTF8String);
+                        KKP_ERROR(L, error);
                         break;
                     }
                 }
@@ -445,7 +446,7 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
                 } else {
                     free(value);
                     NSString *error = [NSString stringWithFormat:@"Converstion from %s to Objective-c not implemented.", typeDescription];
-                    KKP_ERROR(L, error.UTF8String);
+                    KKP_ERROR(L, error);
                 }
         }
         
@@ -454,7 +455,7 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
         }
     } else {
         NSString* error = [NSString stringWithFormat:@"type %s in not support !", typeDescription];
-        KKP_ERROR(L, error.UTF8String);
+        KKP_ERROR(L, error);
         return NULL;
     }
     return value;
@@ -556,7 +557,7 @@ int kkp_toLuaObjectWithBuffer(lua_State *L, const char * typeDescription, void *
         }
         else {
             NSString* error = [NSString stringWithFormat:@"Unable to convert Obj-C type with type description '%s'", typeDescription];
-            KKP_ERROR(L, error.UTF8String);
+            KKP_ERROR(L, error);
             return 0;
         }
         

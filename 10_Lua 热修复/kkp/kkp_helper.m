@@ -244,7 +244,7 @@ int kkp_pcall(lua_State *L, int argumentCount, int returnCount) {
     
     if (result != 0) {
         NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n\n%s", lua_tostring(L, -1), kkp_getLuaStackTrace(L)];
-        KKP_ERROR(L, log.UTF8String);
+        KKP_ERROR(L, log);
     }
     
     return result;
@@ -259,7 +259,7 @@ int kkp_dostring(lua_State *L, const char *script) {
     
     if (result != 0) {
         NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
-        KKP_ERROR(L, log.UTF8String);
+        KKP_ERROR(L, log);
     }
     
     return result;
@@ -274,7 +274,7 @@ int kkp_dofile(lua_State *L, const char *fname) {
     
     if (result != 0) {
         NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
-        KKP_ERROR(L, log.UTF8String);
+        KKP_ERROR(L, log);
     }
     
     return result;
@@ -289,7 +289,7 @@ int kkp_dobuffer(lua_State *L, NSData *data, const char *name) {
     
     if (result != 0) {
         NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
-        KKP_ERROR(L, log.UTF8String);
+        KKP_ERROR(L, log);
     }
     
     return result;
@@ -652,7 +652,7 @@ int kkp_invoke_closure(lua_State *L)
                 }
                 
                 NSString* error = [NSString stringWithFormat:@"selector %s not be found in %@. You may need to use ‘_’ to indicate that there are parameters. If your selector is 'function:', use 'function_', if your selector is 'function:a:b:', use 'function_a_b_'", func, klass];
-                KKP_ERROR(L, error.UTF8String);
+                KKP_ERROR(L, error);
                 return 0;
             }
         }

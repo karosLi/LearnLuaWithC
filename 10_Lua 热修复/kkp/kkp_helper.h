@@ -18,11 +18,11 @@
 
 /// 打印错误之前，设置跳转 为 0，这样就会先调用 luaL_error，而 luaL_error 会触发 kkp_panic 调用，在 kkp_panic 函数里使用 longjmp 长跳转 重新设置 kkp_jbuf 为 1，这样长跳转会回到 setjmp(kkp_jbuf) == 0 这行代码，而此时 kkp_jbuf 值为 1，所以就不会重新走 luaL_error 逻辑
 extern jmp_buf kkp_jbuf;
-#define KKP_ERROR(L, err)                                                                   \
-if (setjmp(kkp_jbuf) == 0) {                                                                \
-    luaL_error(L, "[KKP] error %s line %d %s: %s", __FILE__, __LINE__, __FUNCTION__, err);  \
-} else {                                                                                    \
-                                                                                            \
+#define KKP_ERROR(L, err)                                                                               \
+if (kkp_getLuaRuntimeHandler()) {                                                                       \
+    kkp_getLuaRuntimeHandler()(err);                                                                    \
+} else {                                                                                                \
+    luaL_error(L, "[KKP] error %s line %d %s: %s", __FILE__, __LINE__, __FUNCTION__, err.UTF8String);   \
 }
 
 typedef int (^kkp_lua_stack_safe_block_t)(void);

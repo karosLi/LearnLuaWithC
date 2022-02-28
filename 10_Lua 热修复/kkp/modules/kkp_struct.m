@@ -227,7 +227,7 @@ static int kkp_struct_create_userdata_closure(lua_State *L) {
     return kkp_safeInLuaStack(L, ^int{
         if (!lua_istable(L, 1)) {// 必须是一个 table 字典
             NSString *error = @"Couldn't new struct. The argument must be table with key";
-            KKP_ERROR(L, error.UTF8String);
+            KKP_ERROR(L, error);
         }
         
         const char *name = lua_tostring(L, lua_upvalueindex(1));
@@ -244,7 +244,7 @@ static int kkp_struct_create_userdata_closure(lua_State *L) {
         
         if (![structDict isKindOfClass:NSDictionary.class] || structDict.count != realTypeDescription.length) {
             NSString *error = [NSString stringWithFormat:@"Couldn't new struct. Received %lu arguments for struct with type description '%@'", (unsigned long)structDict.count, realTypeDescription];
-            KKP_ERROR(L, error.UTF8String);
+            KKP_ERROR(L, error);
         }
         
         /// 把字典里的数据填充到结构体指向的内存里

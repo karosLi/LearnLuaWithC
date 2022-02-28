@@ -354,7 +354,7 @@ static int LUserData_kkp_class__newIndex(lua_State *L)
                  */
             }
         } else {
-            KKP_ERROR(L, "type must function");
+            KKP_ERROR(L, @"type must function");
         }
         return 0;
     });
@@ -524,7 +524,7 @@ static int LM_kkp_class__call(lua_State *L)
         
         if (!superClass) {
             NSString* error = [NSString stringWithFormat:@"Failed to create '%s'. Unknown superclass \"%s\" received.", className, luaL_checkstring(L, 3)];
-            KKP_ERROR(L, error.UTF8String);
+            KKP_ERROR(L, error);
         }
         
         /// 创建新类

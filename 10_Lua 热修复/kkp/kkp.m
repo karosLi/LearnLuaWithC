@@ -68,9 +68,6 @@ static int kkp_panic(lua_State *L) {
     
     printf("%s\n", log.UTF8String);
     lua_pop(L, 1);
-    
-    /// 长跳转后，不会走 return 语句，可以防止 abort，因为这里的目的只是想统一记录，不是想崩溃
-    longjmp(kkp_jbuf, 1);
     return 0;
 }
 
@@ -94,7 +91,7 @@ void kkp_start(KKPCLibFunction extensionCLibFunction)
     size_t stdlibSize = sizeof(stdlib);
     if (luaL_loadbuffer(L, stdlib, stdlibSize, "loading kkp lua stdlib") || lua_pcall(L, 0, LUA_MULTRET, 0)) {
         NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: opening kkp lua stdlib failed: %s\n", lua_tostring(L, -1)];
-        KKP_ERROR(L, log.UTF8String);
+        KKP_ERROR(L, log);
         return;
     }
 }
