@@ -543,11 +543,13 @@ int kkp_toLuaObjectWithBuffer(lua_State *L, const char * typeDescription, void *
             __unsafe_unretained id instance;
             instance = (__bridge id)(*(void **)buffer);
             
+            /// 创建 实例 user data
             kkp_toLuaObject(L, instance);
         } else if (type[0] == _C_CLASS) {// 返回值是 class 类型
             __unsafe_unretained id instance;
             instance = (__bridge id)(*(void **)buffer);
             
+            /// 创建 类 user data
             kkp_class_create_userdata(L, NSStringFromClass(instance).UTF8String);
         } else if (type[0] == _C_STRUCT_B) {// 返回值是 结构体 类型
             kkp_createStructUserDataWithBuffer(L, typeDescription, buffer);
