@@ -16,8 +16,6 @@
 #define KKP_PROTOCOL_TYPE_BYREF 'R'
 #define KKP_PROTOCOL_TYPE_ONEWAY 'V'
 
-/// 打印错误之前，设置跳转 为 0，这样就会先调用 luaL_error，而 luaL_error 会触发 kkp_panic 调用，在 kkp_panic 函数里使用 longjmp 长跳转 重新设置 kkp_jbuf 为 1，这样长跳转会回到 setjmp(kkp_jbuf) == 0 这行代码，而此时 kkp_jbuf 值为 1，所以就不会重新走 luaL_error 逻辑
-extern jmp_buf kkp_jbuf;
 #define KKP_ERROR(L, err)                                                                               \
 if (kkp_getLuaRuntimeHandler()) {                                                                       \
     kkp_getLuaRuntimeHandler()(err);                                                                    \
