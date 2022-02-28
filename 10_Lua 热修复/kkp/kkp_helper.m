@@ -205,10 +205,13 @@ const char* kkp_getLuaStackTrace(lua_State *L) {
 //    return traceback;
 }
 
+/// 用于获取 lua 调用运行时堆栈
 int kkp_callErrorFunction(lua_State *L) {
     luaL_traceback(L, L, "", 1);
-    const char *traceback = lua_tostring(L, -1);
+    const char *traceback = lua_tostring(L, 1);
     lua_pop(L, 1);
+    
+//    kkp_getLuaStackTrace(L);
     
 //    wax_printStack(L);
 //    lua_getfield(L, LUA_GLOBALSINDEX, "debug");
@@ -382,7 +385,8 @@ int kkp_callBlock(lua_State *L)
 {
     KKPInstanceUserdata* instance = lua_touserdata(L, 1);
     id block = instance->instance;
-    KKPBlockDescription* blockDescription = [[KKPBlockDescription alloc] initWithBlock:block];
+    /// 获取 block 签名，比如 i12@?0i8
+    KKPBlockDescription *blockDescription = [[KKPBlockDescription alloc] initWithBlock:block];
     NSMethodSignature *signature = blockDescription.blockSignature;
     
     int nresults = [signature methodReturnLength] ? 1 : 0;
@@ -393,7 +397,6 @@ int kkp_callBlock(lua_State *L)
     for (unsigned long i = [signature numberOfArguments] - 1; i >= 1; i--) {
         const char *typeDescription = [signature getArgumentTypeAtIndex:i];
         void *pReturnValue = kkp_toOCObject(L, typeDescription, -1);
-        lua_pop(L, 1);
         [invocation setArgument:pReturnValue atIndex:i];
         
         if (pReturnValue != NULL) {
@@ -591,16 +594,8 @@ int kkp_invoke_closure(lua_State *L)
                 for (int i = 2; i < [signature numberOfArguments]; i++) {
                     const char* typeDescription = [signature getArgumentTypeAtIndex:i];
                     void *argValue = kkp_toOCObject(L, typeDescription, i);
-                    if (argValue == NULL) {
-                        id object = nil;
-                        [invocation setArgument:&object atIndex:i];
-                    } else {
-                        [invocation setArgument:argValue atIndex:i];
-                    }
-                    
-                    if (argValue != NULL) {
-                        free(argValue);
-                    }
+                    [invocation setArgument:argValue atIndex:i];
+                    free(argValue);
                 }
                 /// 如果调用的方法被替换了，invoke 会触发 __KKP_ARE_BEING_CALLED__ 调用
                 [invocation invoke];

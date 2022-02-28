@@ -34,10 +34,14 @@ function(_ENV)
         dispatch_after(dispatch_time(0, 1 * 1000000000), dispatch_get_main_queue(), kkp_block(function()
             print("【LUA】dispatch_after 回调")
         end, "void,void"))
+        
+        self:refreshView()
     end
 
     function refreshView()
         print("【LUA】CustomTableViewController refreshView", self.aa)
+        -- 运行时错误，测试获取 lua 堆栈
+        n = n / nil
     end
 
     function dealloc()

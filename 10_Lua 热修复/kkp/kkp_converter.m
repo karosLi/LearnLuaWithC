@@ -67,27 +67,36 @@ NSString *kkp_create_real_method_signature(NSString *signatureStr, bool isBlock)
         KKP_DEFINE_TYPE_SIGNATURE(NSNumber *);
     }
     NSArray *lt = [signatureStr componentsSeparatedByString:@","];
+    
     /**
      * 这里注意下block与func签名要区分下,block中没有_cmd, 并且要用@?便是target
+     * 比如 block 签名：i12@?0i8
+     * 比如 非 block 签名 i16@0:8i12
      */
-    NSString *funcSignature = isBlock ? @"@?0" : @"@0:8";
+    NSMutableString *funcSignature = [[NSMutableString alloc] initWithString:isBlock ? @"@?0" : @"@0:8"];
     NSInteger size = isBlock ? sizeof(void *) : sizeof(void *) + sizeof(SEL);
-    for (NSInteger i = 1; i < lt.count;) {
+    
+    /// 先处理参数类型
+    for (NSInteger i = 1; i < lt.count; i++) {
         // 去掉两边空格
-        NSString *t = [lt[i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        NSString *tpe = typeSignatureDict[typeSignatureDict[t] ? t : @"id"][0];
-        if (i == 0) {
-            if (!t || t.length == 0)
-                funcSignature = [[NSString stringWithFormat:@"%@%@", tpe, [@(size) stringValue]] stringByAppendingString:funcSignature];
-            else
-                funcSignature = [[NSString stringWithFormat:@"%@%@", tpe, [@(size) stringValue]] stringByAppendingString:funcSignature];
-            break;
-        } else {
-            funcSignature = [funcSignature stringByAppendingString:[NSString stringWithFormat:@"%@%@", tpe, [@(size) stringValue]]];
-            size += [typeSignatureDict[typeSignatureDict[t] ? t : @"id"][1] integerValue];
+        NSString *inputType = [lt[i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSArray *typeWithSize = typeSignatureDict[typeSignatureDict[inputType] ? inputType : @"id"];
+        NSString *outputType = typeWithSize[0];
+        NSInteger outputSize = [typeWithSize[1] integerValue];
+        
+        if (!isBlock && [outputType isEqualToString:[NSString stringWithUTF8String:@encode(void)]]) {// 如果是方法，遇到 void 就跳过
+            continue;
         }
-        i = (i == lt.count - 1) ? 0 : i + 1;
+        
+        [funcSignature appendFormat:@"%@%zd", outputType, size];
+        size += outputSize;
     }
+    
+    /// 最后处理返回类型
+    NSString *inputType = [lt[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSArray *typeWithSize = typeSignatureDict[typeSignatureDict[inputType] ? inputType : @"id"];
+    NSString *outputType = typeWithSize[0];
+    [funcSignature insertString:[NSString stringWithFormat:@"%@%zd", outputType, size] atIndex:0];
 
     return funcSignature;
 }
