@@ -11,35 +11,36 @@ function(_ENV)
 
     function init()
         self.super.init()
-        print("【LUA】CustomTableViewController init", self)
+        kkp.print("【LUA】CustomTableViewController init", self)
         self.trends = {}
         self.aa = 1111;
         
         local size = CGSize({width = 22.0, height = 33.0})
         local copySize = size:copy()
         size.width = 45.0
-        print("【LUA】CGSize", size.width)
+        kkp.print("【LUA】CGSize", size.width)
         size.height = 56.0
-        print("【LUA】CGSize", size)
-        print("【LUA】copy CGSize", copySize)
+        -- 结构体打印，需要使用 tostring 方法
+        kkp.print("【LUA】CGSize", tostring(size))
+        kkp.print("【LUA】copy CGSize", tostring(copySize))
         return self
     end
 
     function viewDidLoad()
-        print("【LUA】CustomTableViewController viewDidLoad", self.aa)
+        kkp.print("【LUA】CustomTableViewController viewDidLoad", self.aa)
         self:view():setBackgroundColor_(UIColor:blueColor())
         
         CustomTableViewController:refreshData_({key = "value", key1 = "value1"})
         
         dispatch_after(dispatch_time(0, 1 * 1000000000), dispatch_get_main_queue(), kkp_block(function()
-            print("【LUA】dispatch_after 回调")
+            kkp.print("【LUA】dispatch_after 回调")
         end, "void,void"))
         
         self:refreshView()
     end
 
     function refreshView()
-        print("【LUA】CustomTableViewController refreshView", self.aa)
+        kkp.print("【LUA】CustomTableViewController refreshView", self.aa)
         -- 运行时错误，测试运行时错误获取 lua 堆栈
         -- n = n / nil
         
@@ -48,7 +49,7 @@ function(_ENV)
     end
 
     function dealloc()
-        print("【LUA】CustomTableViewController dalloc")
+        kkp.print("【LUA】CustomTableViewController dalloc")
     end
 
     -- DataSource
@@ -61,9 +62,9 @@ end,
 function(_ENV)
 
     function refreshData_(data)
-        print("【LUA】CustomTableViewController STATICrefreshData", data)
+        kkp.print("【LUA】CustomTableViewController STATICrefreshData", data)
         for k,v in pairs(data) do
-            print("【LUA】CustomTableViewController STATICrefreshData", k, v)
+            kkp.print("【LUA】CustomTableViewController STATICrefreshData", k, v)
         end
     end
 

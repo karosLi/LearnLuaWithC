@@ -29,7 +29,15 @@ int kkp_global_isNull(lua_State *L)
 int kkp_global_print(lua_State *L)
 {
     return kkp_safeInLuaStack(L, ^int{
-        NSLog(@"%s", luaL_checkstring(L, 1));//only NSLog can show log in console when not debug
+        NSMutableString *string = [NSMutableString new];
+        for (int i = 1; i <= lua_gettop(L); i++) {
+            void *value = kkp_toOCObject(L, "@", i);
+            __unsafe_unretained id instance = (__bridge  id)(*(void **)value);
+            free(value);
+            [string appendFormat:@"%@ ", instance];
+        }
+        
+        NSLog(@"%@", string);//only NSLog can show log in console when not debug
         return 0;
     });
 }

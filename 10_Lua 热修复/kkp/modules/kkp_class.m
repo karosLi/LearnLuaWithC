@@ -105,9 +105,12 @@ void kkp_class_cleanClass(NSString *className)
 /// 实例方法调用时，self 是 实例。类方法调用时，self 是 类
 static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL selector, NSInvocation *invocation)
 {
+    Class klass = [self class];
+    NSString *selectorName = NSStringFromSelector(invocation.selector);
+    
     lua_State* L = kkp_currentLuaState();
     kkp_safeInLuaStack(L, ^int{
-        if (kkp_class_isReplaceByKKP([self class], NSStringFromSelector(invocation.selector))) {// selector 是否已经被替换了
+        if (kkp_class_isReplaceByKKP(klass, selectorName)) {// selector 是否已经被替换了
             int nresults = kkp_callLuaFunction(L, self, invocation.selector, invocation);
             if (nresults > 0) {
                 NSMethodSignature *signature = [self methodSignatureForSelector:invocation.selector];

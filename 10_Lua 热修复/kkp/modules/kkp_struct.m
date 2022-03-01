@@ -212,7 +212,7 @@ static int LUserData_kkp_struct__gc(lua_State *L)
 static const struct luaL_Reg UserDataMetaMethods[] = {
     {"__index", LUserData_kkp_struct__index},
     {"__newindex", LUserData_kkp_struct__newIndex},
-    {"__tostring", LUserData_kkp_struct__tostring},
+    {"__tostring", LUserData_kkp_struct__tostring},// print(struct) 和 tostring(struct) 会触发
     {"__gc", LUserData_kkp_struct__gc},
     {NULL, NULL}
 };
