@@ -10,6 +10,11 @@
 #include "kkp.h"
 
 int main(int argc, char * argv[]) {
+    // 设置日志处理
+    kkp_setLuaLogHandler(^(NSString *log) {
+        NSLog(@"【统一日志打印】 %@", log);
+    });
+    
     // 设置错误处理
     kkp_setLuaErrorHandler(^(NSString *error) {
         NSLog(@"【统一错误拦截】 %@", error);
@@ -27,7 +32,7 @@ int main(int argc, char * argv[]) {
 //    // 执行测试脚本
 //    kkp_runLuaFile(@"test.lua");
     
-    NSString * appDelegateClassName;
+    NSString *appDelegateClassName;
     @autoreleasepool {
         // Setup code that might create autoreleased objects goes here.
         appDelegateClassName = NSStringFromClass([AppDelegate class]);

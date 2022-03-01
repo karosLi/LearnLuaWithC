@@ -12,10 +12,15 @@
 #define KKP "kkp"
 
 typedef void (*KKPCLibFunction) (lua_State *L);
+typedef void (^KKPLuaLogHanlder)(NSString *log);
 typedef void (^KKPLuaErrorHanlder)(NSString *error);
 
-#pragma mark - 错误处理
-/// 设置 lua error 处理器
+#pragma mark - 日志和错误处理
+/// 设置 lua log 处理器，当 lua 脚本代码里使用 kkp.print 时就会触发这个处理器
+extern void kkp_setLuaLogHandler(KKPLuaLogHanlder handler);
+/// 获取 lua log  处理器
+extern KKPLuaLogHanlder kkp_getLuaLogHandler(void);
+/// 设置 lua error 处理器，当出现 lua 脚本语法错误，运行时错误时就会触发这个处理器
 extern void kkp_setLuaErrorHandler(KKPLuaErrorHanlder handler);
 /// 获取 lua error  处理器
 extern KKPLuaErrorHanlder kkp_getLuaErrorHandler(void);

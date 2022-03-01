@@ -8,6 +8,7 @@
 #import "kkp_global_util.h"
 #import "lualib.h"
 #import "lauxlib.h"
+#import "kkp.h"
 #import "kkp_define.h"
 #import "kkp_helper.h"
 #import "kkp_converter.h"
@@ -37,7 +38,12 @@ int kkp_global_print(lua_State *L)
             [string appendFormat:@"%@ ", instance];
         }
         
-        NSLog(@"%@", string);//only NSLog can show log in console when not debug
+        if (kkp_getLuaLogHandler()) {
+            kkp_getLuaLogHandler()(string);
+        } else {
+            NSLog(@"%@", string);//only NSLog can show log in console when not debug
+        }
+        
         return 0;
     });
 }

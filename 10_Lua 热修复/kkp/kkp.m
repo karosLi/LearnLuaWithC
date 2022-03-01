@@ -31,7 +31,19 @@ lua_State *kkp_currentLuaState(void) {
     return kkp_currentL;
 }
 
-#pragma mark - 错误处理相关
+#pragma mark - 日志错误处理相关
+static KKPLuaLogHanlder kkp_lua_log_handler;
+/// 设置 lua log 处理器
+void kkp_setLuaLogHandler(KKPLuaLogHanlder handler)
+{
+    kkp_lua_log_handler = handler;
+}
+/// 获取 lua log  处理器
+KKPLuaLogHanlder kkp_getLuaLogHandler(void)
+{
+    return kkp_lua_log_handler;
+}
+
 static KKPLuaErrorHanlder kkp_lua_error_handler;
 /// 设置 lua error 处理器
 void kkp_setLuaErrorHandler(KKPLuaErrorHanlder handler)
