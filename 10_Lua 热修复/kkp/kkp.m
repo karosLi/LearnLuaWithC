@@ -33,13 +33,13 @@ lua_State *kkp_currentLuaState(void) {
 
 #pragma mark - 错误处理相关
 static KKPLuaErrorHanlder kkp_lua_error_handler;
-/// 设置 lua runtime 处理器
+/// 设置 lua error 处理器
 void kkp_setLuaErrorHandler(KKPLuaErrorHanlder handler)
 {
     kkp_lua_error_handler = handler;
 }
 
-/// 获取 lua runtime  处理器
+/// 获取 lua error  处理器
 KKPLuaErrorHanlder kkp_getLuaErrorHandler(void)
 {
     return kkp_lua_error_handler;

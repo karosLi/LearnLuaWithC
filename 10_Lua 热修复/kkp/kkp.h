@@ -31,7 +31,7 @@ extern void kkp_runLuaFile(const char *fname);
 extern void kkp_runLuaByteCode(NSData *data, NSString *name);
 
 #pragma mark - 错误处理
-/// 设置 lua runtime 处理器
+/// 设置 lua error 处理器
 extern void kkp_setLuaErrorHandler(KKPLuaErrorHanlder handler);
-/// 获取 lua runtime  处理器
+/// 获取 lua error  处理器
 extern KKPLuaErrorHanlder kkp_getLuaErrorHandler(void);
