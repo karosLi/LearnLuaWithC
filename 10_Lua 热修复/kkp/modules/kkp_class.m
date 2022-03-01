@@ -17,13 +17,15 @@
 #import "kkp_converter.h"
 #import "KKPBlockWrapper.h"
 
+#pragma mark - 记录重写过的方法
 /// 用于记录替换过的方法
 @interface KKPClassMethodReplaceRecord : NSObject
 @property(nonatomic, copy) NSString *className;
 @property(nonatomic, copy) NSString *selecotorName;
-@property(nonatomic, assign) BOOL isInstanceMethod;
-@property(nonatomic, assign) BOOL isReplaceMethod;
+@property(nonatomic, assign) BOOL isInstanceMethod;// 是否是实例方法，如果不是，那就是类方法
+@property(nonatomic, assign) BOOL isReplaceMethod;// 是否是替换方法，如果不是，那就是添加方法
 @end
+
 @implementation KKPClassMethodReplaceRecord
 @end
 
@@ -45,14 +47,58 @@ static BOOL kkp_class_isReplaceByKKP(Class cls, NSString *selectorName)
 {
     if (_KKPOverrideMethods) {
         if (_KKPOverrideMethods[cls]) {
-            if ([selectorName isEqualToString:@"refreshData:"]) {
-                NSLog(@"");
-            }
             return _KKPOverrideMethods[cls][selectorName] ? YES : NO;
         }
     }
     
     return NO;
+}
+
+static void kkp_doesNotRecognizeSelector(id object, SEL _cmd) {
+    [object doesNotRecognizeSelector:_cmd];
+}
+
+/// 用于清理 hook 过方法替换
+void kkp_class_cleanClass(NSString *className)
+{
+    NSMutableArray *removedKeys = [NSMutableArray array];
+    NSMutableDictionary *overrideMethodsDict = _KKPOverrideMethods;
+    for (Class cls in overrideMethodsDict.allKeys) {
+        if (className && ![className isEqualToString:NSStringFromClass(cls)]) {
+            continue;
+        }
+        
+        /// 恢复方法替换
+        NSMutableDictionary<NSString *, KKPClassMethodReplaceRecord*> *methodsDict = _KKPOverrideMethods[cls];
+        for (NSString *selectorName in methodsDict.allKeys) {
+            KKPClassMethodReplaceRecord *record = methodsDict[selectorName];
+            
+            Class klass = record.isInstanceMethod ? cls : object_getClass(cls);
+            SEL selector = NSSelectorFromString(selectorName);
+            if (record.isReplaceMethod) {// 如果是替换方法，则恢复成原始方法的实现
+                SEL originSelector = kkp_runtime_originForSelector(selector);
+                Method originMethod = class_getInstanceMethod(klass, originSelector);
+                const char *typeEncoding = method_getTypeEncoding(originMethod);
+                IMP originIMP = method_getImplementation(originMethod);
+                class_replaceMethod(klass, selector, originIMP, typeEncoding);
+            } else {// 如果是添加方法，则恢复成一个空实现
+                Method addMethod = class_getInstanceMethod(klass, selector);
+                const char *typeEncoding = method_getTypeEncoding(addMethod);
+                class_replaceMethod(klass, selector, (IMP)kkp_doesNotRecognizeSelector, typeEncoding);
+            }
+        }
+        
+        /// 恢复 forwardInvocation: 的实现
+        const char *typeDescription = (char *)method_getTypeEncoding(class_getInstanceMethod(cls, @selector(forwardInvocation:)));
+        IMP originForwardInvocationIMP = class_getMethodImplementation(cls, NSSelectorFromString(KKP_ORIGIN_FORWARD_INVOCATION_SELECTOR_NAME));
+        if (originForwardInvocationIMP) {
+            class_replaceMethod(cls, @selector(forwardInvocation:), originForwardInvocationIMP, typeDescription);
+        }
+        
+        [removedKeys addObject:cls];
+    }
+    
+    [_KKPOverrideMethods removeObjectsForKeys:removedKeys];
 }
 
 #pragma mark - 运行时方法替换
@@ -61,7 +107,7 @@ static void __KKP_ARE_BEING_CALLED__(__unsafe_unretained NSObject *self, SEL sel
 {
     lua_State* L = kkp_currentLuaState();
     kkp_safeInLuaStack(L, ^int{
-        if (kkp_class_isReplaceByKKP(object_getClass(self), NSStringFromSelector(invocation.selector))) {// selector 是否已经被替换了
+        if (kkp_class_isReplaceByKKP([self class], NSStringFromSelector(invocation.selector))) {// selector 是否已经被替换了
             int nresults = kkp_callLuaFunction(L, self, invocation.selector, invocation);
             if (nresults > 0) {
                 NSMethodSignature *signature = [self methodSignatureForSelector:invocation.selector];
@@ -111,61 +157,25 @@ static void kkp_class_overrideMethod(Class klass, SEL sel, BOOL isInstanceMethod
         isReplaceMethod = NO;
         /// 把要 hook 的方法实现，直接替换成 _objc_msgForward，意味着 hook 的方法在调用时，直接走消息转发流程，不用经过 method list 查找流程
         /// 如果方法存在就替换，否则就是添加
-        class_replaceMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, sel), typeDescription);
+        class_addMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, sel), typeDescription);
     }
     
     /// 把已经替换的方法记录下
     KKPClassMethodReplaceRecord *record = [KKPClassMethodReplaceRecord new];
-    record.className = NSStringFromClass(klass);
+    NSString *className = NSStringFromClass(klass);
+    record.className = className;
     record.selecotorName = NSStringFromSelector(sel);
     record.isInstanceMethod = isInstanceMethod;
     record.isReplaceMethod = isReplaceMethod;
-    kkp_class_recordOverideMethods(klass, NSStringFromSelector(sel), record);
-}
-
-static bool kkp_class_recoverMethod(const char* class_name, const char* selector_name)
-{
-    if (class_name && selector_name) {
-        Class klass = objc_getClass(class_name);
-        Class metaClass = object_getClass(klass);
-        SEL sel = NSSelectorFromString([NSString stringWithFormat:@"%s", kkp_toObjcSel(selector_name)]);
-        
-        BOOL canBeReplace = NO;
-        NSString* selectorName = [NSString stringWithFormat:@"%s", selector_name];
-        if ([selectorName hasPrefix:KKP_STATIC_PREFIX]) {
-            sel = NSSelectorFromString([selectorName substringFromIndex:[KKP_STATIC_PREFIX length]]);
-            if ([metaClass instancesRespondToSelector:sel]) {
-                klass = metaClass;
-                canBeReplace = YES;
-            }
-        } else {
-            if ([klass instancesRespondToSelector:sel]) {
-                canBeReplace = YES;
-            } else {
-                if ([metaClass instancesRespondToSelector:sel]) {
-                    klass = metaClass;
-                    canBeReplace = YES;
-                }
-            }
-        }
-        if (canBeReplace) {
-            // cancel forward
-            SEL originSelector = kkp_runtime_originForSelector(sel);
-            Method originalMethod = class_getInstanceMethod(klass, originSelector);
-            const char *typeEncoding = method_getTypeEncoding(originalMethod);
-            IMP originalIMP = method_getImplementation(originalMethod);
-            class_replaceMethod(klass, sel, originalIMP, typeEncoding);
-            
-            return true;
-        }
-    }
-    return false;
+    kkp_class_recordOverideMethods(NSClassFromString(className), NSStringFromSelector(sel), record);
 }
 
 #pragma mark - 帮助方法
-int kkp_class_create_userdata(lua_State *L, const char *klass_name)
+int kkp_class_create_userdata(lua_State *L, Class klass)
 {
     return kkp_safeInLuaStack(L, ^int{
+        const char *klass_name = NSStringFromClass(klass).UTF8String;
+        
         // 从类列表元表里获取 class_name 对应 class userdata，并压栈，如果没有的话，压入会是一个 nil
         luaL_getmetatable(L, KKP_CLASS_USER_DATA_LIST_TABLE);
         lua_getfield(L, -1, klass_name);
@@ -392,33 +402,7 @@ static int LF_kkp_class_find_userData(lua_State *L)
     if (klass == nil) {
         return 0;// 没有结果返回，在 lua 中做条件判断时，会返回 false
     }
-    return kkp_class_create_userdata(L, klass_name);
-}
-
-static int LF_kkp_class_recoverMethod(lua_State *L)
-{
-    // class
-    const char* class_name = lua_tostring(L, 1);
-    const char* selector_name = lua_tostring(L, 2);
-    
-    bool r =  kkp_class_recoverMethod(class_name, selector_name);
-    if (r) {
-        __block NSMutableIndexSet* indexes = [NSMutableIndexSet indexSet];
-//        [kkp_class_replacedClassMethods() enumerateObjectsUsingBlock:^(NSDictionary* obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//            NSString* klass = obj[@"class"];
-//            NSString* sel = obj[@"sel"];
-//            if (strcmp(klass.UTF8String, class_name) == 0
-//                && strcmp(sel.UTF8String, selector_name) == 0) {
-//                [indexes addIndex:idx];
-//                *stop = YES;
-//            }
-//        }];
-//        if (index > 0) {
-//            [kkp_class_replacedClassMethods() removeObjectsAtIndexes:indexes];
-//        }
-    }
-    
-    return 0;
+    return kkp_class_create_userdata(L, klass);
 }
 
 /// 定义一个 oc block，用于把 lua 函数转成一个 oc block 做的前置工作，主要是先保存 lua 函数的 返回和参数类型
@@ -548,12 +532,11 @@ static int LM_kkp_class__call(lua_State *L)
         }
     }
     
-    return kkp_class_create_userdata(L, className);
+    return kkp_class_create_userdata(L, klass);
 }
 
 static const struct luaL_Reg Methods[] = {
     {"findUserData", LF_kkp_class_find_userData},
-    {"recoverMethod", LF_kkp_class_recoverMethod},
     {"defineBlock", LF_kkp_class_define_block},
     {"defineProtocol", LF_kkp_class_define_protocol},
     {NULL, NULL}
@@ -567,13 +550,6 @@ static const struct luaL_Reg MetaMethods[] = {
 
 LUAMOD_API int luaopen_kkp_class(lua_State *L)
 {
-//    [kkp_class_replacedClassMethods() enumerateObjectsUsingBlock:^(NSDictionary* obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//        NSString* klass = obj[@"class"];
-//        NSString* sel = obj[@"sel"];
-//        kkp_class_recoverMethod(klass.UTF8String, sel.UTF8String);
-//    }];
-//    [kkp_class_replacedClassMethods() removeAllObjects];
-    
     /// 创建 class user data 元表，并添加元方法
     luaL_newmetatable(L, KKP_CLASS_USER_DATA_META_TABLE);// 新建元表用于存放元方法
     luaL_setfuncs(L, UserDataMetaMethods, 0); //给元表设置函数

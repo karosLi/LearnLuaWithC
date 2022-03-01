@@ -16,11 +16,12 @@
 #define KKP_PROTOCOL_TYPE_BYREF 'R'
 #define KKP_PROTOCOL_TYPE_ONEWAY 'V'
 
-extern bool kkp_recordLuaRuntimeError(NSString *error);
+extern bool kkp_recordLuaError(NSString *error);
 #define KKP_ERROR(L, err)                                                                               \
-if (kkp_recordLuaRuntimeError(err)) {                                                                   \
+NSString *_errorString = [NSString stringWithFormat:@"[KKP] error %s line %d %s: %@", __FILE__, __LINE__, __FUNCTION__, err];\
+if (kkp_recordLuaError(_errorString)) {                                                                          \
 } else {                                                                                                \
-    luaL_error(L, "[KKP] error %s line %d %s: %s", __FILE__, __LINE__, __FUNCTION__, err.UTF8String);   \
+    luaL_error(L, "%s", _errorString.UTF8String);   \
 }
 
 typedef int (^kkp_lua_stack_safe_block_t)(void);

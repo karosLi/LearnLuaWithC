@@ -24,7 +24,7 @@
 #define KKP_END_STACK_MODIFY(L, i) while(lua_gettop((L)) > (__startStackIndex + (i))) lua_remove((L), __startStackIndex + 1);
 
 #pragma mark - 帮助方法
-bool kkp_recordLuaRuntimeError(NSString *error)
+bool kkp_recordLuaError(NSString *error)
 {
     if (kkp_getLuaErrorHandler()) {
         kkp_getLuaErrorHandler()(error);
@@ -135,7 +135,7 @@ void kkp_stackDump(lua_State *L) {
 #pragma mark - lua 调用相关
 
 /// 用于获取 lua 调用运行时堆栈
-/// 栈顶默认是错误消息，但是不包含堆栈信息，当能获取堆栈就使用堆栈代替错误信息，获取失败就使用错误信息
+/// 栈顶默认是错误消息，但是不包含堆栈信息，当能获取堆栈就使用 堆栈+错误信息，获取失败就使用 错误信息
 int kkp_callRuntimeErrorFunction(lua_State *L) {
     lua_getglobal(L, "debug");
     if (!lua_istable(L, -1)) {
@@ -151,32 +151,28 @@ int kkp_callRuntimeErrorFunction(lua_State *L) {
     lua_remove(L, -2); // 移除 debug
     
     lua_call(L, 0, 1);
-    lua_remove(L, -2);// 移除原始的错误信息
+    lua_pushstring(L, "\n");
+    lua_insert(L, -2);
+    lua_concat(L, 3);// 把原始错误和堆栈拼接起来然后放到栈顶
     return 1;
 }
 
 /// 调用 lua 代码块
 int kkp_pcall(lua_State *L, int argumentCount, int returnCount) {
-    lua_pushcclosure(L, kkp_callRuntimeErrorFunction, 0);
-    int errorFuncStackIndex = lua_gettop(L) - (argumentCount + 1); // Insert error function before arguments
+    /// 把错误函数插入到函数和参数的前面
+    lua_pushcfunction(L, kkp_callRuntimeErrorFunction);
+    int errorFuncStackIndex = lua_gettop(L) - (argumentCount + 1);
     lua_insert(L, errorFuncStackIndex);
     
     int result = lua_pcall(L, argumentCount, returnCount, errorFuncStackIndex);
-    
-    if (result != 0) {
-        NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
-        KKP_ERROR(L, log);
-    }
+    lua_remove(L, errorFuncStackIndex);// 移除错误函数
     
     return result;
 }
 
 /// 运行 lua 字符串
 int kkp_dostring(lua_State *L, const char *script) {
-    int result = luaL_loadstring(L, script);
-    if (result == 0) {
-        result = kkp_pcall(L, 0, LUA_MULTRET);
-    }
+    int result = luaL_loadstring(L, script) || kkp_pcall(L, 0, LUA_MULTRET);
     
     if (result != 0) {
         NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
@@ -188,10 +184,7 @@ int kkp_dostring(lua_State *L, const char *script) {
 
 /// 运行 lua 文件
 int kkp_dofile(lua_State *L, const char *fname) {
-    int result = luaL_loadfile(L, fname);
-    if (result == 0) {
-        result = kkp_pcall(L, 0, LUA_MULTRET);
-    }
+    int result = luaL_loadfile(L, fname) || kkp_pcall(L, 0, LUA_MULTRET);
     
     if (result != 0) {
         NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
@@ -203,10 +196,7 @@ int kkp_dofile(lua_State *L, const char *fname) {
 
 /// 运行 lua 字节码
 int kkp_dobuffer(lua_State *L, NSData *data, const char *name) {
-    int result = luaL_loadbuffer(L, [data bytes], data.length, name);
-    if (result == 0) {
-        result = kkp_pcall(L, 0, LUA_MULTRET);
-    }
+    int result = luaL_loadbuffer(L, [data bytes], data.length, name) || kkp_pcall(L, 0, LUA_MULTRET);
     
     if (result != 0) {
         NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
@@ -419,7 +409,10 @@ int kkp_callLuaFunction(lua_State *L, __unsafe_unretained id assignSlf, SEL sele
         }
         
         // 栈上有了 lua 函数，self 参数，和其他参数后，就可以调用 lua 函数了
-        kkp_pcall(L, nargs, nresults);
+        if (kkp_pcall(L, nargs, nresults)) {
+            NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
+            KKP_ERROR(L, log);
+        }
         
         if (deallocFlag) {// 调用完 lua dealloc 后，需要继续调用 oc 实例对象的 dealloc
             slf = nil;

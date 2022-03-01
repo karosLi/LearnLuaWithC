@@ -9,7 +9,7 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-extern void kkp_runtime_swizzleForwardInvocation(Class klass, IMP imp);
+extern void kkp_runtime_swizzleForwardInvocation(Class klass, IMP newforwardInvocationIMP);
 
 extern BOOL kkp_runtime_isMsgForwardIMP(IMP impl);
 

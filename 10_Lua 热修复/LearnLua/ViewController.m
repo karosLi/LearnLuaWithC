@@ -45,6 +45,7 @@
 }
 
 - (void)setup {
+    self.view.backgroundColor = [UIColor greenColor];
     _gotoButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_gotoButton setTitle:@"跳转" forState:UIControlStateNormal];
     [_gotoButton addTarget:self action:@selector(onClickGotoButton) forControlEvents:UIControlEventTouchUpInside];
@@ -70,6 +71,7 @@
 }
 
 - (void)onClickGotoButton {
+    NSLog(@"onClickGotoButton");
 }
 
 /// lua 脚本 hook 这个方法

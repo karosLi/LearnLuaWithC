@@ -9,7 +9,7 @@
 #import "kkp_define.h"
 #import "kkp_helper.h"
 
-void kkp_runtime_swizzleForwardInvocation(Class klass, IMP imp)
+void kkp_runtime_swizzleForwardInvocation(Class klass, IMP newforwardInvocationIMP)
 {
     NSCParameterAssert(klass);
     // get origin forwardInvocation impl, include superClass impl，not NSObject impl, and class method to kClass
@@ -21,7 +21,7 @@ void kkp_runtime_swizzleForwardInvocation(Class klass, IMP imp)
         
     }
     // If there is no method, replace will act like class_addMethod.
-    class_replaceMethod(klass, @selector(forwardInvocation:), imp, "v@:@");
+    class_replaceMethod(klass, @selector(forwardInvocation:), newforwardInvocationIMP, "v@:@");
 }
 
 BOOL kkp_runtime_isMsgForwardIMP(IMP impl)

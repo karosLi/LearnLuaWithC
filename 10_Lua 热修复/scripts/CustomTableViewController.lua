@@ -40,8 +40,11 @@ function(_ENV)
 
     function refreshView()
         print("【LUA】CustomTableViewController refreshView", self.aa)
-        -- 运行时错误，测试获取 lua 堆栈
-        n = n / nil
+        -- 运行时错误，测试运行时错误获取 lua 堆栈
+        -- n = n / nil
+        
+        -- 语法错误，测试语法错误获取 lua 堆栈
+        -- ddd
     end
 
     function dealloc()

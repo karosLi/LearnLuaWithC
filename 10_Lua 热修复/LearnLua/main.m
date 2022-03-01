@@ -10,11 +10,22 @@
 #include "kkp.h"
 
 int main(int argc, char * argv[]) {
-    // 启动
-    kkp_start(nil);
+    // 设置错误处理
+    kkp_setLuaErrorHandler(^(NSString *error) {
+        NSLog(@"【统一错误拦截】 %@", error);
+    });
     
+    // 启动
+    kkp_start();
     // 执行测试脚本
-    kkp_runLuaFile("test.lua");
+    kkp_runLuaFile(@"test.lua");
+    
+//    // 清理 hook 的类
+//    kkp_cleanAllClass();
+//    // 重启
+//    kkp_restart();
+//    // 执行测试脚本
+//    kkp_runLuaFile(@"test.lua");
     
     NSString * appDelegateClassName;
     @autoreleasepool {
