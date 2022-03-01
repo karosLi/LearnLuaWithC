@@ -124,9 +124,6 @@ static void kkp_setup(void)
     
     // 添加全局变量
     kkp_addGlobals(L);
-    
-    // 启动GC
-    
 }
 
 /// 添加全局 lua 函数
