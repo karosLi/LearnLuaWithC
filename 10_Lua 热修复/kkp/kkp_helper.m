@@ -24,6 +24,16 @@
 #define KKP_END_STACK_MODIFY(L, i) while(lua_gettop((L)) > (__startStackIndex + (i))) lua_remove((L), __startStackIndex + 1);
 
 #pragma mark - 帮助方法
+bool kkp_recordLuaRuntimeError(NSString *error)
+{
+    if (kkp_getLuaErrorHandler()) {
+        kkp_getLuaErrorHandler()(error);
+        return true;
+    }
+    
+    return false;
+}
+
 int kkp_safeInLuaStack(lua_State *L, kkp_lua_stack_safe_block_t block)
 {
     return kkp_performLocked(^int{
@@ -123,128 +133,38 @@ void kkp_stackDump(lua_State *L) {
 }
 
 #pragma mark - lua 调用相关
-/// 获取 lua 调用堆栈
-const char* kkp_getLuaStackTrace(lua_State *L) {
-    int level = 1;
-    int max = 21;
-
-    lua_Debug ar;
-    int top = lua_gettop(L);
-    luaL_checkstack(L, 10, NULL);
-    lua_pushliteral(L, "STACK TRACEBACK:");
-    int n;
-    const char *name;
-    while (lua_getstack(L, level++, &ar)) {
-        lua_getinfo(L, "Slntu", &ar);
-        lua_pushfstring(L, "\n=> %s:%d in ", ar.short_src, ar.currentline);
-        if (ar.name)
-            lua_pushstring(L, ar.name);
-        else if (ar.what[0] == 'm')
-            lua_pushliteral(L, "mainchunk");
-        else
-            lua_pushliteral(L, "?");
-        if (ar.istailcall)
-            lua_pushliteral(L, "\n(...tail calls...)");
-        lua_concat(L, lua_gettop(L) - top);     // <str>
-
-        // varargs
-        n = -1;
-        while ((name = lua_getlocal(L, &ar, n--)) != NULL) {    // <str|value>
-            lua_pushfstring(L, "\n    %s = ", name);        // <str|value|name>
-            luaL_tolstring(L, -2, NULL);    // <str|value|name|valstr>
-            lua_remove(L, -3);  // <str|name|valstr>
-            lua_concat(L, lua_gettop(L) - top);     // <str>
-        }
-
-        // arg and local
-        n = 1;
-        while ((name = lua_getlocal(L, &ar, n++)) != NULL) {    // <str|value>
-            if (name[0] == '(') {
-                lua_pop(L, 1);      // <str>
-            } else {
-                if (n <= ar.nparams+1)
-                    lua_pushfstring(L, "\n    param %s = ", name);      // <str|value|name>
-                else
-                    lua_pushfstring(L, "\n    local %s = ", name);      // <str|value|name>
-                luaL_tolstring(L, -2, NULL);    // <str|value|name|valstr>
-                lua_remove(L, -3);  // <str|name|valstr>
-                lua_concat(L, lua_gettop(L) - top);     // <str>
-            }
-        }
-
-        if (level > max)
-            break;
-    }
-    lua_concat(L, lua_gettop(L) - top);
-    const char *traceback = lua_tostring(L, -1);
-    lua_pop(L, 1);
-    kkp_stackDump(L);
-    return traceback;
-    
-//    luaL_traceback(L, kkp_currentLuaState(), "", 1);
-//    const char *traceback = lua_tostring(L, -1);
-//    lua_pop(L, 1);
-//    return traceback;
-    
-//    lua_getglobal(L, "debug");
-//    if (!lua_istable(L, -1)) {
-//        lua_pop(L, 1);
-//        return NULL;
-//    }
-//
-//    lua_getfield(L, -1, "traceback");
-//    if (!lua_isfunction(L, -1)) {
-//        lua_pop(L, 2);
-//        return NULL;
-//    }
-//    lua_remove(L, -2); // Remove debug
-//    kkp_stackDump(L);
-//    lua_call(L, 0, 1);
-//    const char *traceback = lua_tostring(L, -1);
-//    lua_pop(L, 2);
-//    return traceback;
-}
 
 /// 用于获取 lua 调用运行时堆栈
-int kkp_callErrorFunction(lua_State *L) {
-    luaL_traceback(L, L, "", 1);
-    const char *traceback = lua_tostring(L, 1);
-    lua_pop(L, 1);
+/// 栈顶默认是错误消息，但是不包含堆栈信息，当能获取堆栈就使用堆栈代替错误信息，获取失败就使用错误信息
+int kkp_callRuntimeErrorFunction(lua_State *L) {
+    lua_getglobal(L, "debug");
+    if (!lua_istable(L, -1)) {
+        lua_pop(L, 1);
+        return 1;
+    }
+
+    lua_getfield(L, -1, "traceback");
+    if (!lua_isfunction(L, -1)) {
+        lua_pop(L, 2);
+        return 1;
+    }
+    lua_remove(L, -2); // 移除 debug
     
-//    kkp_getLuaStackTrace(L);
-    
-//    wax_printStack(L);
-//    lua_getfield(L, LUA_GLOBALSINDEX, "debug");
-//    if (!lua_istable(L, -1)) {
-//        lua_pop(L, 1);
-//        return 1;
-//    }
-//
-//    lua_getfield(L, -1, "traceback");
-//    if (!lua_isfunction(L, -1)) {
-//        lua_pop(L, 2);
-//        return 1;
-//    }
-//    lua_remove(L, -2); // Remove debug
-//
-//    lua_pushvalue(L, -2); // Grab the error string and place it on the stack
-//
-//    lua_call(L, 1, 1);
-//    lua_remove(L, -2); // Remove original error string
-    
+    lua_call(L, 0, 1);
+    lua_remove(L, -2);// 移除原始的错误信息
     return 1;
 }
 
 /// 调用 lua 代码块
 int kkp_pcall(lua_State *L, int argumentCount, int returnCount) {
-    lua_pushcclosure(L, kkp_callErrorFunction, 0);
+    lua_pushcclosure(L, kkp_callRuntimeErrorFunction, 0);
     int errorFuncStackIndex = lua_gettop(L) - (argumentCount + 1); // Insert error function before arguments
     lua_insert(L, errorFuncStackIndex);
     
     int result = lua_pcall(L, argumentCount, returnCount, errorFuncStackIndex);
     
     if (result != 0) {
-        NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n\n%s", lua_tostring(L, -1), kkp_getLuaStackTrace(L)];
+        NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: unprotected error in call to Lua API (%s)\n", lua_tostring(L, -1)];
         KKP_ERROR(L, log);
     }
     

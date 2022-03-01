@@ -16,9 +16,9 @@
 #define KKP_PROTOCOL_TYPE_BYREF 'R'
 #define KKP_PROTOCOL_TYPE_ONEWAY 'V'
 
+extern bool kkp_recordLuaRuntimeError(NSString *error);
 #define KKP_ERROR(L, err)                                                                               \
-if (kkp_getLuaRuntimeHandler()) {                                                                       \
-    kkp_getLuaRuntimeHandler()(err);                                                                    \
+if (kkp_recordLuaRuntimeError(err)) {                                                                   \
 } else {                                                                                                \
     luaL_error(L, "[KKP] error %s line %d %s: %s", __FILE__, __LINE__, __FUNCTION__, err.UTF8String);   \
 }
@@ -31,8 +31,6 @@ extern int kkp_safeInLuaStack(lua_State *L, kkp_lua_stack_safe_block_t block);
 extern int kkp_performLocked(kkp_lua_lock_safe_block_t block);
 
 extern void kkp_stackDump(lua_State *L);
-
-extern const char* kkp_getLuaStackTrace(lua_State *L);
 
 extern int kkp_pcall(lua_State *L, int argumentCount, int returnCount);
 

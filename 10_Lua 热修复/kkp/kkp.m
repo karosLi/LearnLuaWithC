@@ -31,39 +31,26 @@ lua_State *kkp_currentLuaState(void) {
     return currentL;
 }
 
-#pragma mark - 日志相关
-static KKPLogHandler kkp_log_handler;
-/// 设置日志回调
-void kkp_setLogHandler(KKPLogHandler handler)
-{
-    kkp_log_handler = handler;
-}
-
-/// 获取日志回调
-KKPLogHandler kkp_getLogHandler(void)
-{
-    return kkp_log_handler;
-}
-
-static KKPLuaRuntimeHanlder kkp_lua_runtime_handler;
+#pragma mark - 错误处理相关
+static KKPLuaErrorHanlder kkp_lua_error_handler;
 /// 设置 lua runtime 处理器
-void kkp_setLuaRuntimeHandler(KKPLuaRuntimeHanlder handler)
+void kkp_setLuaErrorHandler(KKPLuaErrorHanlder handler)
 {
-    kkp_lua_runtime_handler = handler;
+    kkp_lua_error_handler = handler;
 }
 
 /// 获取 lua runtime  处理器
-KKPLuaRuntimeHanlder kkp_getLuaRuntimeHandler(void)
+KKPLuaErrorHanlder kkp_getLuaErrorHandler(void)
 {
-    return kkp_lua_runtime_handler;
+    return kkp_lua_error_handler;
 }
 
 /// 错误处理函数
 static int kkp_panic(lua_State *L) {
     NSString *log = [NSString stringWithFormat:@"%s\n", lua_tostring(L, -1)];
     
-    if (kkp_getLuaRuntimeHandler()) {
-        kkp_getLuaRuntimeHandler()(log);
+    if (kkp_getLuaErrorHandler()) {
+        kkp_getLuaErrorHandler()(log);
     }
     
     printf("%s\n", log.UTF8String);

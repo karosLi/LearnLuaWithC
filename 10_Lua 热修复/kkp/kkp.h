@@ -12,8 +12,7 @@
 #define KKP "kkp"
 
 typedef void (*KKPCLibFunction) (lua_State *L);
-typedef void (^KKPLogHandler)(NSString *log);
-typedef void (^KKPLuaRuntimeHanlder)(NSString *log);
+typedef void (^KKPLuaErrorHanlder)(NSString *error);
 
 #pragma mark - 安装和运行
 /// 启动 kkp
@@ -31,13 +30,8 @@ extern void kkp_runLuaFile(const char *fname);
 /// 运行 lua 脚本字节码
 extern void kkp_runLuaByteCode(NSData *data, NSString *name);
 
-#pragma mark - 日志和错误处理
-/// 设置日志处理器
-extern void kkp_setLogHandler(KKPLogHandler handler);
-/// 获取日志处理器
-extern KKPLogHandler kkp_getLogHandler(void);
-
+#pragma mark - 错误处理
 /// 设置 lua runtime 处理器
-extern void kkp_setLuaRuntimeHandler(KKPLuaRuntimeHanlder handler);
+extern void kkp_setLuaErrorHandler(KKPLuaErrorHanlder handler);
 /// 获取 lua runtime  处理器
-extern KKPLuaRuntimeHanlder kkp_getLuaRuntimeHandler(void);
+extern KKPLuaErrorHanlder kkp_getLuaErrorHandler(void);
