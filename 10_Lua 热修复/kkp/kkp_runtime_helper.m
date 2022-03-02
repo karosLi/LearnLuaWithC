@@ -36,23 +36,6 @@ BOOL kkp_runtime_isMsgForwardIMP(IMP impl)
 IMP kkp_runtime_getMsgForwardIMP(Class kClass, SEL selector)
 {
     IMP msgForwardIMP = _objc_msgForward;
-#if !defined(__arm64__)
-    // As an ugly internal runtime implementation detail in the 32bit runtime, we need to determine of the method we hook returns a struct or anything larger than id.
-    // https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/LowLevelABI/000-Introduction/introduction.html
-    // https://github.com/ReactiveCocoa/ReactiveCocoa/issues/783
-    // http://infocenter.arm.com/help/topic/com.arm.doc.ihi0042e/IHI0042E_aapcs.pdf (Section 5.4)
-    Method method = class_getInstanceMethod(kClass, selector);
-    const char *typeDescription = method_getTypeEncoding(method);
-    if (typeDescription[0] == '{') {
-        //In some cases that returns struct, we should use the '_stret' API:
-        //http://sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
-        //NSMethodSignature knows the detail but has no API to return, we can only get the info from debugDescription.
-        NSMethodSignature *methodSignature = [NSMethodSignature signatureWithObjCTypes:typeDescription];
-        if ([methodSignature.debugDescription rangeOfString:@"is special struct return? YES"].location != NSNotFound) {
-            msgForwardIMP = (IMP)_objc_msgForward_stret;
-        }
-    }
-#endif
     return msgForwardIMP;
 }
 
