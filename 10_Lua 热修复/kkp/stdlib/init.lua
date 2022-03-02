@@ -1,2 +1,5 @@
+require("kkp.ext.string")
+require("kkp.ext.table")
+require("kkp.kkpEnums")
 require("kkp.kkpClass")
 require("kkp.kkpStruct")

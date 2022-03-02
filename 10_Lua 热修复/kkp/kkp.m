@@ -241,21 +241,8 @@ void kkp_cleanClass(NSString *className)
     kkp_class_cleanClass(className);
 }
 
-#pragma mark - 模块相关方法
-
-static const struct luaL_Reg Methods[] = {
-    {NULL, NULL}
-};
-
-LUAMOD_API int luaopen_kkp(lua_State *L)
-{
-    luaL_newlib(L, Methods);// 创建库函数
-    return 1;
-}
-
 #pragma mark - 库加载相关方法
 static const luaL_Reg kkp_libs[] = {
-    {KKP, luaopen_kkp},
     {KKP_CLASS, luaopen_kkp_class},
     {KKP_INSTANCE, luaopen_kkp_instance},
     {KKP_STRUCT, luaopen_kkp_struct},

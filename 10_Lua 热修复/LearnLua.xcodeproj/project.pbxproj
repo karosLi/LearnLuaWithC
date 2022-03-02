@@ -62,6 +62,9 @@
 		7C8A90DD27C8CD2F003E3EEF /* kkp_global_config.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90DC27C8CD2F003E3EEF /* kkp_global_config.m */; };
 		7C8A90E027C8D3D3003E3EEF /* kkp_global_util.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A90DF27C8D3D3003E3EEF /* kkp_global_util.m */; };
 		7C8A938A27CF1610003E3EEF /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C8A938927CF1610003E3EEF /* libffi.a */; };
+		7C8A94AC27CF4427003E3EEF /* kkpEnums.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7C8A94AB27CF4427003E3EEF /* kkpEnums.lua */; };
+		7C8A94B127CF4533003E3EEF /* ext.string.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7C8A94B027CF4533003E3EEF /* ext.string.lua */; };
+		7C8A94B327CF453E003E3EEF /* ext.table.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7C8A94B227CF453E003E3EEF /* ext.table.lua */; };
 		7C9DEBB3279FF0B60029B30D /* KKPBlockDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C9DEBB2279FF0B60029B30D /* KKPBlockDescription.m */; };
 		7CB7759C279FA0B60062CFE0 /* init.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CB7759B279FA0B60062CFE0 /* init.lua */; };
 		7CB7759F279FA4350062CFE0 /* kkp.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CB7759E279FA4350062CFE0 /* kkp.m */; };
@@ -191,6 +194,9 @@
 		7C8A938727CF1610003E3EEF /* ffi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi.h; sourceTree = "<group>"; };
 		7C8A938827CF1610003E3EEF /* ffi_arm64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffi_arm64.h; sourceTree = "<group>"; };
 		7C8A938927CF1610003E3EEF /* libffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libffi.a; sourceTree = "<group>"; };
+		7C8A94AB27CF4427003E3EEF /* kkpEnums.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = kkpEnums.lua; sourceTree = "<group>"; };
+		7C8A94B027CF4533003E3EEF /* ext.string.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = ext.string.lua; sourceTree = "<group>"; };
+		7C8A94B227CF453E003E3EEF /* ext.table.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = ext.table.lua; sourceTree = "<group>"; };
 		7C9DEBB1279FF0B60029B30D /* KKPBlockDescription.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KKPBlockDescription.h; sourceTree = "<group>"; };
 		7C9DEBB2279FF0B60029B30D /* KKPBlockDescription.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KKPBlockDescription.m; sourceTree = "<group>"; };
 		7CB77594279F9F890062CFE0 /* compile-stdlib.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "compile-stdlib.sh"; sourceTree = "<group>"; };
@@ -473,6 +479,9 @@
 				7CB7759B279FA0B60062CFE0 /* init.lua */,
 				7CE04D3727A1329000AA27E0 /* kkpClass.lua */,
 				7CF9B60B27C5D17A007DB181 /* kkpStruct.lua */,
+				7C8A94AB27CF4427003E3EEF /* kkpEnums.lua */,
+				7C8A94B027CF4533003E3EEF /* ext.string.lua */,
+				7C8A94B227CF453E003E3EEF /* ext.table.lua */,
 			);
 			path = stdlib;
 			sourceTree = "<group>";
@@ -582,7 +591,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C56D6712796A2C7007E2C56 /* test.lua in Resources */,
+				7C8A94AC27CF4427003E3EEF /* kkpEnums.lua in Resources */,
 				7CE04D3827A1329000AA27E0 /* kkpClass.lua in Resources */,
+				7C8A94B127CF4533003E3EEF /* ext.string.lua in Resources */,
+				7C8A94B327CF453E003E3EEF /* ext.table.lua in Resources */,
 				7C76971327954179004F314D /* LaunchScreen.storyboard in Resources */,
 				7C76971027954179004F314D /* Assets.xcassets in Resources */,
 				7CB7759C279FA0B60062CFE0 /* init.lua in Resources */,

@@ -32,6 +32,8 @@ function(_ENV)
 
     -- hook 实例方法
     function doSomeThing_(thingName)
+        -- 打印枚举
+        kkp.print("【LUA】打印枚举 UIImagePickerControllerCameraFlashModeOn", UIImagePickerControllerCameraFlashModeOn)
         -- 打印原生入参
         kkp.print("【LUA】打印原生入参 thingName", thingName)
         -- 设置/获取 lua 属性
