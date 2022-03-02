@@ -610,7 +610,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# 编译字节码\ncd kkp/build-scripts\n./compile-stdlib.sh\n\n# 并且也要拷贝 lua 标准库文件到 app 里\n./copy-stdlib.sh\n";
+			shellScript = "# 编译字节码\ncd kkp/build-scripts\n./compile-stdlib.sh\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
