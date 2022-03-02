@@ -76,3 +76,5 @@ chmod 777 ./build-ios.sh
 
 ### 修改 build settings
 
+![image](https://github.com/karosLi/LearnLuaWithC/blob/main/%E5%BA%93%E6%96%87%E4%BB%B6/build_settings_libffi_1.png)
+![image](https://github.com/karosLi/LearnLuaWithC/blob/main/%E5%BA%93%E6%96%87%E4%BB%B6/build_settings_libffi_2.png)
