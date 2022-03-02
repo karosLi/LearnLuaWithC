@@ -8,6 +8,7 @@
 #import <Foundation/Foundation.h>
 #import "lua.h"
 
+#define KKP_LUA(x) #x // 方便定义 多行 lua 代码，比如 NSString *script = @KKP_LUA(function() end);
 #define KKP_VERSION 0.01
 #define KKP "kkp"
 

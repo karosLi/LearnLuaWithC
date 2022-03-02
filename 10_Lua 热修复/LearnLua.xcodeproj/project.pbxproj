@@ -21,7 +21,6 @@
 		7C8A94B127CF4533003E3EEF /* ext.string.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7C8A94B027CF4533003E3EEF /* ext.string.lua */; };
 		7C8A94B327CF453E003E3EEF /* ext.table.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7C8A94B227CF453E003E3EEF /* ext.table.lua */; };
 		7C8A95D927CF525A003E3EEF /* LearnLuaTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A95D827CF525A003E3EEF /* LearnLuaTests.m */; };
-		7C8A95E127CF52AA003E3EEF /* KKPFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A95E027CF52AA003E3EEF /* KKPFunctionTest.m */; };
 		7C8A960327CF554E003E3EEF /* lua.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C76973E27954217004F314D /* lua.c */; };
 		7C8A960427CF554E003E3EEF /* luac.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C7697992795455D004F314D /* luac.c */; };
 		7C8A960527CF554E003E3EEF /* lauxlib.c in Sources */ = {isa = PBXBuildFile; fileRef = 7C76972B27954217004F314D /* lauxlib.c */; };
@@ -79,6 +78,18 @@
 		7C8A966E27CF58E2003E3EEF /* libkkp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C8A95E627CF5410003E3EEF /* libkkp.a */; };
 		7C8A966F27CF5A54003E3EEF /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C8A938927CF1610003E3EEF /* libffi.a */; };
 		7C8A967027CF6008003E3EEF /* NSObject+KKPIvarAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CD5867027B66E68000D8AED /* NSObject+KKPIvarAccess.m */; };
+		7C8A979B27CF6585003E3EEF /* KKPBlockFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A978F27CF6584003E3EEF /* KKPBlockFunctionTest.m */; };
+		7C8A979C27CF6585003E3EEF /* KKPCFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979027CF6584003E3EEF /* KKPCFunctionTest.m */; };
+		7C8A979D27CF6585003E3EEF /* KKPKeyWordTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979127CF6584003E3EEF /* KKPKeyWordTest.m */; };
+		7C8A979E27CF6585003E3EEF /* KKPCreateTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979227CF6584003E3EEF /* KKPCreateTest.m */; };
+		7C8A979F27CF6585003E3EEF /* KKPVarTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979327CF6584003E3EEF /* KKPVarTest.m */; };
+		7C8A97A027CF6585003E3EEF /* KKPBlockConvertTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979427CF6584003E3EEF /* KKPBlockConvertTest.m */; };
+		7C8A97A127CF6585003E3EEF /* KKPStructTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979527CF6585003E3EEF /* KKPStructTest.m */; };
+		7C8A97A227CF6585003E3EEF /* KKPConvertTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979627CF6585003E3EEF /* KKPConvertTest.m */; };
+		7C8A97A327CF6585003E3EEF /* KKPNewClassTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979727CF6585003E3EEF /* KKPNewClassTest.m */; };
+		7C8A97A427CF6585003E3EEF /* KKPMethodTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979827CF6585003E3EEF /* KKPMethodTest.m */; };
+		7C8A97A527CF6585003E3EEF /* KKPBlockCreateTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979927CF6585003E3EEF /* KKPBlockCreateTest.m */; };
+		7C8A97A927CF66BC003E3EEF /* KKPXCTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A97A827CF66BC003E3EEF /* KKPXCTestCase.m */; };
 		7CB7759C279FA0B60062CFE0 /* init.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CB7759B279FA0B60062CFE0 /* init.lua */; };
 		7CD5868127B77597000D8AED /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CD5868027B77597000D8AED /* ExternalAccessory.framework */; };
 		7CE04D3827A1329000AA27E0 /* kkpClass.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CE04D3727A1329000AA27E0 /* kkpClass.lua */; };
@@ -227,10 +238,22 @@
 		7C8A94B227CF453E003E3EEF /* ext.table.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = ext.table.lua; sourceTree = "<group>"; };
 		7C8A95D627CF525A003E3EEF /* LearnLuaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LearnLuaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C8A95D827CF525A003E3EEF /* LearnLuaTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LearnLuaTests.m; sourceTree = "<group>"; };
-		7C8A95E027CF52AA003E3EEF /* KKPFunctionTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KKPFunctionTest.m; sourceTree = "<group>"; };
 		7C8A95E627CF5410003E3EEF /* libkkp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libkkp.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C8A95E827CF5410003E3EEF /* kkp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kkp.h; sourceTree = "<group>"; };
 		7C8A95E927CF5410003E3EEF /* kkp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = kkp.m; sourceTree = "<group>"; };
+		7C8A978F27CF6584003E3EEF /* KKPBlockFunctionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockFunctionTest.m; sourceTree = "<group>"; };
+		7C8A979027CF6584003E3EEF /* KKPCFunctionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPCFunctionTest.m; sourceTree = "<group>"; };
+		7C8A979127CF6584003E3EEF /* KKPKeyWordTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPKeyWordTest.m; sourceTree = "<group>"; };
+		7C8A979227CF6584003E3EEF /* KKPCreateTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPCreateTest.m; sourceTree = "<group>"; };
+		7C8A979327CF6584003E3EEF /* KKPVarTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPVarTest.m; sourceTree = "<group>"; };
+		7C8A979427CF6584003E3EEF /* KKPBlockConvertTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockConvertTest.m; sourceTree = "<group>"; };
+		7C8A979527CF6585003E3EEF /* KKPStructTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPStructTest.m; sourceTree = "<group>"; };
+		7C8A979627CF6585003E3EEF /* KKPConvertTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPConvertTest.m; sourceTree = "<group>"; };
+		7C8A979727CF6585003E3EEF /* KKPNewClassTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPNewClassTest.m; sourceTree = "<group>"; };
+		7C8A979827CF6585003E3EEF /* KKPMethodTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPMethodTest.m; sourceTree = "<group>"; };
+		7C8A979927CF6585003E3EEF /* KKPBlockCreateTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockCreateTest.m; sourceTree = "<group>"; };
+		7C8A97A727CF66BC003E3EEF /* KKPXCTestCase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KKPXCTestCase.h; sourceTree = "<group>"; };
+		7C8A97A827CF66BC003E3EEF /* KKPXCTestCase.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KKPXCTestCase.m; sourceTree = "<group>"; };
 		7C9DEBB1279FF0B60029B30D /* KKPBlockDescription.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KKPBlockDescription.h; sourceTree = "<group>"; };
 		7C9DEBB2279FF0B60029B30D /* KKPBlockDescription.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KKPBlockDescription.m; sourceTree = "<group>"; };
 		7CB77594279F9F890062CFE0 /* compile-stdlib.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "compile-stdlib.sh"; sourceTree = "<group>"; };
@@ -437,8 +460,20 @@
 		7C8A95D727CF525A003E3EEF /* LearnLuaTests */ = {
 			isa = PBXGroup;
 			children = (
+				7C8A979827CF6585003E3EEF /* KKPMethodTest.m */,
+				7C8A979727CF6585003E3EEF /* KKPNewClassTest.m */,
+				7C8A979627CF6585003E3EEF /* KKPConvertTest.m */,
+				7C8A979227CF6584003E3EEF /* KKPCreateTest.m */,
+				7C8A979327CF6584003E3EEF /* KKPVarTest.m */,
+				7C8A978F27CF6584003E3EEF /* KKPBlockFunctionTest.m */,
+				7C8A979427CF6584003E3EEF /* KKPBlockConvertTest.m */,
+				7C8A979927CF6585003E3EEF /* KKPBlockCreateTest.m */,
+				7C8A979527CF6585003E3EEF /* KKPStructTest.m */,
+				7C8A979127CF6584003E3EEF /* KKPKeyWordTest.m */,
+				7C8A979027CF6584003E3EEF /* KKPCFunctionTest.m */,
 				7C8A95D827CF525A003E3EEF /* LearnLuaTests.m */,
-				7C8A95E027CF52AA003E3EEF /* KKPFunctionTest.m */,
+				7C8A97A727CF66BC003E3EEF /* KKPXCTestCase.h */,
+				7C8A97A827CF66BC003E3EEF /* KKPXCTestCase.m */,
 			);
 			path = LearnLuaTests;
 			sourceTree = "<group>";
@@ -766,8 +801,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7C8A95E127CF52AA003E3EEF /* KKPFunctionTest.m in Sources */,
+				7C8A979F27CF6585003E3EEF /* KKPVarTest.m in Sources */,
+				7C8A97A427CF6585003E3EEF /* KKPMethodTest.m in Sources */,
+				7C8A97A927CF66BC003E3EEF /* KKPXCTestCase.m in Sources */,
+				7C8A97A227CF6585003E3EEF /* KKPConvertTest.m in Sources */,
+				7C8A979E27CF6585003E3EEF /* KKPCreateTest.m in Sources */,
+				7C8A979D27CF6585003E3EEF /* KKPKeyWordTest.m in Sources */,
+				7C8A97A327CF6585003E3EEF /* KKPNewClassTest.m in Sources */,
+				7C8A979B27CF6585003E3EEF /* KKPBlockFunctionTest.m in Sources */,
+				7C8A979C27CF6585003E3EEF /* KKPCFunctionTest.m in Sources */,
+				7C8A97A527CF6585003E3EEF /* KKPBlockCreateTest.m in Sources */,
+				7C8A97A127CF6585003E3EEF /* KKPStructTest.m in Sources */,
 				7C8A95D927CF525A003E3EEF /* LearnLuaTests.m in Sources */,
+				7C8A97A027CF6585003E3EEF /* KKPBlockConvertTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1057,32 +1103,42 @@
 		7C8A95DD27CF525A003E3EEF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-Objc",
+					"-all_load",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.karos.learnlua.LearnLuaTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LearnLua.app/LearnLua";
+				VALID_ARCHS = "arm64 armv7s x86_64 i386";
 			};
 			name = Debug;
 		};
 		7C8A95DE27CF525A003E3EEF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-Objc",
+					"-all_load",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.karos.learnlua.LearnLuaTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LearnLua.app/LearnLua";
+				VALID_ARCHS = "arm64 armv7s";
 			};
 			name = Release;
 		};
