@@ -38,6 +38,8 @@
 #include "ltable.h"
 #include "lvm.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconditional-uninitialized"
 
 /*
 ** MAXABITS is the largest integer such that MAXASIZE fits in an
@@ -969,3 +971,5 @@ Node *luaH_mainposition (const Table *t, const TValue *key) {
 int luaH_isdummy (const Table *t) { return isdummy(t); }
 
 #endif
+
+#pragma clang diagnostic pop

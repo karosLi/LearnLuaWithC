@@ -28,6 +28,8 @@
 #include "lstring.h"
 #include "lvm.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconditional-uninitialized"
 
 /*
 ** Computes ceil(log2(x))
@@ -590,3 +592,4 @@ void luaO_chunkid (char *out, const char *source, size_t srclen) {
   }
 }
 
+#pragma clang diagnostic pop

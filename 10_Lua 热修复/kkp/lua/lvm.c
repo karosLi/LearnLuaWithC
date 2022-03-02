@@ -30,6 +30,9 @@
 #include "ltm.h"
 #include "lvm.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconditional-uninitialized"
+
 
 /*
 ** By default, use jump tables in the main interpreter loop on gcc
@@ -1834,3 +1837,5 @@ void luaV_execute (lua_State *L, CallInfo *ci) {
 }
 
 /* }================================================================== */
+
+#pragma clang diagnostic pop

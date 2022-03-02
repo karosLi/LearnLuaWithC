@@ -22,8 +22,8 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-
-
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconditional-uninitialized"
 
 /*
 ** Change this macro to accept other modes for 'fopen' besides
@@ -826,3 +826,4 @@ LUAMOD_API int luaopen_io (lua_State *L) {
   return 1;
 }
 
+#pragma clang diagnostic pop

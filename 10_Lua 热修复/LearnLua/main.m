@@ -7,7 +7,7 @@
 
 #import <UIKit/UIKit.h>
 #import "AppDelegate.h"
-#include "kkp.h"
+#import <kkp/kkp.h>
 
 int main(int argc, char * argv[]) {
     // 设置日志处理

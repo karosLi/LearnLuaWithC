@@ -35,7 +35,7 @@ static int tolua_dispatch_lua_dispatch_get_main_queue00(lua_State* tolua_S)
 #endif
  {
   {
-   void* tolua_ret = (void*)  dispatch_get_main_queue();
+   void* tolua_ret = (__bridge void*)  dispatch_get_main_queue();
    tolua_pushuserdata(tolua_S,(void*)tolua_ret);
   }
  }
@@ -66,7 +66,7 @@ static int tolua_dispatch_lua_dispatch_get_global_queue00(lua_State* tolua_S)
   long identifier = ((long)  tolua_tonumber(tolua_S,1,0));
   unsigned long flags = ((unsigned long)  tolua_tonumber(tolua_S,2,0));
   {
-   void* tolua_ret = (void*)  dispatch_get_global_queue(identifier,flags);
+   void* tolua_ret = (__bridge void*)  dispatch_get_global_queue(identifier,flags);
    tolua_pushuserdata(tolua_S,(void*)tolua_ret);
   }
  }
@@ -97,7 +97,7 @@ static int tolua_dispatch_lua_dispatch_queue_create00(lua_State* tolua_S)
   const char* label = ((const char*)  tolua_tostring(tolua_S,1,0));
   void* attr = ((void*)  tolua_touserdata(tolua_S,2,0));
   {
-   void* tolua_ret = (void*)  dispatch_queue_create(label,attr);
+   void* tolua_ret = (__bridge void*)  dispatch_queue_create(label,(__bridge dispatch_queue_attr_t _Nullable)(attr));
    tolua_pushuserdata(tolua_S,(void*)tolua_ret);
   }
  }
@@ -126,7 +126,7 @@ static int tolua_dispatch_lua_dispatch_queue_get_label00(lua_State* tolua_S)
  {
   void* queue = ((void*)  tolua_touserdata(tolua_S,1,0));
   {
-   const char* tolua_ret = (const char*)  dispatch_queue_get_label(queue);
+   const char* tolua_ret = (const char*)  dispatch_queue_get_label((__bridge dispatch_queue_t _Nullable)(queue));
    tolua_pushstring(tolua_S,(const char*)tolua_ret);
   }
  }
@@ -183,7 +183,7 @@ static int tolua_dispatch_lua_dispatch_async00(lua_State* tolua_S)
   void* queue = ((void*)  tolua_touserdata(tolua_S,1,0));
   void* block = ((void*)  tolua_touserdata(tolua_S,2,0));
   {
-   dispatch_async(queue,block);
+   dispatch_async((__bridge dispatch_queue_t _Nonnull)(queue),(__bridge dispatch_block_t _Nonnull)(block));
   }
  }
  return 0;
@@ -213,7 +213,7 @@ static int tolua_dispatch_lua_dispatch_sync00(lua_State* tolua_S)
   void* queue = ((void*)  tolua_touserdata(tolua_S,1,0));
   void* block = ((void*)  tolua_touserdata(tolua_S,2,0));
   {
-   dispatch_sync(queue,block);
+   dispatch_sync((__bridge dispatch_queue_t _Nonnull)(queue),(__bridge dispatch_block_t _Nonnull)(block));
   }
  }
  return 0;
@@ -245,7 +245,7 @@ static int tolua_dispatch_lua_dispatch_after00(lua_State* tolua_S)
   void* queue = ((void*)  tolua_touserdata(tolua_S,2,0));
   void* block = ((void*)  tolua_touserdata(tolua_S,3,0));
   {
-   dispatch_after(when,queue,block);
+   dispatch_after(when,(__bridge dispatch_queue_t _Nonnull)(queue),(__bridge dispatch_block_t _Nonnull)(block));
   }
  }
  return 0;
@@ -277,7 +277,7 @@ static int tolua_dispatch_lua_dispatch_apply00(lua_State* tolua_S)
   void* queue = ((void*)  tolua_touserdata(tolua_S,2,0));
   void* tolua_var_1 = ((void*)  tolua_touserdata(tolua_S,3,0));
   {
-   dispatch_apply(iterations,queue,tolua_var_1);
+   dispatch_apply(iterations,(__bridge dispatch_queue_t _Nullable)(queue),(__bridge void (^ _Nonnull)(size_t))(tolua_var_1));
   }
  }
  return 0;
@@ -307,7 +307,7 @@ static int tolua_dispatch_lua_dispatch_once00(lua_State* tolua_S)
   long predicate = ((long)  tolua_tonumber(tolua_S,1,0));
   void* block = ((void*)  tolua_touserdata(tolua_S,2,0));
   {
-   dispatch_once(&predicate,block);
+   dispatch_once(&predicate,(__bridge dispatch_block_t _Nonnull)(block));
    tolua_pushnumber(tolua_S,(lua_Number)predicate);
   }
  }
@@ -336,7 +336,7 @@ static int tolua_dispatch_lua_dispatch_semaphore_create00(lua_State* tolua_S)
  {
   long value = ((long)  tolua_tonumber(tolua_S,1,0));
   {
-   void* tolua_ret = (void*)  dispatch_semaphore_create(value);
+   void* tolua_ret = (__bridge void*)  dispatch_semaphore_create(value);
    tolua_pushuserdata(tolua_S,(void*)tolua_ret);
   }
  }
@@ -365,7 +365,7 @@ static int tolua_dispatch_lua_dispatch_semaphore_signal00(lua_State* tolua_S)
  {
   void* dsema = ((void*)  tolua_touserdata(tolua_S,1,0));
   {
-   long tolua_ret = (long)  dispatch_semaphore_signal(dsema);
+   long tolua_ret = (long)  dispatch_semaphore_signal((__bridge dispatch_semaphore_t _Nonnull)(dsema));
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -396,7 +396,7 @@ static int tolua_dispatch_lua_dispatch_semaphore_wait00(lua_State* tolua_S)
   void* dsema = ((void*)  tolua_touserdata(tolua_S,1,0));
   unsigned long long timeout = ((unsigned long long)  tolua_tonumber(tolua_S,2,0));
   {
-   long tolua_ret = (long)  dispatch_semaphore_wait(dsema,timeout);
+   long tolua_ret = (long)  dispatch_semaphore_wait((__bridge dispatch_semaphore_t _Nonnull)(dsema),timeout);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }

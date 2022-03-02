@@ -22,6 +22,8 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 /*
 ** {==================================================================
@@ -439,3 +441,4 @@ LUAMOD_API int luaopen_os (lua_State *L) {
   return 1;
 }
 
+#pragma clang diagnostic pop
