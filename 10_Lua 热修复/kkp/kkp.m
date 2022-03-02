@@ -18,7 +18,7 @@
 #import "kkp_global_config.h"
 #import "kkp_global_util.h"
 
-static void kkp_setup(void);
+static void kkp_setup(bool useByteCode);
 static void kkp_addGlobals(lua_State *L);
 LUALIB_API void kkp_open_libs(lua_State *L);
 
@@ -82,8 +82,19 @@ void kkp_setExtensionCLib(KKPCLibFunction extensionCLibFunction)
 /// 启动 kkp
 void kkp_start(void)
 {
+    // 获取 kkp lua 脚本标准库
+//#ifdef KKP_STDLIB
+//    char stdlib[] = KKP_STDLIB;// 编译好的字节码，字节码减少了编译过程，能更快加载；如果修改了 stdlib 里的 lua 文件，就需要重新 build，重新生成新的字节码
+//    size_t stdlibSize = sizeof(stdlib);
+//    bool useByteCode = true;
+//#else
+    char stdlib[] = "require 'kkp'";// 如果没有编译好的字节码，就使用 app 内置的脚本
+    size_t stdlibSize = strlen(stdlib);
+    bool useByteCode = false;
+//#endif
+    
     // 安装 lua c 标准库 和 kkp c 库
-    kkp_setup();
+    kkp_setup(useByteCode);
     
     lua_State *L = kkp_currentLuaState();
     
@@ -93,8 +104,6 @@ void kkp_start(void)
     }
     
     // 加载 kkp lua 脚本标准库
-    char stdlib[] = KKP_STDLIB;// 编译好的字节码，字节码减少了编译过程，能更快加载；如果修改了 stdlib 里的 lua 文件，就需要重新 build，重新生成新的字节码
-    size_t stdlibSize = sizeof(stdlib);
     if (luaL_loadbuffer(L, stdlib, stdlibSize, "loading kkp lua stdlib") || lua_pcall(L, 0, LUA_MULTRET, 0)) {
         NSString *log = [NSString stringWithFormat:@"[KKP] PANIC: opening kkp lua stdlib failed: %s\n", lua_tostring(L, -1)];
         KKP_ERROR(L, log);
@@ -118,11 +127,16 @@ void kkp_restart(void)
 }
 
 /// 安装 lua c 标准库 和 kkp c 库
-static void kkp_setup(void)
+static void kkp_setup(bool useByteCode)
 {
-    // 切换到应用主bundle目录，为了 lua 可以寻找到 lua 脚本
+    // 切换到应用主根目录，为了 lua 可以寻找到 lua 脚本
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    [fileManager changeCurrentDirectoryPath:[[NSBundle mainBundle] bundlePath]];
+    // 默认为 bundle 目录
+    NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
+    if (!useByteCode) {// 如果不使用字节码，就需要设置根查询路径为 scripts 目录
+        [bundlePath stringByAppendingPathComponent:[NSString stringWithUTF8String:KKP_LUA_SCRIPTS_DIR]];
+    }
+    [fileManager changeCurrentDirectoryPath:bundlePath];
     
     // 创建状态机
     lua_State *L = kkp_currentLuaState();

@@ -73,7 +73,6 @@
 		7CD5868127B77597000D8AED /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CD5868027B77597000D8AED /* ExternalAccessory.framework */; };
 		7CD5868427B78F2A000D8AED /* KKPBlockWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CD5868327B78F2A000D8AED /* KKPBlockWrapper.m */; };
 		7CE04D3827A1329000AA27E0 /* kkpClass.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CE04D3727A1329000AA27E0 /* kkpClass.lua */; };
-		7CE04E5A27A1658E00AA27E0 /* luac.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CE04E5927A1658E00AA27E0 /* luac.lua */; };
 		7CF9B60C27C5D17B007DB181 /* kkpStruct.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CF9B60B27C5D17A007DB181 /* kkpStruct.lua */; };
 		7CF9B60F27C5D1D8007DB181 /* kkp_struct.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CF9B60E27C5D1D8007DB181 /* kkp_struct.m */; };
 /* End PBXBuildFile section */
@@ -216,7 +215,6 @@
 		7CD5868327B78F2A000D8AED /* KKPBlockWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockWrapper.m; sourceTree = "<group>"; };
 		7CD58E9327BD213C000D8AED /* ProtocolLoader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProtocolLoader.h; sourceTree = "<group>"; };
 		7CE04D3727A1329000AA27E0 /* kkpClass.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = kkpClass.lua; sourceTree = "<group>"; };
-		7CE04E5927A1658E00AA27E0 /* luac.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = luac.lua; sourceTree = "<group>"; };
 		7CF9B60B27C5D17A007DB181 /* kkpStruct.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = kkpStruct.lua; sourceTree = "<group>"; };
 		7CF9B60D27C5D1D8007DB181 /* kkp_struct.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kkp_struct.h; sourceTree = "<group>"; };
 		7CF9B60E27C5D1D8007DB181 /* kkp_struct.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = kkp_struct.m; sourceTree = "<group>"; };
@@ -482,7 +480,6 @@
 		7CB7758F279F9DED0062CFE0 /* build-scripts */ = {
 			isa = PBXGroup;
 			children = (
-				7CE04E5927A1658E00AA27E0 /* luac.lua */,
 				7CB77594279F9F890062CFE0 /* compile-stdlib.sh */,
 			);
 			path = "build-scripts";
@@ -588,7 +585,6 @@
 				7CE04D3827A1329000AA27E0 /* kkpClass.lua in Resources */,
 				7C76971327954179004F314D /* LaunchScreen.storyboard in Resources */,
 				7C76971027954179004F314D /* Assets.xcassets in Resources */,
-				7CE04E5A27A1658E00AA27E0 /* luac.lua in Resources */,
 				7CB7759C279FA0B60062CFE0 /* init.lua in Resources */,
 				7C76970E27954178004F314D /* Main.storyboard in Resources */,
 				7C30187827B3A992008F8A5F /* CustomTableViewController.lua in Resources */,
@@ -614,7 +610,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd kkp/build-scripts\n./compile-stdlib.sh\n";
+			shellScript = "# 编译字节码\ncd kkp/build-scripts\n./compile-stdlib.sh\n\n# 并且也要拷贝 lua 标准库文件到 app 里\n./copy-stdlib.sh\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
