@@ -18,38 +18,34 @@
             endingLineNumber = "560"
             landmarkName = "kkp_invoke_closure(L)"
             landmarkType = "9">
-            <Locations>
-               <Location
-                  uuid = "75E9D7A1-8A46-4E16-809E-3124D603E218 - b9a9b56211af20fc"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "__kkp_invoke_closure_block_invoke"
-                  moduleName = "LearnLua"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/karosli/Documents/Study/iOS/Lua/LearnLuaWithC/10_Lua%20%E7%83%AD%E4%BF%AE%E5%A4%8D/kkp/kkp_helper.m"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "560"
-                  endingLineNumber = "560"
-                  offsetFromSymbolStart = "2426">
-               </Location>
-               <Location
-                  uuid = "75E9D7A1-8A46-4E16-809E-3124D603E218 - 7c57bfbf6a6414d4"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "__kkp_invoke_closure_block_invoke"
-                  moduleName = "LearnLuaTests"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/karosli/Documents/Study/iOS/Lua/LearnLuaWithC/10_Lua%20%E7%83%AD%E4%BF%AE%E5%A4%8D/kkp/kkp_helper.m"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "560"
-                  endingLineNumber = "560"
-                  offsetFromSymbolStart = "2426">
-               </Location>
-            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.ExceptionBreakpoint">
+         <BreakpointContent
+            uuid = "D2DDCCE9-D63E-40DF-858F-5F73E1D17124"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            breakpointStackSelectionBehavior = "1"
+            scope = "1"
+            stopOnStyle = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C66E7769-C40B-4203-849C-BE9078339945"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "kkp/modules/kkp_class.m"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "58"
+            endingLineNumber = "58"
+            landmarkName = "kkp_doesNotRecognizeSelector(object)"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

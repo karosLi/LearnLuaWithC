@@ -85,6 +85,13 @@ function(_ENV)
     function getViewSize()
         return CGSize({width=55,height=66})
     end
+    
+    -- hook 返回值是 结构体 实例方法
+    function argInRect_(vRect)
+        vRect.x = 10
+        self:setVRect_(vRect)
+        return vRect
+    end
 
 end,
 function(_ENV)

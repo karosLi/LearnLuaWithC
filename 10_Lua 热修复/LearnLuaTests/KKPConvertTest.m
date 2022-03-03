@@ -8,6 +8,7 @@
 #import <XCTest/XCTest.h>
 #import <kkp/kkp.h>
 #import "KKPXCTestCase.h"
+#import <objc/runtime.h>
 
 @interface Person : NSObject
 
@@ -20,12 +21,10 @@
 
 @end
 
-typedef struct _XPoint
-{
+typedef struct XPoint {
     int x;
     int y;
-}XPoint;
-
+} XPoint;
 
 /**
  测试数据转换
@@ -46,8 +45,13 @@ typedef struct _XPoint
 @property (nonatomic) NSDictionary* vNSDictionary;
 @property (nonatomic) NSArray* vNSArray;
 @property (nonatomic) Person* vPerson;
-@property (nonatomic) XPoint vP;
 @property (nonatomic) SEL vSel;
+
+@property (nonatomic) CGSize vSize;
+@property (nonatomic) CGPoint vPoint;
+@property (nonatomic) CGRect vRect;
+@property (nonatomic) UIEdgeInsets vEdgeInsets;
+@property (nonatomic) XPoint vP;
 
 @end
 
@@ -123,14 +127,41 @@ typedef struct _XPoint
     return vPerson;
 }
 
+- (SEL)argInSel:(SEL)vSel
+{
+    return vSel;
+}
+
+- (CGSize)argInSize:(CGSize)vSize
+{
+    return vSize;
+}
+
+- (CGPoint)argInPoint:(CGPoint)vPoint
+{
+    return vPoint;
+}
+
+- (CGRect)argInRect:(CGRect)vRect
+{
+    return vRect;
+}
+
+- (UIEdgeInsets)argInEdgeInsets:(UIEdgeInsets)vEdgeInsets
+{
+    return vEdgeInsets;
+}
+
 - (XPoint)argInXPoint:(XPoint)vXPoint
 {
     return vXPoint;
 }
 
-- (SEL)argInSel:(SEL)vSel
-{
-    return vSel;
+- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
+    NSMethodSignature *signature = [super methodSignatureForSelector:aSelector];
+    
+
+    return signature;
 }
 
 - (void)testChar {
@@ -427,9 +458,112 @@ typedef struct _XPoint
     kkp_runLuaString(script);
     XCTAssert([self argInSel:@selector(argInSel:)] == @selector(argInSel:));
     XCTAssert(self.vSel == @selector(argInSel:));
+}
+
+- (void)testStruct {
+    /// CGSize
+    [self restartKKP];
+    CGSize xsize;
+    xsize.width = 3.0;
+    xsize.height = 4.0;
+    CGSize size = [self argInSize:xsize];
+    XCTAssert(size.width == 3.0 && size.height == 4.0);
+    NSString *script =
+    @KKP_LUA(
+             kkp_class({"KKPConvertTest"},
+             function(_ENV)
+                 function argInSize_(a)
+                       self:setVSize_(a)
+                       return a
+                 end
+             end)
+             );
+
+    kkp_runLuaString(script);
+    size = [self argInSize:xsize];
+    XCTAssert(size.width == 3.0 && size.height == 4.0);
+    XCTAssert(self.vSize.width == 3.0 && self.vSize.height == 4.0);
+
+
+    /// CGPoint
+    [self restartKKP];
+    CGPoint xpoint;
+    xpoint.x = 3.0;
+    xpoint.y = 4.0;
+    CGPoint point = [self argInPoint:xpoint];
+    XCTAssert(point.x == 3.0 && point.y == 4.0);
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPConvertTest"},
+             function(_ENV)
+                 function argInPoint_(a)
+                       self:setVPoint_(a)
+                       return a
+                 end
+             end)
+             );
+
+    kkp_runLuaString(script);
+    point = [self argInPoint:xpoint];
+    XCTAssert(point.x == 3.0 && point.y == 4.0);
+    XCTAssert(self.vPoint.x == 3.0 && self.vPoint.y == 4.0);
+
+    
+    /// CGRect
+    [self restartKKP];
+    CGRect xrect;
+    xrect.origin.x = 3.0;
+    xrect.origin.y = 4.0;
+    xrect.size.width = 5.0;
+    xrect.size.height = 6.0;
+
+    CGRect rect = [self argInRect:xrect];
+    XCTAssert(rect.origin.x == 3.0 && rect.origin.y == 4.0 && rect.size.width == 5.0 && rect.size.height == 6.0);
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPConvertTest"},
+             function(_ENV)
+                 function argInRect_(a)
+                       self:setVRect_(a)
+                       return a
+                 end
+             end)
+             );
+
+    kkp_runLuaString(script);
+    rect = [self argInRect:xrect];
+    XCTAssert(rect.origin.x == 3.0 && rect.origin.y == 4.0 && rect.size.width == 5.0 && rect.size.height == 6.0);
+    XCTAssert(self.vRect.origin.x == 3.0 && self.vRect.origin.y == 4.0 && self.vRect.size.width == 5.0 && self.vRect.size.height == 6.0);
+
+    
+    /// UIEdgeInsets
+    [self restartKKP];
+    UIEdgeInsets xinsets;
+    xinsets.left = 3.0;
+    xinsets.right = 4.0;
+    xinsets.top = 5.0;
+    xinsets.bottom = 6.0;
+    
+    UIEdgeInsets insets = [self argInEdgeInsets:xinsets];
+    XCTAssert(insets.left == 3.0 && insets.right == 4.0 && insets.top == 5.0 && insets.bottom == 6.0);
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPConvertTest"},
+             function(_ENV)
+                 function argInEdgeInsets_(a)
+                       self:setVEdgeInsets_(a)
+                       return a
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    insets = [self argInEdgeInsets:xinsets];
+    XCTAssert(insets.left == 3.0 && insets.right == 4.0 && insets.top == 5.0 && insets.bottom == 6.0);
+    XCTAssert(self.vEdgeInsets.left == 3.0 && self.vEdgeInsets.right == 4.0 && self.vEdgeInsets.top == 5.0 && self.vEdgeInsets.bottom == 6.0);
     
     
-    /// XPoint 结构体从 原生 传入到 lua, 并从 lua 返回给 原生
+    /// XPoint 自定义结构体
     [self restartKKP];
     XPoint xp;
     xp.x = 3;
@@ -438,6 +572,7 @@ typedef struct _XPoint
     XCTAssert(p.x == 3 && p.y == 4);
     script =
     @KKP_LUA(
+             require("kkp.struct").registerStruct({name = "XPoint", types = "int,int", keys = "x,y"})
              kkp_class({"KKPConvertTest"},
              function(_ENV)
                  function argInXPoint_(a)

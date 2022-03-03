@@ -14,6 +14,7 @@
 
 @property(nonatomic, assign) NSInteger age;
 @property(nonatomic, strong) UIButton *gotoButton;
+@property (nonatomic) CGRect vRect;
 
 @property (nonatomic) int index;
 
@@ -31,6 +32,7 @@
     [super viewDidLoad];
     
     [self setup];
+    
     [self doSomeThing:@"做饭"];
     NSLog(@"【原生】ViewController 年龄 %zd", self.age);
     
@@ -42,6 +44,14 @@
     
     NSString *value = [self blockReturnBoolWithString](@"xxx");
     NSLog(@"【原生】ViewController blockReturnBoolWithString 调用结果 %@", value);
+    
+    CGRect xrect;
+    xrect.origin.x = 3.0;
+    xrect.origin.y = 4.0;
+    xrect.size.width = 5.0;
+    xrect.size.height = 6.0;
+    CGRect rect = [self argInRect:xrect];
+    NSLog(@"【原生】ViewController argInRect 期望 x 是 10.0，目前 x 是 %f", rect.origin.x);
 }
 
 - (void)setup {
@@ -88,6 +98,11 @@
 
 - (CGSize)getViewSize {
     return self.view.frame.size;
+}
+
+- (CGRect)argInRect:(CGRect)vRect
+{
+    return vRect;
 }
 
 @end

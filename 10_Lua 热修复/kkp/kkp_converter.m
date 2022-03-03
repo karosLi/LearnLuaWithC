@@ -632,9 +632,6 @@ void kkp_getStructDataOfDict(void *structData, NSDictionary *structDict, NSDicti
     NSArray *itemKeys = [structDefine[@"keys"] componentsSeparatedByString:@","];
     const char *structTypes = [structDefine[@"types"] UTF8String];
     
-//    [structDict.allValues objectAtIndex:<#(NSUInteger)#>];
-    
-    
     int position = 0;
     for (NSString *itemKey in itemKeys) {
         switch(*structTypes) {

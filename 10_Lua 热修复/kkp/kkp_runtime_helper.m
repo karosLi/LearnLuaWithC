@@ -12,16 +12,18 @@
 void kkp_runtime_swizzleForwardInvocation(Class klass, IMP newforwardInvocationIMP)
 {
     NSCParameterAssert(klass);
-    // get origin forwardInvocation impl, include superClass impl，not NSObject impl, and class method to kClass
-    SEL originForwardSelector = NSSelectorFromString(KKP_ORIGIN_FORWARD_INVOCATION_SELECTOR_NAME);
-    if (![klass instancesRespondToSelector:originForwardSelector]) {
-        Method originalMethod = class_getInstanceMethod(klass, @selector(forwardInvocation:));
-        IMP originalImplementation = method_getImplementation(originalMethod);
-        class_addMethod(klass, NSSelectorFromString(KKP_ORIGIN_FORWARD_INVOCATION_SELECTOR_NAME), originalImplementation, "v@:@");
-        
+    if (class_getMethodImplementation(klass, @selector(forwardInvocation:)) != newforwardInvocationIMP) {// 防止重复替换
+        // get origin forwardInvocation impl, include superClass impl，not NSObject impl, and class method to kClass
+        SEL originForwardSelector = NSSelectorFromString(KKP_ORIGIN_FORWARD_INVOCATION_SELECTOR_NAME);
+        if (![klass instancesRespondToSelector:originForwardSelector]) {
+            Method originalMethod = class_getInstanceMethod(klass, @selector(forwardInvocation:));
+            IMP originalImplementation = method_getImplementation(originalMethod);
+            class_addMethod(klass, NSSelectorFromString(KKP_ORIGIN_FORWARD_INVOCATION_SELECTOR_NAME), originalImplementation, "v@:@");
+            
+        }
+        // If there is no method, replace will act like class_addMethod.
+        class_replaceMethod(klass, @selector(forwardInvocation:), newforwardInvocationIMP, "v@:@");
     }
-    // If there is no method, replace will act like class_addMethod.
-    class_replaceMethod(klass, @selector(forwardInvocation:), newforwardInvocationIMP, "v@:@");
 }
 
 BOOL kkp_runtime_isMsgForwardIMP(IMP impl)
@@ -36,6 +38,23 @@ BOOL kkp_runtime_isMsgForwardIMP(IMP impl)
 IMP kkp_runtime_getMsgForwardIMP(Class kClass, SEL selector)
 {
     IMP msgForwardIMP = _objc_msgForward;
+#if !defined(__arm64__)
+    // As an ugly internal runtime implementation detail in the 32bit runtime, we need to determine of the method we hook returns a struct or anything larger than id.
+    // https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/LowLevelABI/000-Introduction/introduction.html
+    // https://github.com/ReactiveCocoa/ReactiveCocoa/issues/783
+    // http://infocenter.arm.com/help/topic/com.arm.doc.ihi0042e/IHI0042E_aapcs.pdf (Section 5.4)
+    Method method = class_getInstanceMethod(kClass, selector);
+    const char *typeDescription = method_getTypeEncoding(method);
+    if (typeDescription[0] == '{') {
+        //In some cases that returns struct, we should use the '_stret' API:
+        //http://sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
+        //NSMethodSignature knows the detail but has no API to return, we can only get the info from debugDescription.
+        NSMethodSignature *methodSignature = [NSMethodSignature signatureWithObjCTypes:typeDescription];
+        if ([methodSignature.debugDescription rangeOfString:@"is special struct return? YES"].location != NSNotFound) {
+            msgForwardIMP = (IMP)_objc_msgForward_stret;
+        }
+    }
+#endif
     return msgForwardIMP;
 }
 
