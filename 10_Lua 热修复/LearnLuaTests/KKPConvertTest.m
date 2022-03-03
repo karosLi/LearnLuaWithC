@@ -8,7 +8,6 @@
 #import <XCTest/XCTest.h>
 #import <kkp/kkp.h>
 #import "KKPXCTestCase.h"
-#import <objc/runtime.h>
 
 @interface Person : NSObject
 
@@ -30,6 +29,9 @@ typedef struct XPoint {
  测试数据转换
  */
 @interface KKPConvertTest : KKPXCTestCase
+{
+    int _var_int;
+}
 
 @property (nonatomic) char vChar;
 @property (nonatomic) int vInt;
@@ -56,6 +58,11 @@ typedef struct XPoint {
 @end
 
 @implementation KKPConvertTest
+
+- (void)setVarInt
+{
+    _var_int = 9;
+}
 
 - (char)argInChar:(char)vChar
 {
@@ -587,6 +594,25 @@ typedef struct XPoint {
     p = [self argInXPoint:xp];
     XCTAssert(p.x == 3 && p.y == 4);
     XCTAssert(self.vP.x == 3 && self.vP.y == 4);
+}
+
+- (void)testVar {
+    [self restartKKP];
+    [self setVarInt];
+    XCTAssert(_var_int == 9);
+    NSString *script =
+    @KKP_LUA(
+             kkp_class({"KKPConvertTest"},
+             function(_ENV)
+                 function setVarInt(a)
+                       self:setIvar_withInt_("_var_int", 10)
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    [self setVarInt];
+    XCTAssert(_var_int == 10);
 }
 
 @end
