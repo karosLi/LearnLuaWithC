@@ -77,7 +77,6 @@
 		7C8A966D27CF5743003E3EEF /* kkp.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7CB7759D279FA4350062CFE0 /* kkp.h */; };
 		7C8A966F27CF5A54003E3EEF /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7C8A938927CF1610003E3EEF /* libffi.a */; };
 		7C8A967027CF6008003E3EEF /* NSObject+KKPIvarAccess.m in Sources */ = {isa = PBXBuildFile; fileRef = 7CD5867027B66E68000D8AED /* NSObject+KKPIvarAccess.m */; };
-		7C8A979B27CF6585003E3EEF /* KKPBlockFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A978F27CF6584003E3EEF /* KKPBlockFunctionTest.m */; };
 		7C8A979C27CF6585003E3EEF /* KKPCFunctionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979027CF6584003E3EEF /* KKPCFunctionTest.m */; };
 		7C8A979D27CF6585003E3EEF /* KKPKeyWordTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979127CF6584003E3EEF /* KKPKeyWordTest.m */; };
 		7C8A979E27CF6585003E3EEF /* KKPNewInstanceTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979227CF6584003E3EEF /* KKPNewInstanceTest.m */; };
@@ -85,7 +84,7 @@
 		7C8A97A227CF6585003E3EEF /* KKPConvertTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979627CF6585003E3EEF /* KKPConvertTest.m */; };
 		7C8A97A327CF6585003E3EEF /* KKPNewClassTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979727CF6585003E3EEF /* KKPNewClassTest.m */; };
 		7C8A97A427CF6585003E3EEF /* KKPMethodTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979827CF6585003E3EEF /* KKPMethodTest.m */; };
-		7C8A97A527CF6585003E3EEF /* KKPBlockCreateTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979927CF6585003E3EEF /* KKPBlockCreateTest.m */; };
+		7C8A97A527CF6585003E3EEF /* KKPBlockDefineTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979927CF6585003E3EEF /* KKPBlockDefineTest.m */; };
 		7C8A97A927CF66BC003E3EEF /* KKPXCTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A97A827CF66BC003E3EEF /* KKPXCTestCase.m */; };
 		7CB7759C279FA0B60062CFE0 /* init.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7CB7759B279FA0B60062CFE0 /* init.lua */; };
 		7CD5868127B77597000D8AED /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CD5868027B77597000D8AED /* ExternalAccessory.framework */; };
@@ -238,7 +237,6 @@
 		7C8A95E627CF5410003E3EEF /* libkkp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libkkp.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C8A95E827CF5410003E3EEF /* kkp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kkp.h; sourceTree = "<group>"; };
 		7C8A95E927CF5410003E3EEF /* kkp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = kkp.m; sourceTree = "<group>"; };
-		7C8A978F27CF6584003E3EEF /* KKPBlockFunctionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockFunctionTest.m; sourceTree = "<group>"; };
 		7C8A979027CF6584003E3EEF /* KKPCFunctionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPCFunctionTest.m; sourceTree = "<group>"; };
 		7C8A979127CF6584003E3EEF /* KKPKeyWordTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPKeyWordTest.m; sourceTree = "<group>"; };
 		7C8A979227CF6584003E3EEF /* KKPNewInstanceTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPNewInstanceTest.m; sourceTree = "<group>"; };
@@ -246,7 +244,7 @@
 		7C8A979627CF6585003E3EEF /* KKPConvertTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPConvertTest.m; sourceTree = "<group>"; };
 		7C8A979727CF6585003E3EEF /* KKPNewClassTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPNewClassTest.m; sourceTree = "<group>"; };
 		7C8A979827CF6585003E3EEF /* KKPMethodTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPMethodTest.m; sourceTree = "<group>"; };
-		7C8A979927CF6585003E3EEF /* KKPBlockCreateTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockCreateTest.m; sourceTree = "<group>"; };
+		7C8A979927CF6585003E3EEF /* KKPBlockDefineTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockDefineTest.m; sourceTree = "<group>"; };
 		7C8A97A727CF66BC003E3EEF /* KKPXCTestCase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KKPXCTestCase.h; sourceTree = "<group>"; };
 		7C8A97A827CF66BC003E3EEF /* KKPXCTestCase.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KKPXCTestCase.m; sourceTree = "<group>"; };
 		7C9DEBB1279FF0B60029B30D /* KKPBlockDescription.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KKPBlockDescription.h; sourceTree = "<group>"; };
@@ -458,9 +456,8 @@
 				7C8A979727CF6585003E3EEF /* KKPNewClassTest.m */,
 				7C8A979627CF6585003E3EEF /* KKPConvertTest.m */,
 				7C8A979227CF6584003E3EEF /* KKPNewInstanceTest.m */,
-				7C8A978F27CF6584003E3EEF /* KKPBlockFunctionTest.m */,
 				7C8A979427CF6584003E3EEF /* KKPBlockConvertTest.m */,
-				7C8A979927CF6585003E3EEF /* KKPBlockCreateTest.m */,
+				7C8A979927CF6585003E3EEF /* KKPBlockDefineTest.m */,
 				7C8A979127CF6584003E3EEF /* KKPKeyWordTest.m */,
 				7C8A979027CF6584003E3EEF /* KKPCFunctionTest.m */,
 				7C8A95D827CF525A003E3EEF /* LearnLuaTests.m */,
@@ -799,9 +796,8 @@
 				7C8A979E27CF6585003E3EEF /* KKPNewInstanceTest.m in Sources */,
 				7C8A979D27CF6585003E3EEF /* KKPKeyWordTest.m in Sources */,
 				7C8A97A327CF6585003E3EEF /* KKPNewClassTest.m in Sources */,
-				7C8A979B27CF6585003E3EEF /* KKPBlockFunctionTest.m in Sources */,
 				7C8A979C27CF6585003E3EEF /* KKPCFunctionTest.m in Sources */,
-				7C8A97A527CF6585003E3EEF /* KKPBlockCreateTest.m in Sources */,
+				7C8A97A527CF6585003E3EEF /* KKPBlockDefineTest.m in Sources */,
 				7C8A95D927CF525A003E3EEF /* LearnLuaTests.m in Sources */,
 				7C8A97A027CF6585003E3EEF /* KKPBlockConvertTest.m in Sources */,
 			);

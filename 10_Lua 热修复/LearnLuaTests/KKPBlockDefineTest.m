@@ -8,10 +8,10 @@
 #import <XCTest/XCTest.h>
 #import <kkp/kkp.h>
 
-@interface KKPBlockFunctionTest : XCTestCase
+@interface KKPBlockDefineTest : XCTestCase
 
 @end
 
-@implementation KKPBlockFunctionTest
+@implementation KKPBlockDefineTest
 
 @end
