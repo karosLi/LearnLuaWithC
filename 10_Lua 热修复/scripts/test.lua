@@ -78,7 +78,7 @@ function(_ENV)
     -- hook 返回值是 oc block 的实例方法，block 带参数和返回值
     function blockReturnBoolWithString()
         -- 把 lua 函数包装成一个 oc block，原生在实际调用 oc block 时，会触发包裹的 lua 函数代码
-        return kkp_block(function(string) kkp.print("【LUA】原生调用 lua 提供的 oc block 参数是", string, "性别", self:sex()) return "哈哈" end, "NSString*,NSString*")
+        return kkp_block(function(string) kkp.print("【LUA】原生调用 lua 提供的 oc block 参数是", string, "性别", self:sex()) return "哈哈" end, "NSString *,NSString *")
     end
     
     -- hook 返回值是 结构体 实例方法

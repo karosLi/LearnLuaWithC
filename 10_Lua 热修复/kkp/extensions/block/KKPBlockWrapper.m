@@ -252,6 +252,8 @@ static ffi_type *typeEncodingToffiType(const char *typeEncoding) {
             return &ffi_type_void;
         case 'c':
             return &ffi_type_schar;
+        case '*':// char *
+            return &ffi_type_pointer;
         case 'C':
             return &ffi_type_uchar;
         case 's':

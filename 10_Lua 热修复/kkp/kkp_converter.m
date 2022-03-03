@@ -31,17 +31,19 @@
 NSString *kkp_create_real_method_signature(NSString *signatureStr, bool isBlock) {
     static NSMutableDictionary *typeSignatureDict;
     if (!typeSignatureDict) {
+        //        https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100
         typeSignatureDict =
             [NSMutableDictionary dictionaryWithObject:@[[NSString stringWithUTF8String:@encode(dispatch_block_t)], @(sizeof(dispatch_block_t))]
                                                forKey:@"?"];
 #define KKP_DEFINE_TYPE_SIGNATURE(_type) \
-    [typeSignatureDict setObject:@[[NSString stringWithUTF8String:@encode(_type)], @(sizeof(_type))] forKey:@ #_type];
+    [typeSignatureDict setObject:@[[NSString stringWithUTF8String:@encode(_type)], @(sizeof(_type))] forKey:kkp_removeAllWhiteSpace(@ #_type)];
 
         KKP_DEFINE_TYPE_SIGNATURE(id);
         KKP_DEFINE_TYPE_SIGNATURE(BOOL);
         KKP_DEFINE_TYPE_SIGNATURE(int);
         KKP_DEFINE_TYPE_SIGNATURE(void);
         KKP_DEFINE_TYPE_SIGNATURE(char);
+        KKP_DEFINE_TYPE_SIGNATURE(char *);
         KKP_DEFINE_TYPE_SIGNATURE(short);
         KKP_DEFINE_TYPE_SIGNATURE(unsigned short);
         KKP_DEFINE_TYPE_SIGNATURE(unsigned int);
@@ -79,7 +81,7 @@ NSString *kkp_create_real_method_signature(NSString *signatureStr, bool isBlock)
     /// 先处理参数类型
     for (NSInteger i = 1; i < lt.count; i++) {
         // 去掉两边空格
-        NSString *inputType = [lt[i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSString *inputType = kkp_removeAllWhiteSpace(lt[i]);
         NSArray *typeWithSize = typeSignatureDict[typeSignatureDict[inputType] ? inputType : @"id"];
         NSString *outputType = typeWithSize[0];
         NSInteger outputSize = [typeWithSize[1] integerValue];
@@ -106,16 +108,18 @@ NSString *kkp_create_real_method_signature(NSString *signatureStr, bool isBlock)
 NSString *kkp_create_real_argument_signature(NSString *signatureStr) {
     static NSMutableDictionary *typeSignatureDict;
     if (!typeSignatureDict) {
+        //    https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100
         typeSignatureDict =
             [NSMutableDictionary dictionary];
 #define KKP_DEFINE_ARG_TYPE_SIGNATURE(_type) \
-    [typeSignatureDict setObject:[NSString stringWithUTF8String:@encode(_type)] forKey:@ #_type];
+    [typeSignatureDict setObject:[NSString stringWithUTF8String:@encode(_type)] forKey:kkp_removeAllWhiteSpace(@ #_type)];
 
         KKP_DEFINE_ARG_TYPE_SIGNATURE(id);
         KKP_DEFINE_ARG_TYPE_SIGNATURE(BOOL);
         KKP_DEFINE_ARG_TYPE_SIGNATURE(int);
         KKP_DEFINE_ARG_TYPE_SIGNATURE(void);
         KKP_DEFINE_ARG_TYPE_SIGNATURE(char);
+        KKP_DEFINE_ARG_TYPE_SIGNATURE(char *);
         KKP_DEFINE_ARG_TYPE_SIGNATURE(short);
         KKP_DEFINE_ARG_TYPE_SIGNATURE(unsigned short);
         KKP_DEFINE_ARG_TYPE_SIGNATURE(unsigned int);
@@ -145,7 +149,7 @@ NSString *kkp_create_real_argument_signature(NSString *signatureStr) {
     NSMutableString *funcSignature = [NSMutableString new];
     for (NSInteger i = 0; i < lt.count; i++) {
         // 去掉两边空格
-        NSString *t = [lt[i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSString *t = kkp_removeAllWhiteSpace(lt[i]);
         NSString *tpe = typeSignatureDict[typeSignatureDict[t] ? t : @"id"];
         [funcSignature appendString:tpe];
     }
@@ -506,7 +510,7 @@ int kkp_toLuaObjectWithBuffer(lua_State *L, const char * typeDescription, void *
     return kkp_safeInLuaStack(L, ^int{
         const char * type = kkp_removeProtocolEncodings(typeDescription);
         
-        // http://developer.apple.com/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
+        // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100
         if (type[0] == _C_VOID) {// 没有返回值
             lua_pushnil(L);
         } else if (type[0] == _C_PTR) {// 返回值是 指针 类型

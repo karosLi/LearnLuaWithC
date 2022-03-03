@@ -270,6 +270,12 @@ NSString *kkp_trim(NSString *string)
     return [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 }
 
+NSString *kkp_removeAllWhiteSpace(NSString *string)
+{
+    string = [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    return [string stringByReplacingOccurrencesOfString:@"\\s" withString:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, string.length)];
+}
+
 bool kkp_isAllocMethod(const char *methodName) {
     if (strncmp(methodName, "alloc", 5) == 0) {
         if (methodName[5] == '\0') return true; // It's just an alloc

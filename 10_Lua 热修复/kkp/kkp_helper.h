@@ -51,6 +51,8 @@ extern const char* kkp_toLuaFuncName(const char *objcSel);
 
 extern NSString *kkp_trim(NSString *string);
 
+extern NSString *kkp_removeAllWhiteSpace(NSString *string);
+
 extern bool kkp_isAllocMethod(const char *methodName);
 
 extern bool kkp_isBlock(id object);
