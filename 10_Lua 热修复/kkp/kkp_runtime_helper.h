@@ -13,7 +13,7 @@ extern void kkp_runtime_swizzleForwardInvocation(Class klass, IMP newforwardInvo
 
 extern BOOL kkp_runtime_isMsgForwardIMP(IMP impl);
 
-extern IMP kkp_runtime_getMsgForwardIMP(Class kClass, SEL selector);
+extern IMP kkp_runtime_getMsgForwardIMP(Class kClass, const char *typeDescription);
 
 extern SEL kkp_runtime_originForSelector(SEL sel);
 

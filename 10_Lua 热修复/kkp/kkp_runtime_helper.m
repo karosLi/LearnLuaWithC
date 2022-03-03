@@ -35,7 +35,7 @@ BOOL kkp_runtime_isMsgForwardIMP(IMP impl)
     ;
 }
 
-IMP kkp_runtime_getMsgForwardIMP(Class kClass, SEL selector)
+IMP kkp_runtime_getMsgForwardIMP(Class kClass, const char *typeDescription)
 {
     IMP msgForwardIMP = _objc_msgForward;
 #if !defined(__arm64__)
@@ -43,8 +43,6 @@ IMP kkp_runtime_getMsgForwardIMP(Class kClass, SEL selector)
     // https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/LowLevelABI/000-Introduction/introduction.html
     // https://github.com/ReactiveCocoa/ReactiveCocoa/issues/783
     // http://infocenter.arm.com/help/topic/com.arm.doc.ihi0042e/IHI0042E_aapcs.pdf (Section 5.4)
-    Method method = class_getInstanceMethod(kClass, selector);
-    const char *typeDescription = method_getTypeEncoding(method);
     if (typeDescription[0] == '{') {
         //In some cases that returns struct, we should use the '_stret' API:
         //http://sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html

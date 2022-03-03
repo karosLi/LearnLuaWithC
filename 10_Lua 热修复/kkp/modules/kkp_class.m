@@ -155,12 +155,12 @@ static void kkp_class_overrideMethod(Class klass, SEL sel, BOOL isInstanceMethod
         
         /// 把要 hook 的方法实现，直接替换成 _objc_msgForward，意味着 hook 的方法在调用时，直接走消息转发流程，不用经过 method list 查找流程
         /// 如果方法存在就替换，否则就是添加
-        class_replaceMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, sel), typeDescription);
+        class_replaceMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, typeDescription), typeDescription);
     } else {// 添加新方法（添加不存在方法，不管是现有类还是新创建的类）
         isReplaceMethod = NO;
         /// 把要 hook 的方法实现，直接替换成 _objc_msgForward，意味着 hook 的方法在调用时，直接走消息转发流程，不用经过 method list 查找流程
         /// 如果方法存在就替换，否则就是添加
-        class_addMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, sel), typeDescription);
+        class_addMethod(klass, sel, kkp_runtime_getMsgForwardIMP(klass, typeDescription), typeDescription);
     }
     
     /// 把已经替换的方法记录下
