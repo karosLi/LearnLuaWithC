@@ -83,7 +83,6 @@
 		7C8A979E27CF6585003E3EEF /* KKPCreateTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979227CF6584003E3EEF /* KKPCreateTest.m */; };
 		7C8A979F27CF6585003E3EEF /* KKPVarTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979327CF6584003E3EEF /* KKPVarTest.m */; };
 		7C8A97A027CF6585003E3EEF /* KKPBlockConvertTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979427CF6584003E3EEF /* KKPBlockConvertTest.m */; };
-		7C8A97A127CF6585003E3EEF /* KKPStructTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979527CF6585003E3EEF /* KKPStructTest.m */; };
 		7C8A97A227CF6585003E3EEF /* KKPConvertTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979627CF6585003E3EEF /* KKPConvertTest.m */; };
 		7C8A97A327CF6585003E3EEF /* KKPNewClassTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979727CF6585003E3EEF /* KKPNewClassTest.m */; };
 		7C8A97A427CF6585003E3EEF /* KKPMethodTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C8A979827CF6585003E3EEF /* KKPMethodTest.m */; };
@@ -246,7 +245,6 @@
 		7C8A979227CF6584003E3EEF /* KKPCreateTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPCreateTest.m; sourceTree = "<group>"; };
 		7C8A979327CF6584003E3EEF /* KKPVarTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPVarTest.m; sourceTree = "<group>"; };
 		7C8A979427CF6584003E3EEF /* KKPBlockConvertTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPBlockConvertTest.m; sourceTree = "<group>"; };
-		7C8A979527CF6585003E3EEF /* KKPStructTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPStructTest.m; sourceTree = "<group>"; };
 		7C8A979627CF6585003E3EEF /* KKPConvertTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPConvertTest.m; sourceTree = "<group>"; };
 		7C8A979727CF6585003E3EEF /* KKPNewClassTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPNewClassTest.m; sourceTree = "<group>"; };
 		7C8A979827CF6585003E3EEF /* KKPMethodTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPMethodTest.m; sourceTree = "<group>"; };
@@ -466,7 +464,6 @@
 				7C8A978F27CF6584003E3EEF /* KKPBlockFunctionTest.m */,
 				7C8A979427CF6584003E3EEF /* KKPBlockConvertTest.m */,
 				7C8A979927CF6585003E3EEF /* KKPBlockCreateTest.m */,
-				7C8A979527CF6585003E3EEF /* KKPStructTest.m */,
 				7C8A979127CF6584003E3EEF /* KKPKeyWordTest.m */,
 				7C8A979027CF6584003E3EEF /* KKPCFunctionTest.m */,
 				7C8A95D827CF525A003E3EEF /* LearnLuaTests.m */,
@@ -809,7 +806,6 @@
 				7C8A979B27CF6585003E3EEF /* KKPBlockFunctionTest.m in Sources */,
 				7C8A979C27CF6585003E3EEF /* KKPCFunctionTest.m in Sources */,
 				7C8A97A527CF6585003E3EEF /* KKPBlockCreateTest.m in Sources */,
-				7C8A97A127CF6585003E3EEF /* KKPStructTest.m in Sources */,
 				7C8A95D927CF525A003E3EEF /* LearnLuaTests.m in Sources */,
 				7C8A97A027CF6585003E3EEF /* KKPBlockConvertTest.m in Sources */,
 			);

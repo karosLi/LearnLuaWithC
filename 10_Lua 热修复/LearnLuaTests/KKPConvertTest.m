@@ -524,6 +524,7 @@ typedef struct XPoint {
              kkp_class({"KKPConvertTest"},
              function(_ENV)
                  function argInRect_(a)
+                       a.x = 10.0
                        self:setVRect_(a)
                        return a
                  end
@@ -532,8 +533,8 @@ typedef struct XPoint {
 
     kkp_runLuaString(script);
     rect = [self argInRect:xrect];
-    XCTAssert(rect.origin.x == 3.0 && rect.origin.y == 4.0 && rect.size.width == 5.0 && rect.size.height == 6.0);
-    XCTAssert(self.vRect.origin.x == 3.0 && self.vRect.origin.y == 4.0 && self.vRect.size.width == 5.0 && self.vRect.size.height == 6.0);
+    XCTAssert(rect.origin.x == 10.0 && rect.origin.y == 4.0 && rect.size.width == 5.0 && rect.size.height == 6.0);
+    XCTAssert(self.vRect.origin.x == 10.0 && self.vRect.origin.y == 4.0 && self.vRect.size.width == 5.0 && self.vRect.size.height == 6.0);
 
     
     /// UIEdgeInsets
