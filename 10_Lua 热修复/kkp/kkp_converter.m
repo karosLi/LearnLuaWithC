@@ -253,7 +253,7 @@ NSString * kkp_parseStructFromTypeDescription(NSString *typeDes, BOOL needStruct
     }
     
     if (replaceRightBracket && [parsingTypes hasSuffix:replaceRightBracket]) {// 去掉最后一个 replaceRightBracket
-        parsingTypes = [[parsingTypes substringWithRange:NSMakeRange(0, parsingTypes.length - replaceRightBracket.length)] mutableCopy];
+        [parsingTypes deleteCharactersInRange:NSMakeRange(0, parsingTypes.length - replaceRightBracket.length)];
     }
     
     return parsingTypes;
