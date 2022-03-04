@@ -196,7 +196,29 @@ typedef struct XPoint4 {
     XCTAssert([self.vPerson.age isEqualToNumber:@99]);
 }
 
-
-
+- (void)testStruct {
+    /// 返回 一个结构体入参无结果 block
+    [self restartKKP];
+    NSString *script =
+    @KKP_LUA(
+             kkp_struct({name = "XPoint4", types = "int,int", keys = "x,y"})
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkVoidStruct()
+                       return kkp_block(function(point)
+                                        self:setVP_(point)
+                                        end, "void,{XPoint4=int,int}")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XPoint4 p;
+    p.x = 3;
+    p.y = 4;
+    [self blkVoidStruct](p);
+    XCTAssert(self.vP.x == 3);
+    XCTAssert(self.vP.y == 4);
+}
 
 @end

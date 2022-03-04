@@ -289,7 +289,7 @@ static int LF_kkp_struct_register_struct(lua_State *L)
             }
             
             if (name != NULL && types != NULL && keys != NULL) {
-                NSString *realTypeDescription = kkp_create_real_argument_signature([NSString stringWithUTF8String:types]);
+                NSString *realTypeDescription = kkp_create_real_signature([NSString stringWithUTF8String:types], YES, NO);
                 /// 注册结构体类型信息
                 kkp_struct_registeredStructs()[[NSString stringWithUTF8String:name]] = @{
                     @"types" : realTypeDescription,

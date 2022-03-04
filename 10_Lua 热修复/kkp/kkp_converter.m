@@ -24,19 +24,20 @@
 #define CGFloatValue floatValue
 #endif
 
-
-/// 根据 Class 字符串拼接的方法签名, 构造真实方法签名
+/// 根据类型的可读性字符串签名, 构造真实签名
 /// @param signatureStr 字符串参数类型 例'void,NSString*'
+/// @param isAllArg 是否所有类型都是参数类型，不是的话，就需要把第一个类型当做返回值类型
 /// @param isBlock 是否构造block签名
-NSString *kkp_create_real_method_signature(NSString *signatureStr, bool isBlock) {
+NSString *kkp_create_real_signature(NSString *signatureStr, BOOL isAllArg, BOOL isBlock)
+{
     static NSMutableDictionary *typeSignatureDict;
     if (!typeSignatureDict) {
         //        https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100
         typeSignatureDict =
-            [NSMutableDictionary dictionaryWithObject:@[[NSString stringWithUTF8String:@encode(dispatch_block_t)], @(sizeof(dispatch_block_t))]
+            [NSMutableDictionary dictionaryWithObject:[NSString stringWithUTF8String:@encode(dispatch_block_t)]
                                                forKey:@"?"];
 #define KKP_DEFINE_TYPE_SIGNATURE(_type) \
-    [typeSignatureDict setObject:@[[NSString stringWithUTF8String:@encode(_type)], @(sizeof(_type))] forKey:kkp_removeAllWhiteSpace(@ #_type)];
+    [typeSignatureDict setObject:[NSString stringWithUTF8String:@encode(_type)] forKey:kkp_removeAllWhiteSpace(@ #_type)];
 
         KKP_DEFINE_TYPE_SIGNATURE(id);
         KKP_DEFINE_TYPE_SIGNATURE(BOOL);
@@ -65,143 +66,208 @@ NSString *kkp_create_real_method_signature(NSString *signatureStr, bool isBlock)
         KKP_DEFINE_TYPE_SIGNATURE(Class);
         KKP_DEFINE_TYPE_SIGNATURE(SEL);
         KKP_DEFINE_TYPE_SIGNATURE(void *);
-        KKP_DEFINE_TYPE_SIGNATURE(NSString *);
-        KKP_DEFINE_TYPE_SIGNATURE(NSNumber *);
     }
-    NSArray *lt = [signatureStr componentsSeparatedByString:@","];
+    
+    /// 如果类型签名里包含结构体，比如 void,{XPoint4={XPoint3=int,int}int,int}，这样的字符串以逗号分割会有问题，需要先把结构体相关字符串的逗号转成下划线，然后在使用的时候还原成逗号
+    NSString *mutableString = [signatureStr copy];
+    NSInteger leftIndex = 0;
+    NSInteger rightIndex = 0;
+    NSInteger leftCount = 0;
+    NSInteger rightCount = 0;
+    for (NSInteger i = 0; i < signatureStr.length; i++) {
+        char chr = [signatureStr characterAtIndex:i];
+        if (chr == '{') {
+            leftCount++;
+            if (leftCount == 1) {
+                leftIndex = i;
+            }
+        } else if (chr == '}') {
+            rightCount++;
+        }
+        
+        if (leftCount == rightCount && chr == '}') {// 当相等的时候，说明左括号和右括号匹对上了，就先把这部分字符串中含有的逗号换成下划线
+            rightIndex = i;
+            leftCount = 0;
+            rightCount = 0;
+            mutableString = [mutableString stringByReplacingOccurrencesOfString:@"," withString:@"_" options:0 range:NSMakeRange(leftIndex, rightIndex - leftIndex + 1)];
+        }
+    }
+    
+    NSArray *lt = [mutableString componentsSeparatedByString:@","];
     
     /**
      * 这里注意下block与func签名要区分下,block中没有_cmd, 并且要用@?便是target
-     * 比如 block 签名：i12@?0i8
-     * 比如 非 block 签名 i16@0:8i12
+     * 比如 block 签名：i@?i
+     * 比如 非 block 签名 i@:i
      */
-    NSMutableString *funcSignature = [[NSMutableString alloc] initWithString:isBlock ? @"@?0" : @"@0:8"];
-    NSInteger size = isBlock ? sizeof(void *) : sizeof(void *) + sizeof(SEL);
+    NSMutableString *funcSignature;
+    NSInteger fromIndex = 0;
     
-    /// 先处理参数类型
-    for (NSInteger i = 1; i < lt.count; i++) {
+    if (isAllArg) {
+        fromIndex = 0;// 0 表示是参数签名，所有类型都是参数类型
+        funcSignature = [NSMutableString new];
+    } else {
+        /**
+         * 这里注意下block与func签名要区分下,block中没有_cmd, 并且要用@?便是target
+         * 比如 block 签名：i@?i
+         * 比如 非 block 签名 i@:i
+         */
+        funcSignature = [[NSMutableString alloc] initWithString:isBlock ? @"@?" : @"@:"];
+        fromIndex = 1; // 1 表示是方法签名，第一个类型是返回类型，后面的类型是参数类型
+    }
+    
+    for (NSInteger i = fromIndex; i < lt.count; i++) {
         // 去掉两边空格
         NSString *inputType = kkp_removeAllWhiteSpace(lt[i]);
-        NSArray *typeWithSize = typeSignatureDict[typeSignatureDict[inputType] ? inputType : @"id"];
-        NSString *outputType = typeWithSize[0];
-        NSInteger outputSize = [typeWithSize[1] integerValue];
+        NSString *outputType = typeSignatureDict[inputType];
+        if (!outputType) {
+            if ([inputType containsString:@"*"]) {// 说明是一个对象指针，就设置默认类型 @
+                outputType = @"@";
+            } else {// 如果不存在，就以输入为准，比如，输入的是 i 而非 int，那么这个时候 i 找不到对应的类型编码，那就以输入的 i 为准
+                outputType = inputType;
+            }
+        }
         
-        if (!isBlock && [outputType isEqualToString:[NSString stringWithUTF8String:@encode(void)]]) {// 如果是方法，遇到 void 就跳过
+        // 比如是下面几种情况，都需要进行处理，统一转换成 {XRect=iiff}
+        // {XRect={XPoint=ii}ff} 或者 {XRect=iiff} 或者 {XRect={XPoint=int,int}float,float} 或者 {XRect=int,int,float,float}
+        if ([outputType characterAtIndex:0] == '{') {// 说明签名里包含结构体，需要把结构体也进行解析
+            NSString *types = kkp_parseStructFromTypeDescription(outputType, YES, [outputType containsString:@"_"] ? @"_" : nil);
+            NSArray *structWithType = [types componentsSeparatedByString:@"="];
+            if (structWithType.count > 1) {
+                NSString *structName = structWithType.firstObject;
+                // typeString 是 iiff 或者 int,int,float,float
+                NSString *typeString = structWithType.lastObject;
+                if ([typeString containsString:@"_"]) {// 如果包含下划线(也就是逗号)，就需要把 int,int,float,float 转成 iiff
+                    typeString = [typeString stringByReplacingOccurrencesOfString:@"_" withString:@"," options:0 range:NSMakeRange(0, typeString.length)];
+                    typeString = kkp_create_real_signature(typeString, YES, isBlock);
+                }
+                outputType = [NSString stringWithFormat:@"{%@=%@}", structName, typeString];
+            }
+        }
+        
+        if (!isBlock &&
+            ([outputType isEqualToString:[NSString stringWithUTF8String:@encode(void)]] ||
+             strcmp(outputType.UTF8String, "v") == 0)) {// 如果是方法，遇到 void 就跳过
             continue;
         }
         
-        [funcSignature appendFormat:@"%@%zd", outputType, size];
-        size += outputSize;
+        [funcSignature appendFormat:@"%@", outputType];
     }
     
-    /// 最后处理返回类型
-    NSString *inputType = [lt[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    NSArray *typeWithSize = typeSignatureDict[typeSignatureDict[inputType] ? inputType : @"id"];
-    NSString *outputType = typeWithSize[0];
-    [funcSignature insertString:[NSString stringWithFormat:@"%@%zd", outputType, size] atIndex:0];
-
-    return funcSignature;
-}
-
-/// 根据 Class 字符串拼接的参数签名, 构造真实参数签名。目前用于构造结构体的真实参数签名
-/// @param signatureStr 字符串参数类型 例'CGFloat,CGFloat'
-NSString *kkp_create_real_argument_signature(NSString *signatureStr) {
-    static NSMutableDictionary *typeSignatureDict;
-    if (!typeSignatureDict) {
-        //    https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100
-        typeSignatureDict =
-            [NSMutableDictionary dictionary];
-#define KKP_DEFINE_ARG_TYPE_SIGNATURE(_type) \
-    [typeSignatureDict setObject:[NSString stringWithUTF8String:@encode(_type)] forKey:kkp_removeAllWhiteSpace(@ #_type)];
-
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(id);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(BOOL);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(int);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(void);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(char);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(char *);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(short);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(unsigned short);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(unsigned int);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(long);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(unsigned long);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(long long);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(unsigned long long);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(float);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(double);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(bool);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(size_t);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(CGFloat);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(CGSize);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(CGRect);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(CGPoint);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(CGVector);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(NSRange);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(NSInteger);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(Class);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(SEL);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(void *);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(NSString *);
-        KKP_DEFINE_ARG_TYPE_SIGNATURE(NSNumber *);
-    }
-    NSArray *lt = [signatureStr componentsSeparatedByString:@","];
-    
-    NSMutableString *funcSignature = [NSMutableString new];
-    for (NSInteger i = 0; i < lt.count; i++) {
-        // 去掉两边空格
-        NSString *t = kkp_removeAllWhiteSpace(lt[i]);
-        NSString *tpe = typeSignatureDict[typeSignatureDict[t] ? t : @"id"];
-        [funcSignature appendString:tpe];
+    if (!isAllArg) {
+        /// 最后处理返回类型
+        NSString *inputType = kkp_removeAllWhiteSpace(lt[0]);
+        NSString *outputType = typeSignatureDict[inputType];
+        if (!outputType) {
+            if ([inputType containsString:@"*"]) {// 说明是一个对象指针，就设置默认类型 @
+                outputType = @"@";
+            } else {// 如果不存在，就以输入为准，比如，输入的是 i 而非 int，那么这个时候 i 找不到对应的类型编码，那就以输入的 i 为准
+                outputType = inputType;
+            }
+        }
+        
+        // 比如是下面几种情况，都需要进行处理，统一转换成 {XRect=iiff}
+        // {XRect={XPoint=ii}ff} 或者 {XRect=iiff} 或者 {XRect={XPoint=int,int}float,float} 或者 {XRect=int,int,float,float}
+        if ([outputType characterAtIndex:0] == '{') {// 说明签名里包含结构体，需要把结构体也进行解析
+            NSString *types = kkp_parseStructFromTypeDescription(outputType, YES, [outputType containsString:@"_"] ? @"_" : nil);
+            NSArray *structWithType = [types componentsSeparatedByString:@"="];
+            if (structWithType.count > 1) {
+                NSString *structName = structWithType.firstObject;
+                // typeString 是 iiff 或者 int,int,float,float
+                NSString *typeString = structWithType.lastObject;
+                if ([typeString containsString:@"_"]) {// 如果包含下划线(也就是逗号)，就需要把 int,int,float,float 转成 iiff
+                    typeString = [typeString stringByReplacingOccurrencesOfString:@"_" withString:@"," options:0 range:NSMakeRange(0, typeString.length)];
+                    typeString = kkp_create_real_signature(typeString, YES, isBlock);
+                }
+                outputType = [NSString stringWithFormat:@"{%@=%@}", structName, typeString];
+            }
+        }
+        
+        [funcSignature insertString:[NSString stringWithFormat:@"%@", outputType] atIndex:0];
     }
 
     return funcSignature;
 }
 
 /// 根据原生结构体的类型签名转成数组 [结构体名字，真实签名]
-/// 比如："{CGSize=dd}" 转成 ["CGSize","dd"]
-NSArray* kkp_parseStructFromTypeDescription(NSString *typeDes)
+/// 比如：{CGSize=dd} 转成 CGSize=dd
+/// 比如：嵌套 {XRect={XPoint=ii}ff} 转成  XRect=iiff
+/// 比如：嵌套 {CGRect={CGPoint=dd}{CGSize=dd}} 转成 CGRect=dddd
+NSString * kkp_parseStructFromTypeDescription(NSString *typeDes, BOOL needStructName, NSString *replaceRightBracket)
 {
     if (typeDes.length == 0) {
         return nil;
     }
+ 
+    NSMutableString *parsingTypes = [NSMutableString new];
     
-    NSError* error = nil;
-    NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"^\\{([A-Za-z0-9_]+)=" options:NSRegularExpressionCaseInsensitive error:&error];
-    assert(error == nil);
-    NSTextCheckingResult *match = [regex firstMatchInString:typeDes options:0 range:NSMakeRange(0, typeDes.length)];
-    NSString* klass = match.numberOfRanges > 0?[typeDes substringWithRange:[match rangeAtIndex:1]]:nil;
-    error = nil;
-    regex = [NSRegularExpression regularExpressionWithPattern:@"=([a-z]+)\\}" options:NSRegularExpressionCaseInsensitive error:&error];
-    assert(error == nil);
-    NSMutableString* des = [NSMutableString string];
-    NSArray *matches = [regex matchesInString:typeDes options:0 range:NSMakeRange(0, typeDes.length)];
-    for (NSTextCheckingResult *match in matches) {
-        NSRange range = [match rangeAtIndex:1];
-        [des appendString:[typeDes substringWithRange:range]];
+    NSString *types = [typeDes substringToIndex:typeDes.length - 1];
+    NSUInteger location = [types rangeOfString:@"="].location + 1;
+    NSString *structName = [typeDes substringWithRange:NSMakeRange(1, location - 1)];
+    [parsingTypes appendString:structName];
+    
+    types = [types substringFromIndex:location];
+    char *typesCode = (char *)[types UTF8String];
+
+    size_t index = 0;
+    size_t subCount = 0;
+    NSString *subTypeEncoding;
+
+    while (typesCode[index]) {
+        if (typesCode[index] == '{') {
+            size_t stackSize = 1;
+            size_t end = index + 1;
+            for (char c = typesCode[end]; c; end++, c = typesCode[end]) {
+                if (c == '{') {
+                    stackSize++;
+                } else if (c == '}') {
+                    stackSize--;
+                    if (stackSize == 0) {
+                        break;
+                    }
+                }
+            }
+            subTypeEncoding = [types substringWithRange:NSMakeRange(index, end - index + 1)];
+            index = end + 1;
+        } else {
+            subTypeEncoding = [types substringWithRange:NSMakeRange(index, 1)];
+            index++;
+        }
+        
+        if ([subTypeEncoding containsString:@"="]) {
+            subTypeEncoding = [subTypeEncoding stringByReplacingOccurrencesOfString:@"{" withString:@"" options:0 range:NSMakeRange(0, subTypeEncoding.length)];
+            subTypeEncoding = [subTypeEncoding stringByReplacingOccurrencesOfString:@"}" withString:@"" options:0 range:NSMakeRange(0, subTypeEncoding.length)];
+            
+            NSArray *array = [subTypeEncoding componentsSeparatedByString:@"="];
+            if (array.count > 1) {
+                [parsingTypes appendString:array[1]];
+                if (replaceRightBracket) {
+                    [parsingTypes appendString:replaceRightBracket];
+                }
+            }
+        } else {
+            [parsingTypes appendString:subTypeEncoding];
+        }
+    
+        subCount++;
     }
     
-    NSMutableString* rdes = [NSMutableString string];
-    for (int i = 0; i < des.length; i++) {
-        char c = [des characterAtIndex:i];
-        [rdes appendString:[NSString stringWithFormat:@"%c", c]];
+    if (replaceRightBracket && [parsingTypes hasSuffix:replaceRightBracket]) {// 去掉最后一个 replaceRightBracket
+        parsingTypes = [[parsingTypes substringWithRange:NSMakeRange(0, parsingTypes.length - replaceRightBracket.length)] mutableCopy];
     }
     
-    if (klass.length > 0 && rdes.length > 0) {
-        return @[klass, rdes];
-    } else {
-        return nil;
-    }
+    return parsingTypes;
 }
 
 /// 把原生结构体转成 struct user data
 int kkp_createStructUserDataWithBuffer(lua_State *L, const char * typeDescription, void *buffer)
 {
-    // create object
-    NSArray *class2des = kkp_parseStructFromTypeDescription([NSString stringWithUTF8String:typeDescription]);
-    if (class2des.count > 1) {
-        NSString *structName = class2des.firstObject;
-        NSString *typeString = class2des.lastObject;
-        
+    NSString *types = kkp_parseStructFromTypeDescription([NSString stringWithUTF8String:typeDescription], YES, nil);
+    NSArray *structWithType = [types componentsSeparatedByString:@"="];
+    if (structWithType.count > 1) {
+        NSString *structName = structWithType.firstObject;
+        NSString *typeString = structWithType.lastObject;
+
         NSDictionary *structDefine = kkp_struct_registeredStructs()[structName];
         if (!structDefine) {
             KKP_ERROR(L, @"Must register struct type in lua before using");

@@ -125,7 +125,7 @@ typedef struct XPoint2 {
     [self restartKKP];
     NSString *script =
     @KKP_LUA(
-             require("kkp.struct").registerStruct({name = "XPoint2", types = "int,int", keys = "x,y"})
+             kkp_struct({name = "XPoint2", types = "int,int", keys = "x,y"})
              kkp_class({"KKPNewInstanceTest"},
              function(_ENV)
                  function argInXPoint()

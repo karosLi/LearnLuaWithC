@@ -8,14 +8,16 @@
 #import <Foundation/Foundation.h>
 #import "lua.h"
 
-/// 根据 Class 字符串拼接的方法签名, 构造真实方法签名
+/// 根据类型的可读性字符串签名, 构造真实签名
 /// @param signatureStr 字符串参数类型 例'void,NSString*'
+/// @param isAllArg 是否所有类型都是参数类型，不是的话，就需要把第一个类型当做返回值类型
 /// @param isBlock 是否构造block签名
-extern NSString *kkp_create_real_method_signature(NSString *signatureStr, bool isBlock);
+extern NSString *kkp_create_real_signature(NSString *signatureStr, BOOL isAllArg, BOOL isBlock);
 
-/// 根据 Class 字符串拼接的参数签名, 构造真实参数签名。目前用于构造结构体的真实参数签名
-/// @param signatureStr 字符串参数类型 例'CGFloat,CGFloat'
-extern NSString *kkp_create_real_argument_signature(NSString *signatureStr);
+/// 根据原生结构体的类型签名转成数组 [结构体名字，真实签名]
+/// 比如：{CGSize=dd} 转成 CGSize=dd
+/// 比如：嵌套 {XRect={XPoint=ii}ff} 转成  XRect=iiff
+NSString * kkp_parseStructFromTypeDescription(NSString *typeDes, BOOL needStructName, NSString *replaceRightBracket);
 
 extern void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index);
 extern int kkp_toLuaObject(lua_State *L, id object);

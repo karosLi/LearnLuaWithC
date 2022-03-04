@@ -26,7 +26,7 @@
     NSString *script =
     @KKP_LUA(
              kkp_protocol("KKPNewClassProtocol", {
-                 refreshView = "NSString,void",
+                 refreshView = "NSString*,void",
              },{
                  refreshData_ = "NSDictionary*,NSDictionary*"
              })

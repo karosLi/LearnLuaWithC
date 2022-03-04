@@ -25,6 +25,12 @@ typedef struct XPoint {
     int y;
 } XPoint;
 
+typedef struct XRect {
+    XPoint origin;
+    float width;
+    float height;
+} XRect;
+
 /**
  测试数据转换
  */
@@ -54,6 +60,7 @@ typedef struct XPoint {
 @property (nonatomic) CGRect vRect;
 @property (nonatomic) UIEdgeInsets vEdgeInsets;
 @property (nonatomic) XPoint vP;
+@property (nonatomic) XRect vXRect;
 
 @end
 
@@ -162,6 +169,11 @@ typedef struct XPoint {
 - (XPoint)argInXPoint:(XPoint)vXPoint
 {
     return vXPoint;
+}
+
+- (XRect)argInXRect:(XRect)vXRect
+{
+    return vXRect;
 }
 
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
@@ -515,7 +527,7 @@ typedef struct XPoint {
     XCTAssert(point.x == 3.0 && point.y == 4.0);
     XCTAssert(self.vPoint.x == 3.0 && self.vPoint.y == 4.0);
 
-    
+
     /// CGRect
     [self restartKKP];
     CGRect xrect;
@@ -580,7 +592,7 @@ typedef struct XPoint {
     XCTAssert(p.x == 3 && p.y == 4);
     script =
     @KKP_LUA(
-             require("kkp.struct").registerStruct({name = "XPoint", types = "int,int", keys = "x,y"})
+             kkp_struct({name = "XPoint", types = "int,int", keys = "x,y"})
              kkp_class({"KKPConvertTest"},
              function(_ENV)
                  function argInXPoint_(a)
@@ -594,6 +606,34 @@ typedef struct XPoint {
     p = [self argInXPoint:xp];
     XCTAssert(p.x == 3 && p.y == 4);
     XCTAssert(self.vP.x == 3 && self.vP.y == 4);
+}
+
+- (void)testCustomWrapStruct {
+    /// 自定义嵌套结构体
+    [self restartKKP];
+    XRect xr;
+    xr.origin.x = 3;
+    xr.origin.y = 4;
+    xr.width = 5;
+    xr.height = 6;
+    XRect p = [self argInXRect:xr];
+    XCTAssert(p.origin.x == 3 && p.origin.y == 4 && p.width == 5 && p.height == 6);
+    NSString *script =
+    @KKP_LUA(
+             kkp_struct({name = "XRect", types = "int,int,int,int", keys = "x,y,width,height"})
+             kkp_class({"KKPConvertTest"},
+             function(_ENV)
+                 function argInXRect_(a)
+                       self:setVXRect_(a)
+                       return a
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    p = [self argInXRect:xr];
+    XCTAssert(p.origin.x == 3 && p.origin.y == 4 && p.width == 5 && p.height == 6);
+    XCTAssert(self.vXRect.origin.x == 3 && self.vXRect.origin.y == 4 && self.vXRect.width == 5 && self.vXRect.height == 6);
 }
 
 - (void)testVar {

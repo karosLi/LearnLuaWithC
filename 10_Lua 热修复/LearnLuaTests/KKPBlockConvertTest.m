@@ -441,7 +441,7 @@ typedef struct XPoint3 {
     [self restartKKP];
     script =
     @KKP_LUA(
-             require("kkp.struct").registerStruct({name = "XPoint3", types = "int,int,double", keys = "x,y,z"})
+             kkp_struct({name = "XPoint3", types = "int,int,double", keys = "x,y,z"})
              kkp_class({"KKPBlockConvertTest"},
              function(_ENV)
                  function argInXPoint_(blk)
