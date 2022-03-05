@@ -234,16 +234,13 @@ NSString * kkp_parseStructFromTypeDescription(NSString *typeDes, BOOL needStruct
             index++;
         }
         
-        if ([subTypeEncoding containsString:@"="]) {
-            subTypeEncoding = [subTypeEncoding stringByReplacingOccurrencesOfString:@"{" withString:@"" options:0 range:NSMakeRange(0, subTypeEncoding.length)];
-            subTypeEncoding = [subTypeEncoding stringByReplacingOccurrencesOfString:@"}" withString:@"" options:0 range:NSMakeRange(0, subTypeEncoding.length)];
-            
-            NSArray *array = [subTypeEncoding componentsSeparatedByString:@"="];
-            if (array.count > 1) {
-                [parsingTypes appendString:array[1]];
-                if (replaceRightBracket) {
-                    [parsingTypes appendString:replaceRightBracket];
-                }
+        NSInteger equalLocation = [subTypeEncoding rangeOfString:@"="].location;
+        if (equalLocation != NSNotFound) {
+            NSInteger end = [subTypeEncoding rangeOfString:@"}"].location;
+            subTypeEncoding = [subTypeEncoding substringWithRange:NSMakeRange(equalLocation + 1, end - (equalLocation + 1))];
+            [parsingTypes appendString:subTypeEncoding];
+            if (replaceRightBracket) {
+                [parsingTypes appendString:replaceRightBracket];
             }
         } else {
             [parsingTypes appendString:subTypeEncoding];
