@@ -1,6 +1,6 @@
 local kkp_structN = require("kkp.struct")
 
--- 注册一个结构体，主要是注册类型签名 和 keys，keys 的注册是为了方便在 lua 里使用 key 去访问数据
+-- 注册一个结构体，注册的目的是为了可以在 lua 里创建结构体，并使用可读性高的 key 去访问数据
 function kkp_struct(struct_define)
     kkp_structN.registerStruct(struct_define)
 end

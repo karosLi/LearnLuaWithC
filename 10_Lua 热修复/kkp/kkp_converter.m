@@ -264,13 +264,7 @@ int kkp_createStructUserDataWithBuffer(lua_State *L, const char * typeDescriptio
     if (structWithType.count > 1) {
         NSString *structName = structWithType.firstObject;
         NSString *typeString = structWithType.lastObject;
-
-        NSDictionary *structDefine = kkp_struct_registeredStructs()[structName];
-        if (!structDefine) {
-            KKP_ERROR(L, @"Must register struct type in lua before using");
-        }
-        NSString *keys = structDefine[@"keys"];
-        kkp_struct_create_userdata(L, structName.UTF8String, typeString.UTF8String, keys.UTF8String, buffer);
+        kkp_struct_create_userdata(L, structName.UTF8String, typeString.UTF8String, buffer);
     } else {
         KKP_ERROR(L, @"Parsing struct type description failed");
     }
@@ -677,9 +671,9 @@ int kkp_sizeOfStructTypes(const char *typeDescription)
                 NSString *structTypeStr = [typeString substringFromIndex:index];
                 NSUInteger end = [structTypeStr rangeOfString:@"}"].location;
                 if (end != NSNotFound) {
-                    NSString *subStructName = [structTypeStr substringWithRange:NSMakeRange(1, end - 1)];
-                    NSDictionary *subStructDefine = kkp_struct_registeredStructs()[subStructName];
-                    size += kkp_sizeOfStructTypes([subStructDefine[@"types"] UTF8String]);
+                    NSUInteger location = [structTypeStr rangeOfString:@"="].location + 1;
+                    NSString *subStructTypes = [structTypeStr substringFromIndex:location];
+                    size += kkp_sizeOfStructTypes([subStructTypes UTF8String]);
                     index += (int)end;
                     break;
                 }
@@ -693,24 +687,23 @@ int kkp_sizeOfStructTypes(const char *typeDescription)
     return size;
 }
 
-/// 把结构体字典里的数据往结构体指针指向的内存里填充
-void kkp_getStructDataOfDict(void *structData, NSDictionary *structDict, NSDictionary *structDefine)
+/// 把结构体数组的数据往结构体指针指向的内存里填充
+void kkp_getStructDataOfArray(void *structData, NSArray *structArray, const char *typeDescription)
 {
-    NSArray *itemKeys = [structDefine[@"keys"] componentsSeparatedByString:@","];
-    const char *structTypes = [structDefine[@"types"] UTF8String];
+    NSString *typeString = [NSString stringWithUTF8String:typeDescription];
     
+    int index = 0;
     int position = 0;
-    for (NSString *itemKey in itemKeys) {
-        switch(*structTypes) {
+    for (int i = 0; i < structArray.count; i++) {
+        switch(typeDescription[index]) {
             #define KKP_STRUCT_DATA_CASE(_typeStr, _type, _transMethod) \
             case _typeStr: { \
                 int size = sizeof(_type);    \
-                _type val = [structDict[itemKey] _transMethod];   \
+                _type val = [structArray[i] _transMethod];   \
                 memcpy(structData + position, &val, size);  \
                 position += size;    \
                 break;  \
             }
-                
             KKP_STRUCT_DATA_CASE('c', char, charValue)
             KKP_STRUCT_DATA_CASE('C', unsigned char, unsignedCharValue)
             KKP_STRUCT_DATA_CASE('s', short, shortValue)
@@ -731,48 +724,46 @@ void kkp_getStructDataOfDict(void *structData, NSDictionary *structDict, NSDicti
             case '*':
             case '^': {
                 int size = sizeof(void *);
-                void *val = (__bridge void *)(structDict[itemKey]);
+                void *val = (__bridge void *)(structArray[i]);
                 memcpy(structData + position, &val, size);
                 break;
             }
             case '{': {// 处理结构体嵌套场景
-                NSString *subStructName = [NSString stringWithCString:structTypes encoding:NSASCIIStringEncoding];
-                NSUInteger end = [subStructName rangeOfString:@"}"].location;
+                NSString *structTypeStr = [typeString substringFromIndex:index];
+                NSUInteger end = [structTypeStr rangeOfString:@"}"].location;
                 if (end != NSNotFound) {
-                    subStructName = [subStructName substringWithRange:NSMakeRange(1, end - 1)];
-                    NSDictionary *subStructDefine = kkp_struct_registeredStructs()[subStructName];
-                    NSDictionary *subDict = structDict[itemKey];
-                    int size = kkp_sizeOfStructTypes([subStructDefine[@"types"] UTF8String]);
-                    kkp_getStructDataOfDict(structData + position, subDict, subStructDefine);
+                    NSUInteger location = [structTypeStr rangeOfString:@"="].location + 1;
+                    NSString *subStructTypes = [structTypeStr substringFromIndex:location];
+                    int size = kkp_sizeOfStructTypes(subStructTypes.UTF8String);
+                    kkp_getStructDataOfArray(structData + position, structArray[i], subStructTypes.UTF8String);
                     position += size;
-                    structTypes += end;
+                    index += end;
                     break;
                 }
             }
             default:
                 break;
-            
         }
-        structTypes ++;
+        index++;
     }
 }
 
-/// 把结构体字指针指向的内存数据转换成字典
-NSDictionary *kkp_getDictOfStructData(void *structData, NSDictionary *structDefine)
+/// 把结构体字指针指向的内存数据转换成数组
+NSArray * kkp_getArrayOfStructData(void *structData, const char *typeDescription)
 {
-    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-    NSArray *itemKeys = [structDefine[@"keys"] componentsSeparatedByString:@","];
-    const char *structTypes = [structDefine[@"types"] UTF8String];
-    int position = 0;
+    NSMutableArray *array = [[NSMutableArray alloc] init];
+    NSString *typeString = [NSString stringWithUTF8String:typeDescription];
     
-    for (NSString *itemKey in itemKeys) {
-        switch(*structTypes) {
+    int index = 0;
+    int position = 0;
+    for (int i = 0; i < typeString.length; i++) {
+        switch(typeDescription[index]) {
             #define KKP_STRUCT_DICT_CASE(_typeName, _type)   \
             case _typeName: { \
                 size_t size = sizeof(_type); \
                 _type *val = malloc(size);   \
                 memcpy(val, structData + position, size);   \
-                [dict setObject:@(*val) forKey:itemKey];    \
+                [array addObject:@(*val)];    \
                 free(val);  \
                 position += size;   \
                 break;  \
@@ -799,26 +790,25 @@ NSDictionary *kkp_getDictOfStructData(void *structData, NSDictionary *structDefi
                 size_t size = sizeof(void *);
                 void *val = malloc(size);
                 memcpy(val, structData + position, size);
-                [dict setObject:(__bridge id _Nonnull)(val) forKey:itemKey];
+                [array addObject:(__bridge id)(val)];
                 position += size;
                 break;
             }
             case '{': {// 处理结构体嵌套场景
-                NSString *subStructName = [NSString stringWithCString:structTypes encoding:NSASCIIStringEncoding];
-                NSUInteger end = [subStructName rangeOfString:@"}"].location;
+                NSString *structTypeStr = [typeString substringFromIndex:index];
+                NSUInteger end = [structTypeStr rangeOfString:@"}"].location;
                 if (end != NSNotFound) {
-                    subStructName = [subStructName substringWithRange:NSMakeRange(1, end - 1)];
-                    NSDictionary *subStructDefine = kkp_struct_registeredStructs()[subStructName];;
-                    int size = kkp_sizeOfStructTypes([subStructDefine[@"types"] UTF8String]);
-                    NSDictionary *subDict = kkp_getDictOfStructData(structData + position, subStructDefine);
-                    [dict setObject:subDict forKey:itemKey];
-                    position += size;
-                    structTypes += end;
+                    NSUInteger location = [structTypeStr rangeOfString:@"="].location + 1;
+                    NSString *subStructTypes = [structTypeStr substringFromIndex:location];
+                    NSArray *subArray = kkp_getArrayOfStructData(structData + position, subStructTypes.UTF8String);
+                    [array addObject:subArray];
+                    position += kkp_sizeOfStructTypes([subStructTypes UTF8String]);
+                    index += end;
                     break;
                 }
             }
         }
-        structTypes ++;
+        index++;
     }
-    return dict;
+    return array;
 }

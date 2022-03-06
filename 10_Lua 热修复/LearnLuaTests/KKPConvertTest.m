@@ -21,8 +21,8 @@
 @end
 
 typedef struct XPoint {
-    int x;
-    int y;
+    float x;
+    float y;
 } XPoint;
 
 typedef struct XRect {
@@ -586,10 +586,10 @@ typedef struct XRect {
     /// XPoint 自定义结构体
     [self restartKKP];
     XPoint xp;
-    xp.x = 3;
-    xp.y = 4;
+    xp.x = 3.0f;
+    xp.y = 4.0f;
     XPoint p = [self argInXPoint:xp];
-    XCTAssert(p.x == 3 && p.y == 4);
+    XCTAssert(p.x == 3.0f && p.y == 4.0f);
     script =
     @KKP_LUA(
              kkp_struct({name = "XPoint", types = "int,int", keys = "x,y"})
@@ -604,26 +604,27 @@ typedef struct XRect {
     
     kkp_runLuaString(script);
     p = [self argInXPoint:xp];
-    XCTAssert(p.x == 3 && p.y == 4);
-    XCTAssert(self.vP.x == 3 && self.vP.y == 4);
+    XCTAssert(p.x == 3.0f && p.y == 4.0f);
+    XCTAssert(self.vP.x == 3.0f && self.vP.y == 4.0f);
 }
 
 - (void)testCustomWrapStruct {
     /// 自定义嵌套结构体
     [self restartKKP];
     XRect xr;
-    xr.origin.x = 3;
-    xr.origin.y = 4;
-    xr.width = 5;
-    xr.height = 6;
+    xr.origin.x = 3.0f;
+    xr.origin.y = 4.0f;
+    xr.width = 5.0f;
+    xr.height = 6.0f;
     XRect p = [self argInXRect:xr];
-    XCTAssert(p.origin.x == 3 && p.origin.y == 4 && p.width == 5 && p.height == 6);
+    XCTAssert(p.origin.x == 3.0f && p.origin.y == 4.0f && p.width == 5.0f && p.height == 6.0f);
     NSString *script =
     @KKP_LUA(
-             kkp_struct({name = "XRect", types = "int,int,int,int", keys = "x,y,width,height"})
+             kkp_struct({name = "XRect", types = "float,float,float,float", keys = "x,y,width,height"})
              kkp_class({"KKPConvertTest"},
              function(_ENV)
                  function argInXRect_(a)
+                       a.x = 10.0
                        self:setVXRect_(a)
                        return a
                  end
@@ -632,8 +633,37 @@ typedef struct XRect {
     
     kkp_runLuaString(script);
     p = [self argInXRect:xr];
-    XCTAssert(p.origin.x == 3 && p.origin.y == 4 && p.width == 5 && p.height == 6);
-    XCTAssert(self.vXRect.origin.x == 3 && self.vXRect.origin.y == 4 && self.vXRect.width == 5 && self.vXRect.height == 6);
+    XCTAssert(p.origin.x == 10.0f && p.origin.y == 4.0f && p.width == 5.0f && p.height == 6.0f);
+    XCTAssert(self.vXRect.origin.x == 10.0f && self.vXRect.origin.y == 4.0f && self.vXRect.width == 5.0f && self.vXRect.height == 6.0f);
+}
+
+- (void)testCustomWrapStructWithoutRegister {
+    /// 自定义嵌套结构体，不注册。不注册的话，可以用 struct[0...n] 来访问数据
+    [self restartKKP];
+    XRect xr;
+    xr.origin.x = 3.0f;
+    xr.origin.y = 4.0f;
+    xr.width = 5.0f;
+    xr.height = 6.0f;
+    XRect p = [self argInXRect:xr];
+    XCTAssert(p.origin.x == 3.0f && p.origin.y == 4.0f && p.width == 5.0f && p.height == 6.0f);
+    NSString *script =
+    @KKP_LUA(
+             kkp_struct({name = "XRect", types = "float,float,float,float", keys = "x,y,width,height"})
+             kkp_class({"KKPConvertTest"},
+             function(_ENV)
+                 function argInXRect_(a)
+                       a[0] = 10.0
+                       self:setVXRect_(a)
+                       return a
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    p = [self argInXRect:xr];
+    XCTAssert(p.origin.x == 10.0f && p.origin.y == 4.0f && p.width == 5.0f && p.height == 6.0f);
+    XCTAssert(self.vXRect.origin.x == 10.0f && self.vXRect.origin.y == 4.0f && self.vXRect.width == 5.0f && self.vXRect.height == 6.0f);
 }
 
 - (void)testVar {

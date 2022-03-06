@@ -15,6 +15,6 @@
 /// 用于获取所有注册的结果信息
 extern NSMutableDictionary * kkp_struct_registeredStructs(void);
 /// 用于创建结构体 user data
-extern int kkp_struct_create_userdata(lua_State *L, const char *name, const char *typeDescription, const char *keys, void *structData);
+extern int kkp_struct_create_userdata(lua_State *L, const char *name, const char *typeDescription, void *structData);
 
 LUAMOD_API int luaopen_kkp_struct(lua_State *L);

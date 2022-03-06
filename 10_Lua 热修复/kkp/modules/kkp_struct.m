@@ -62,7 +62,7 @@ static void kkp_struct_setValueAt(lua_State *L, KKPStructUserdata *structUserdat
 
 /// 创建结构体对应的 user data
 /// 里面存储了类型描述和实际的数据
-int kkp_struct_create_userdata(lua_State *L, const char *name, const char *typeDescription, const char *keys, void *structData)
+int kkp_struct_create_userdata(lua_State *L, const char *name, const char *typeDescription, void *structData)
 {
     return kkp_safeInLuaStack(L, ^int{
         size_t nbytes = sizeof(KKPStructUserdata);
@@ -76,9 +76,6 @@ int kkp_struct_create_userdata(lua_State *L, const char *name, const char *typeD
         
         structUserdata->types = malloc(strlen(typeDescription) + 1);
         strcpy(structUserdata->types, typeDescription);
-        
-        structUserdata->keys = malloc(strlen(keys) + 1);
-        strcpy(structUserdata->keys, keys);
         
         structUserdata->data = malloc(size);
         // 拷贝结构体数据到 structUserdata->data 里
@@ -101,7 +98,7 @@ int kkp_struct_create_userdata(lua_State *L, const char *name, const char *typeD
 static int kkp_struct_copy_userdata_closure(lua_State *L) {
     return kkp_safeInLuaStack(L, ^int{
         KKPStructUserdata *structUserdata = (KKPStructUserdata *)luaL_checkudata(L, 1, KKP_STRUCT_USER_DATA_META_TABLE);
-        kkp_struct_create_userdata(L, structUserdata->name, structUserdata->types, structUserdata->keys, structUserdata->data);
+        kkp_struct_create_userdata(L, structUserdata->name, structUserdata->types, structUserdata->data);
         return 1;
     });
 }
@@ -115,7 +112,7 @@ static int LUserData_kkp_struct__index(lua_State *L)
     return kkp_safeInLuaStack(L, ^int{
         KKPStructUserdata *structUserdata = (KKPStructUserdata *)luaL_checkudata(L, 1, KKP_STRUCT_USER_DATA_META_TABLE);
         
-        int varIndex;
+        NSInteger varIndex = NSNotFound;
         if (lua_isnumber(L, 2)) {
             varIndex = lua_tonumber(L, 2);
         } else {
@@ -125,12 +122,16 @@ static int LUserData_kkp_struct__index(lua_State *L)
                 return 1;
             }
             
-            NSArray *itemKeys = [[NSString stringWithUTF8String:structUserdata->keys] componentsSeparatedByString:@","];
-            varIndex = (int)[itemKeys indexOfObject:[NSString stringWithUTF8String:name]];
+            NSDictionary *structDefine = kkp_struct_registeredStructs()[[NSString stringWithUTF8String:structUserdata->name]];
+            NSString *keys = structDefine[@"keys"];
+            if (keys) {
+                NSArray *itemKeys = [keys componentsSeparatedByString:@","];
+                varIndex = (int)[itemKeys indexOfObject:[NSString stringWithUTF8String:name]];
+            }
         }
         
         if (varIndex != NSNotFound) {
-            kkp_struct_pushValueAt(L, structUserdata, varIndex);
+            kkp_struct_pushValueAt(L, structUserdata, (int)varIndex);
         }
         
         return 1;
@@ -145,17 +146,22 @@ static int LUserData_kkp_struct__newIndex(lua_State *L)
     return kkp_safeInLuaStack(L, ^int{
         KKPStructUserdata *structUserdata = (KKPStructUserdata *)luaL_checkudata(L, 1, KKP_STRUCT_USER_DATA_META_TABLE);
         
-        int varIndex;
+        NSInteger varIndex = NSNotFound;
         if (lua_isnumber(L, 2)) {
             varIndex = lua_tonumber(L, 2);
         } else {
             const char *name = lua_tostring(L, 2);
-            NSArray *itemKeys = [[NSString stringWithUTF8String:structUserdata->keys] componentsSeparatedByString:@","];
-            varIndex = (int)[itemKeys indexOfObject:[NSString stringWithUTF8String:name]];
+            
+            NSDictionary *structDefine = kkp_struct_registeredStructs()[[NSString stringWithUTF8String:structUserdata->name]];
+            NSString *keys = structDefine[@"keys"];
+            if (keys) {
+                NSArray *itemKeys = [keys componentsSeparatedByString:@","];
+                varIndex = (int)[itemKeys indexOfObject:[NSString stringWithUTF8String:name]];
+            }
         }
         
         if (varIndex != NSNotFound) {
-            kkp_struct_setValueAt(L, structUserdata, varIndex, 3);
+            kkp_struct_setValueAt(L, structUserdata, (int)varIndex, 3);
         }
         
         return 0;
@@ -168,23 +174,29 @@ static int LUserData_kkp_struct__tostring(lua_State *L)
     return kkp_safeInLuaStack(L, ^int{
         KKPStructUserdata *structUserdata = (KKPStructUserdata *)luaL_checkudata(L, 1, KKP_STRUCT_USER_DATA_META_TABLE);
         
-        NSArray *itemKeys = [[NSString stringWithUTF8String:structUserdata->keys] componentsSeparatedByString:@","];
+        NSDictionary *structDefine = kkp_struct_registeredStructs()[[NSString stringWithUTF8String:structUserdata->name]];
+        NSString *keys = structDefine[@"keys"];
+        NSArray *itemKeys = [keys componentsSeparatedByString:@","];
         
         luaL_Buffer b;
         luaL_buffinit(L, &b);
         luaL_addstring(&b, structUserdata->name);
         luaL_addstring(&b, " {\n");
         
-        for (int i = 0; i < itemKeys.count; i++) {
-            luaL_addstring(&b, "\t");
-            NSString *itemKey = itemKeys[i];
-            luaL_addstring(&b, itemKey.UTF8String);
-            luaL_addstring(&b, " : ");
-            
-            kkp_struct_pushValueAt(L, structUserdata, i);
-            luaL_addstring(&b, lua_tostring(L, -1));
-            luaL_addstring(&b, "\n");
-            lua_pop(L, 1); // pops the value and the struct offset, keeps the key for the next iteration
+        if (itemKeys.count > 0) {
+            for (int i = 0; i < itemKeys.count; i++) {
+                luaL_addstring(&b, "\t");
+                NSString *itemKey = itemKeys[i];
+                luaL_addstring(&b, itemKey.UTF8String);
+                luaL_addstring(&b, " : ");
+                
+                kkp_struct_pushValueAt(L, structUserdata, i);
+                luaL_addstring(&b, lua_tostring(L, -1));
+                luaL_addstring(&b, "\n");
+                lua_pop(L, 1); // pops the value and the struct offset, keeps the key for the next iteration
+            }
+        } else {
+            luaL_addstring(&b, "Only can print registered struct\n");
         }
         
         luaL_addstring(&b, "}");
@@ -202,7 +214,6 @@ static int LUserData_kkp_struct__gc(lua_State *L)
 
         free(structUserdata->name);
         free(structUserdata->types);
-        free(structUserdata->keys);
         free(structUserdata->data);
         
         return 0;
@@ -222,7 +233,7 @@ static const struct luaL_Reg UserDataMetaMethods[] = {
 /// 用于在 lua 中创建一个结构体实例
 /// upvalues (name)
 /// 第1个参数是一个 lua table 字典。因为是直接调用的，没有使用 ：语法糖
-/// 比如：当使用 CGSize() 时，就会调用该闭包
+/// 比如：当使用 CGSize({width=3, height=4}) 时，就会调用该闭包
 static int kkp_struct_create_userdata_closure(lua_State *L) {
     return kkp_safeInLuaStack(L, ^int{
         if (!lua_istable(L, 1)) {// 必须是一个 table 字典
@@ -234,7 +245,6 @@ static int kkp_struct_create_userdata_closure(lua_State *L) {
         NSDictionary *structDefine = kkp_struct_registeredStructs()[[NSString stringWithUTF8String:name]];
         
         NSString *realTypeDescription = structDefine[@"types"];
-        NSString *keys = structDefine[@"keys"];
        
         /// 把 lua table 转成字典
         void *arg = kkp_toOCObject(L, "@", 1);
@@ -251,10 +261,10 @@ static int kkp_struct_create_userdata_closure(lua_State *L) {
         const char *typeDescription = realTypeDescription.UTF8String;
         size_t size = kkp_sizeOfStructTypes(typeDescription);
         void *structData = malloc(size);
-        kkp_getStructDataOfDict(structData, structDict, structDefine);
+        kkp_getStructDataOfArray(structData, structDict.allValues, typeDescription);
         
         /// 根据结构体指针创建一个 struct user data
-        kkp_struct_create_userdata(L, name, typeDescription, keys.UTF8String, structData);
+        kkp_struct_create_userdata(L, name, typeDescription, structData);
         free(structData);
 
         return 1;

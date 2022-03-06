@@ -25,7 +25,7 @@ extern int kkp_toLuaObjectWithBuffer(lua_State *L, const char * typeDescription,
 
 /// 根据类型描述，计算出结构体占用的字节大小
 extern int kkp_sizeOfStructTypes(const char *typeDescription);
-/// 把结构体字典里的数据往结构体指针指向的内存里填充
-extern void kkp_getStructDataOfDict(void *structData, NSDictionary *structDict, NSDictionary *structDefine);
-/// 把结构体字指针指向的内存数据转换成字典
-extern NSDictionary *kkp_getDictOfStructData(void *structData, NSDictionary *structDefine);
+/// 把结构体数组的数据往结构体指针指向的内存里填充
+extern void kkp_getStructDataOfArray(void *structData, NSArray *structArray, const char *typeDescription);
+/// 把结构体字指针指向的内存数据转换成数组
+extern NSArray * kkp_getArrayOfStructData(void *structData, const char *typeDescription);

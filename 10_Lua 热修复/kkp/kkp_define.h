@@ -23,7 +23,6 @@ typedef struct _KKPStructUserdata {
     size_t size;// 数据总大小
     char *name;// lua定义的结构体名字，比如 "CGSize"
     char *types;// lua定义的结构体签名，比如 "dd"
-    char *keys;// lua定义的结构体签名，比如 "width,height"
 } KKPStructUserdata;
 
 #define KKP_ENV_SCOPE @"_SCOPE" // 用于保存 lua 中的 _ENV 当前环境
