@@ -1,4 +1,4 @@
-require "CustomTableViewController"
+-- require("CustomTableViewController")
 
 -- 添加新类，一个文件里也可以定义多个类
 kkp_class({"Custom1TableViewController", "UIViewController"},
@@ -64,8 +64,8 @@ function(_ENV)
 
     -- 添加新类
     function onClickGotoButton()
-        local controller = CustomTableViewController:alloc():init()
-        -- local controller = Custom1TableViewController:alloc():init()
+        -- local controller = CustomTableViewController:alloc():init()
+        local controller = Custom1TableViewController:alloc():init()
         self:navigationController():pushViewController_animated_(controller, true)
     end
 
