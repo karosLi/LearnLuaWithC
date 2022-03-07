@@ -85,7 +85,7 @@ typedef struct XPoint4 {
 }
 
 - (void)testExample {
-    /// 返回 无参无结果 block
+    /// 返回 无参无返回值 block
     [self restartKKP];
     NSString *script =
     @KKP_LUA(
@@ -104,7 +104,7 @@ typedef struct XPoint4 {
     XCTAssert(self.vInt == 1);
     
     
-    /// 返回 一个入参无结果 block
+    /// 返回 一个入参无返回值 block
     [self restartKKP];
     script =
     @KKP_LUA(
@@ -123,7 +123,7 @@ typedef struct XPoint4 {
     XCTAssert(self.vInt == 2);
     
     
-    /// 返回 无参一个结果 block
+    /// 返回 无参一个返回值 block
     [self restartKKP];
     script =
     @KKP_LUA(
@@ -142,7 +142,7 @@ typedef struct XPoint4 {
 }
 
 - (void)testTotal {
-    /// 返回 多入参无结果 block
+    /// 返回 多入参无返回值 block
     [self restartKKP];
     NSString *script =
     @KKP_LUA(
@@ -197,18 +197,17 @@ typedef struct XPoint4 {
 }
 
 - (void)testStruct {
-    /// 返回 一个结构体入参无结果 block
+    /// 返回 一个结构体入参无返回值 block
     [self restartKKP];
-//    kkp_struct({name = "XPoint4", types = "int,int", keys = "x,y"})
     NSString *script =
     @KKP_LUA(
-             
+             kkp_struct({name = "XPoint4", types = "int,int", keys = "x,y"})
              kkp_class({"KKPBlockDefineTest"},
              function(_ENV)
                  function blkVoidStruct()
                        return kkp_block(function(point)
-                                        print(tostring(point))
-                                        self:setVP_(point)
+                                            print(tostring(point))
+                                            self:setVP_(point)
                                         end, "void,{XPoint4=int,int}")
                  end
              end)
@@ -221,6 +220,340 @@ typedef struct XPoint4 {
     [self blkVoidStruct](p);
     XCTAssert(self.vP.x == 3);
     XCTAssert(self.vP.y == 4);
+    
+    
+    /// 返回 两个结构体入参无返回值 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_struct({name = "XPoint4", types = "int,int", keys = "x,y"})
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkVoidStruct2()
+                       return kkp_block(function(point, rect)
+                                            self:setVP_(point)
+                                            self:setRect_(rect)
+                                        end, "void,{XPoint4=int,int},{CGRect=CGFloat,CGFloat,CGFloat,CGFloat}")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XPoint4 p2;
+    p2.x = 6;
+    p2.y = 8;
+    [self blkVoidStruct2](p, CGRectMake(1, 2, 3, 4));
+    XCTAssert(self.vP.x == 3);
+    XCTAssert(self.vP.y == 4);
+    XCTAssert(self.rect.origin.x == 1);
+    XCTAssert(self.rect.origin.y == 2);
+    XCTAssert(self.rect.size.width == 3);
+    XCTAssert(self.rect.size.height == 4);
+}
+
+
+
+- (BOOL(^)(void))blkReturnBool
+{
+    return nil;
+}
+
+- (char *(^)(void))blkReturnCharX
+{
+    return nil;
+}
+
+- (SEL(^)(void))blkReturnSEL
+{
+    return nil;
+}
+
+- (Class(^)(void))blkReturnClass
+{
+    return nil;
+}
+
+- (char(^)(void))blkReturnChar
+{
+    return nil;
+}
+
+- (int(^)(void))blkReturnInt
+{
+    return nil;
+}
+
+- (long(^)(void))blkReturnLong
+{
+    return nil;
+}
+
+- (short(^)(void))blkReturnShort
+{
+    return nil;
+}
+
+- (float(^)(void))blkReturnFloat
+{
+    return nil;
+}
+
+- (double(^)(void))blkReturnDouble
+{
+    return nil;
+}
+
+- (long long(^)(void))blkReturnLongLong
+{
+    return nil;
+}
+
+- (CGFloat(^)(void))blkReturnCGFloat
+{
+    return nil;
+}
+
+- (XPoint4(^)(void))blkReturnXPoint
+{
+    return nil;
+}
+
+- (void)testReturn {
+    /// 返回 无参带BOOL返回值的 block
+    [self restartKKP];
+    NSString *script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnBool()
+                       return kkp_block(function()
+                                           return true
+                                        end, "BOOL")
+                 end
+             end)
+             );
+
+    kkp_runLuaString(script);
+    XCTAssert([self blkReturnBool]() == true);
+
+    
+    /// 返回 无参带char*返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnCharX()
+                       return kkp_block(function()
+                                           return "string"
+                                        end, "char *")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert(strcmp([self blkReturnCharX](), "string") == 0);
+    
+    
+    /// 返回 无参带SEL返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnSEL()
+                       return kkp_block(function()
+                                           return "selector"
+                                        end, "char *")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert(strcmp(sel_getName([self blkReturnSEL]()) ,"selector") == 0);
+    
+    
+    /// 返回 无参带Class返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnClass()
+                       return kkp_block(function()
+                                           return UIColor
+                                        end, "@")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert([self blkReturnClass]() == NSClassFromString(@"UIColor"));
+    
+    
+    /// 返回 无参带char返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnChar()
+                       return kkp_block(function()
+                                           return 'c'
+                                        end, "char")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert([self blkReturnChar]() == 'c');
+    
+    
+    /// 返回 无参带int返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnInt()
+                       return kkp_block(function()
+                                           return 1
+                                        end, "int")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert([self blkReturnInt]() == 1);
+    
+    
+    /// 返回 无参带long返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnLong()
+                       return kkp_block(function()
+                                           return 100
+                                        end, "long")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert([self blkReturnLong]() == 100);
+    
+    
+    /// 返回 无参带short返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnShort()
+                       return kkp_block(function()
+                                           return 10
+                                        end, "short")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert([self blkReturnShort]() == 10);
+    
+    
+    /// 返回 无参带float返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnFloat()
+                       return kkp_block(function()
+                                           return 3.14
+                                        end, "float")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert([self blkReturnFloat]() == 3.14f);
+    
+    
+    /// 返回 无参带double返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnDouble()
+                       return kkp_block(function()
+                                           return 7.14
+                                        end, "double")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert([self blkReturnDouble]() == 7.14);
+    
+    
+    /// 返回 无参带longlong返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnLongLong()
+                       return kkp_block(function()
+                                           return 70000
+                                        end, "long long")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert([self blkReturnLongLong]() == 70000);
+    
+    
+    /// 返回 无参带CGFloat返回值的 block
+    [self restartKKP];
+    script =
+    @KKP_LUA(
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnCGFloat()
+                       return kkp_block(function()
+                                           return 5.12
+                                        end, "CGFloat")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XCTAssert([self blkReturnCGFloat]() == (CGFloat)5.12);
+}
+
+- (void)testReturnStruct {
+    /// 返回 无参带结构体返回值的 block
+    [self restartKKP];
+    NSString *script =
+    @KKP_LUA(
+             kkp_struct({name = "XPoint4", types = "int,int", keys = "x,y"})
+             kkp_class({"KKPBlockDefineTest"},
+             function(_ENV)
+                 function blkReturnXPoint()
+                       return kkp_block(function()
+                                            return XPoint4({x=3, y=4})
+                                        end, "{XPoint4=int,int}")
+                 end
+             end)
+             );
+    
+    kkp_runLuaString(script);
+    XPoint4 xp = [self blkReturnXPoint]();
+    XCTAssert(xp.x == 3 && xp.y == 4);
 }
 
 @end

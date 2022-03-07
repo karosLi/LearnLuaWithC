@@ -192,39 +192,20 @@ static void convertReturnValue(const char *returnType, void *retBuffer, void *re
     
     switch (type[0]) {
         case _C_ID:
-        case _C_CLASS: {
+        case _C_CLASS:
+        case _C_PTR:
+        case _C_SEL:
+        case _C_CHARPTR:
+        {
             if (retBuffer != nil) {
                 *(void **)ret = *(void **)retBuffer;
             } else {
                 *(void **)ret = nil;
             }
         } break;
-        case _C_STRUCT_B: {
-//            id retObj = [jsValue toObject];
-//            NSString *clsType = [retObj objectForKey:@"__className"];
-//            guard(clsType) else {
-//                NSCAssert(
-//                    NO, [NSString stringWithFormat:@"***************方法签名入参为结构体,当前JS返回params未能获取当前结构体类型,请检查************"]);
-//            }
-//            NSString *str = [retObj objectForKey:@"__isa"];
-//            if ([clsType isEqualToString:@"react"]) {
-//                CGRect ocBaseData = toOcCGReact(str);
-//                void **ptr = retPointer;
-//                *ptr = &ocBaseData;
-//            } else if ([clsType isEqualToString:@"point"]) {
-//                CGPoint ocBaseData = toOcCGPoint(str);
-//                void **ptr = retPointer;
-//                *ptr = &ocBaseData;
-//            } else if ([clsType isEqualToString:@"size"]) {
-//                CGSize ocBaseData = toOcCGSize(str);
-//                void **ptr = retPointer;
-//                *ptr = &ocBaseData;
-//            } else if ([clsType isEqualToString:@"edge"]) {
-//                UIEdgeInsets ocBaseData = toOcEdgeInsets(str);
-//                void **ptr = retPointer;
-//                *ptr = &ocBaseData;
-//            }
-            break;
+        case _C_STRUCT_B:
+        {
+            *(void **)ret = *(void **)retBuffer;
         } break;
             KKP_RETURN_PTR_WRAP(_C_SHT, short);
             KKP_RETURN_PTR_WRAP(_C_USHT, unsigned short);
@@ -238,6 +219,8 @@ static void convertReturnValue(const char *returnType, void *retBuffer, void *re
             KKP_RETURN_PTR_WRAP(_C_DBL, double);
             KKP_RETURN_PTR_WRAP(_C_BFLD, BOOL);
             KKP_RETURN_PTR_WRAP(_C_BOOL, BOOL);
+            KKP_RETURN_PTR_WRAP(_C_CHR, char);
+            KKP_RETURN_PTR_WRAP(_C_UCHR, u_char);
 
         default:
             break;
