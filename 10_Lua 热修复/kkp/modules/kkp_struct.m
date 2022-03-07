@@ -175,15 +175,15 @@ static int LUserData_kkp_struct__tostring(lua_State *L)
         KKPStructUserdata *structUserdata = (KKPStructUserdata *)luaL_checkudata(L, 1, KKP_STRUCT_USER_DATA_META_TABLE);
         
         NSDictionary *structDefine = kkp_struct_registeredStructs()[[NSString stringWithUTF8String:structUserdata->name]];
-        NSString *keys = structDefine[@"keys"];
-        NSArray *itemKeys = [keys componentsSeparatedByString:@","];
         
         luaL_Buffer b;
         luaL_buffinit(L, &b);
         luaL_addstring(&b, structUserdata->name);
         luaL_addstring(&b, " {\n");
         
-        if (itemKeys.count > 0) {
+        NSString *keys = structDefine[@"keys"];
+        if (keys) {
+            NSArray *itemKeys = [keys componentsSeparatedByString:@","];
             for (int i = 0; i < itemKeys.count; i++) {
                 luaL_addstring(&b, "\t");
                 NSString *itemKey = itemKeys[i];
@@ -196,7 +196,7 @@ static int LUserData_kkp_struct__tostring(lua_State *L)
                 lua_pop(L, 1); // pops the value and the struct offset, keeps the key for the next iteration
             }
         } else {
-            NSString *types = structDefine[@"types"];
+            NSString *types = [NSString stringWithUTF8String:structUserdata->types];
             for (int i = 0; i < types.length; i++) {
                 kkp_struct_pushValueAt(L, structUserdata, i);
                 luaL_addstring(&b, lua_tostring(L, -1));

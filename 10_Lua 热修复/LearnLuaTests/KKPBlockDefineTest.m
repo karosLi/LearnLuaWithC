@@ -199,13 +199,15 @@ typedef struct XPoint4 {
 - (void)testStruct {
     /// 返回 一个结构体入参无结果 block
     [self restartKKP];
+//    kkp_struct({name = "XPoint4", types = "int,int", keys = "x,y"})
     NSString *script =
     @KKP_LUA(
-             kkp_struct({name = "XPoint4", types = "int,int", keys = "x,y"})
+             
              kkp_class({"KKPBlockDefineTest"},
              function(_ENV)
                  function blkVoidStruct()
                        return kkp_block(function(point)
+                                        print(tostring(point))
                                         self:setVP_(point)
                                         end, "void,{XPoint4=int,int}")
                  end
