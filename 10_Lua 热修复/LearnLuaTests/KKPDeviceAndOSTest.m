@@ -9,6 +9,9 @@
 #import <kkp/kkp.h>
 #import "KKPXCTestCase.h"
 
+/**
+ 测试系统和设备信息
+ */
 @interface KKPDeviceAndOSTest : KKPXCTestCase
 @end
 
