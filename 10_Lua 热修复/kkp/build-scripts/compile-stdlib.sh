@@ -20,6 +20,8 @@ luaByte=$(hexdump -v -e '1/1 "%d,"' kkp.dat)
 rm kkp.dat
 
 var=`date "+%Y-%m-%d %H:%M:%S"`
+# // ${var}
+
 # cat > "$PROJECT_DIR/kkp_stdlib.h" <<EOF
 # // DO NOT MODIFY
 # // ${var}
@@ -33,7 +35,6 @@ var=`date "+%Y-%m-%d %H:%M:%S"`
 ### 把内容写入到 目标文件，目前已经决定不支持 iPhone5s 之前的机型了，所以可以去掉宏判断了
 cat > "$PROJECT_DIR/kkp_stdlib.h" <<EOF
 // DO NOT MODIFY
-// ${var}
 // This is auto generated, it contains a compiled version of the kkp stdlib
 #define KKP_STDLIB {$luaByte}
 EOF
