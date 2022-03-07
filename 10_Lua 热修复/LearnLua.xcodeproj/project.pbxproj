@@ -10,6 +10,7 @@
 		7C30140027B216EB008F8A5F /* BaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C3013FF27B216EA008F8A5F /* BaseViewController.m */; };
 		7C30187827B3A992008F8A5F /* CustomTableViewController.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7C30187727B3A992008F8A5F /* CustomTableViewController.lua */; };
 		7C56D6712796A2C7007E2C56 /* test.lua in Resources */ = {isa = PBXBuildFile; fileRef = 7C56D6702796A2C7007E2C56 /* test.lua */; };
+		7C5BCE5B27D610CE00322E89 /* KKPDeviceAndOSTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C5BCE5A27D610CE00322E89 /* KKPDeviceAndOSTest.m */; };
 		7C76970527954178004F314D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C76970427954178004F314D /* AppDelegate.m */; };
 		7C76970827954178004F314D /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C76970727954178004F314D /* SceneDelegate.m */; };
 		7C76970B27954178004F314D /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C76970A27954178004F314D /* ViewController.m */; };
@@ -122,6 +123,7 @@
 		7C3013FF27B216EA008F8A5F /* BaseViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BaseViewController.m; sourceTree = "<group>"; };
 		7C30187727B3A992008F8A5F /* CustomTableViewController.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = CustomTableViewController.lua; sourceTree = "<group>"; };
 		7C56D6702796A2C7007E2C56 /* test.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.lua; sourceTree = "<group>"; };
+		7C5BCE5A27D610CE00322E89 /* KKPDeviceAndOSTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KKPDeviceAndOSTest.m; sourceTree = "<group>"; };
 		7C76970027954178004F314D /* LearnLua.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LearnLua.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C76970327954178004F314D /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		7C76970427954178004F314D /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -460,6 +462,7 @@
 				7C8A979927CF6585003E3EEF /* KKPBlockDefineTest.m */,
 				7C8A979127CF6584003E3EEF /* KKPKeyWordTest.m */,
 				7C8A979027CF6584003E3EEF /* KKPCFunctionTest.m */,
+				7C5BCE5A27D610CE00322E89 /* KKPDeviceAndOSTest.m */,
 				7C8A95D827CF525A003E3EEF /* LearnLuaTests.m */,
 				7C8A97A727CF66BC003E3EEF /* KKPXCTestCase.h */,
 				7C8A97A827CF66BC003E3EEF /* KKPXCTestCase.m */,
@@ -794,6 +797,7 @@
 				7C8A97A927CF66BC003E3EEF /* KKPXCTestCase.m in Sources */,
 				7C8A97A227CF6585003E3EEF /* KKPConvertTest.m in Sources */,
 				7C8A979E27CF6585003E3EEF /* KKPNewInstanceTest.m in Sources */,
+				7C5BCE5B27D610CE00322E89 /* KKPDeviceAndOSTest.m in Sources */,
 				7C8A979D27CF6585003E3EEF /* KKPKeyWordTest.m in Sources */,
 				7C8A97A327CF6585003E3EEF /* KKPNewClassTest.m in Sources */,
 				7C8A979C27CF6585003E3EEF /* KKPCFunctionTest.m in Sources */,

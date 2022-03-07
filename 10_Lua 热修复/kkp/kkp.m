@@ -6,6 +6,7 @@
 //
 
 #import "kkp.h"
+#import <UIKit/UIKit.h>
 #import "lualib.h"
 #import "lauxlib.h"
 #import "kkp_stdlib.h"
@@ -196,6 +197,41 @@ static void kkp_addGlobals(lua_State *L)
 
         NSError *error = nil;
         [[NSFileManager defaultManager] createDirectoryAtPath:cachePath withIntermediateDirectories:YES attributes: nil error:&error];
+        
+        
+        /// os 相关
+        lua_newtable(L);
+        lua_setfield(L, -2, "os");
+        lua_getfield(L, -1, "os");
+        
+        /// 设置 kkp.os.systemVersion 版本号
+        lua_pushstring(L, [UIDevice currentDevice].systemVersion.UTF8String);
+        lua_setfield(L, -2, "systemVersion");
+        
+        /// 设置 kkp.os.geOS() 函数
+        lua_pushcfunction(L, kkp_global_isGreaterThanOS);
+        lua_setfield(L, -2, "geOS");
+        lua_pop(L, 1);// pop os
+        
+        
+        /// device 相关
+        lua_newtable(L);
+        lua_setfield(L, -2, "device");
+        lua_getfield(L, -1, "device");
+        
+        /// 设置 kkp.device.screenWidth
+        lua_pushnumber(L, (double)[UIScreen mainScreen].bounds.size.width);
+        lua_setfield(L, -2, "screenWidth");
+        
+        /// 设置 kkp.device.screenHeight
+        lua_pushnumber(L, (double)[UIScreen mainScreen].bounds.size.height);
+        lua_setfield(L, -2, "screenHeight");
+        
+        /// 设置 kkp.device.screenScale
+        lua_pushnumber(L, (double)[UIScreen mainScreen].scale);
+        lua_setfield(L, -2, "screenScale");
+        lua_pop(L, 1);// pop device
+        
         
         return 0;
     });

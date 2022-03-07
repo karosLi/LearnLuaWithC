@@ -5,6 +5,7 @@
 //  Created by karos li on 2022/2/25.
 //
 
+#import <UIKit/UIKit.h>
 #import "kkp_global_util.h"
 #import "lualib.h"
 #import "lauxlib.h"
@@ -12,6 +13,21 @@
 #import "kkp_define.h"
 #import "kkp_helper.h"
 #import "kkp_converter.h"
+
+/// 是否大于等于目标系统
+int kkp_global_isGreaterThanOS(lua_State *L)
+{
+    return kkp_safeInLuaStack(L, ^int{
+        lua_Number targetOS = lua_tonumber(L, -1);
+        if ([UIDevice currentDevice].systemVersion.doubleValue >= targetOS) {
+            lua_pushboolean(L, 1);
+            return 1;
+        } else {
+            lua_pushboolean(L, 0);
+            return 1;
+        }
+    });
+}
 
 int kkp_global_isNull(lua_State *L)
 {

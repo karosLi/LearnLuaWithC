@@ -4,3 +4,7 @@ print(source_code)
 
 local a = 2^2
 print(a)
+
+
+print("15.2" >= "9.0")
+
