@@ -196,7 +196,13 @@ static int LUserData_kkp_struct__tostring(lua_State *L)
                 lua_pop(L, 1); // pops the value and the struct offset, keeps the key for the next iteration
             }
         } else {
-            luaL_addstring(&b, "Only can print registered struct\n");
+            NSString *types = structDefine[@"types"];
+            for (int i = 0; i < types.length; i++) {
+                kkp_struct_pushValueAt(L, structUserdata, i);
+                luaL_addstring(&b, lua_tostring(L, -1));
+                luaL_addstring(&b, "\n");
+                lua_pop(L, 1); // pops the value and the struct offset, keeps the key for the next iteration
+            }
         }
         
         luaL_addstring(&b, "}");
