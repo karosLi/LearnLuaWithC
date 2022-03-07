@@ -32,7 +32,7 @@ function(_ENV)
         
         CustomTableViewController:refreshData_({key = "value", key1 = "value1"})
         
-        dispatch_after(dispatch_time(0, 1 * 1000000000), dispatch_get_main_queue(), kkp_block(function()
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), kkp_block(function()
             kkp.print("【LUA】dispatch_after 回调")
         end, "void,void"))
         
