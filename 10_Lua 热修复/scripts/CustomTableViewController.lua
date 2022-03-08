@@ -21,8 +21,8 @@ function(_ENV)
         kkp.print("【LUA】CGSize", size.width)
         size.height = 56.0
         -- 结构体打印，需要使用 tostring 方法
-        kkp.print("【LUA】CGSize", tostring(size))
-        kkp.print("【LUA】copy CGSize", tostring(copySize))
+        kkp.print("【LUA】CustomTableViewController CGSize", tostring(size))
+        kkp.print("【LUA】CustomTableViewController copy CGSize", tostring(copySize))
         return self
     end
 
@@ -33,7 +33,7 @@ function(_ENV)
         CustomTableViewController:refreshData_({key = "value", key1 = "value1"})
         
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), kkp_block(function()
-            kkp.print("【LUA】dispatch_after 回调")
+            kkp.print("【LUA】CustomTableViewController dispatch_after 回调")
         end, "void,void"))
         
         self:refreshView()

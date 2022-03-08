@@ -10,16 +10,21 @@ function(_ENV)
         self:setTitle_("NEW VC")
         kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad title", self:title())
         
-        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad a", self:a())
-        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad pa", self:pa())
+        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad 修改之前 a", self:a())
+        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad 修改之前 pa", self:pa())
         
         self:setA_("new_a")
         self:setPa_("new_a")
         
-        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad a", self:a())
-        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad pa", self:pa())
+        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad 修改之后 a", self:a())
+        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad 修改之后 pa", self:pa())
         
         self.origin:viewDidLoad()
+    end
+    
+    function doManyThing_(thingName)
+        -- 打印原生入参
+        kkp.print("【LUA】LearnLua.ViewController1 打印原生入参 thingName", thingName)
     end
     
     function dealloc()
@@ -60,24 +65,24 @@ function(_ENV)
     -- hook 实例方法
     function doSomeThing_(thingName)
         -- 打印枚举
-        kkp.print("【LUA】打印枚举 UIImagePickerControllerCameraFlashModeOn", UIImagePickerControllerCameraFlashModeOn)
+        kkp.print("【LUA】ViewController 打印枚举 UIImagePickerControllerCameraFlashModeOn", UIImagePickerControllerCameraFlashModeOn)
         -- 打印原生入参
-        kkp.print("【LUA】打印原生入参 thingName", thingName)
+        kkp.print("【LUA】ViewController 打印原生入参 thingName", thingName)
         -- 设置/获取 lua 属性
         self.aa = "hh"
-        kkp.print("【LUA】获取 lua 属性 aa", self.aa)
+        kkp.print("【LUA】ViewController 获取 lua 属性 aa", self.aa)
         -- 设置/获取 原生 属性
         self:setAge_(18)
-        kkp.print("【LUA】获取 原生 属性 age", self:age())
+        kkp.print("【LUA】ViewController 获取 原生 属性 age", self:age())
         -- 动态添加 设置/获取 原生 属性
         self:setSex_("男")
-        kkp.print("【LUA】获取 动态 原生 属性 sex", self:sex())
+        kkp.print("【LUA】ViewController 获取 动态 原生 属性 sex", self:sex())
         -- 设置/获取 原生 私有 变量
         self:setIvar_withInteger_("_aInteger", 666)
-        kkp.print("【LUA】获取 原生 私有变量 _aInteger", self:getIvarInteger_("_aInteger"))
+        kkp.print("【LUA】ViewController 获取 原生 私有变量 _aInteger", self:getIvarInteger_("_aInteger"))
         -- 调用实例方法
-        kkp.print("【LUA】print in lua getHello ", self:getHello())
-        kkp.print("【LUA】print in lua getViewSize", tostring(self:getViewSize()))
+        kkp.print("【LUA】ViewController 获取原生调用结果 getHello() ", self:getHello())
+        kkp.print("【LUA】ViewController 获取原生调用结果 getViewSize()", tostring(self:getViewSize()))
         -- 调用当前类的静态方法
         ViewController:printHello()
         self:view():setBackgroundColor_(UIColor:redColor())
@@ -86,7 +91,7 @@ function(_ENV)
         -- 调用父类方法
         self.super:doSomeThing_(thingName)
         -- 使用工具方法
-        kkp.print("【LUA】使用工具方法", NSDocumentDirectory)
+        kkp.print("【LUA】ViewController 使用工具方法", NSDocumentDirectory)
     end
 
     -- 添加新类
@@ -106,7 +111,7 @@ function(_ENV)
     -- hook 返回值是 oc block 的实例方法，block 带参数和返回值
     function blockReturnBoolWithString()
         -- 把 lua 函数包装成一个 oc block，原生在实际调用 oc block 时，会触发包裹的 lua 函数代码
-        return kkp_block(function(string) kkp.print("【LUA】原生调用 lua 提供的 oc block 参数是", string, "性别", self:sex()) return "哈哈" end, "NSString *,NSString *")
+        return kkp_block(function(string) kkp.print("【LUA】ViewController 原生调用 lua 提供的 oc block 参数是", string, "性别", self:sex()) return "哈哈" end, "NSString *,NSString *")
     end
     
     -- hook 返回值是 结构体 实例方法
