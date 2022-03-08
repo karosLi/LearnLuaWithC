@@ -341,6 +341,7 @@ void * kkp_toOCObject(lua_State *L, const char * typeDescription, int index)
             case LUA_TNIL:
             case LUA_TNONE:
                 instance = nil;
+                break;
             case LUA_TBOOLEAN: {
                 BOOL flag = lua_toboolean(L, index);
                 instance = [NSValue valueWithBytes:&flag objCType:@encode(bool)];

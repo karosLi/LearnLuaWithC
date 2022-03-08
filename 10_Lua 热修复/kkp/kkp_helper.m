@@ -556,14 +556,18 @@ int kkp_invoke_closure(lua_State *L)
                         
                         objc_setAssociatedObject(instance->instance, kkp_propKey(propName), value, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                         return 0;
-                    } else if (argCount == 0 && kkp_propKeyExists(propName)) {// 说明调用的是获取属性，属性 key 一定要存在，只有先调用 set 属性方法，才会存在 key
+                    } else if (argCount == 0) {// 说明调用的是获取属性
                         id value = objc_getAssociatedObject(instance->instance, kkp_propKey(propName));
-                        kkp_toLuaObject(L, value);
+                        if (value) {
+                            kkp_toLuaObject(L, value);
+                        } else {
+                            lua_pushnil(L);
+                        }
                         return 1;
                     }
                 }
                 
-                NSString *error = [NSString stringWithFormat:@"selector %s not be found in %@. You may need to use ‘_’ to indicate that there are parameters. If your selector is 'function:', use 'function_', if your selector is 'function:a:b:', use 'function_a_b_'", func, klass];
+                NSString *error = [NSString stringWithFormat:@"unrecognized selector %@ for instance %@. ", selectorName, instance->instance];
                 KKP_ERROR(L, error);
                 return 0;
             }

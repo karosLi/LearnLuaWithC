@@ -26,7 +26,19 @@ import UIKit
  */
 
 class ViewController1: BaseViewController {
+    dynamic var a = "a"
+    dynamic private var pa = "pa"
+    
     override func viewDidLoad() {
+        print("ORIG title:\(self.title!)")
+        print("ORIG a:\(a)")
+        print("ORIG pa:\(pa)")
+        
         super.viewDidLoad()
+        view.backgroundColor = .yellow
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
     }
 }

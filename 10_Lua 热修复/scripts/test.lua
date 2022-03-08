@@ -6,7 +6,20 @@ kkp_class({"LearnLua.ViewController1"},
 function(_ENV)
     function viewDidLoad()
         kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad")
-        self:view():setBackgroundColor_(UIColor:yellowColor())
+        
+        self:setTitle_("NEW VC")
+        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad title", self:title())
+        
+        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad a", self:a())
+        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad pa", self:pa())
+        
+        self:setA_("new_a")
+        self:setPa_("new_a")
+        
+        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad a", self:a())
+        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad pa", self:pa())
+        
+        self.origin:viewDidLoad()
     end
     
     function dealloc()

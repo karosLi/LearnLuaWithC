@@ -68,7 +68,7 @@
     [_gotoSwiftButton setTitle:@"跳转到Swift页面" forState:UIControlStateNormal];
     [_gotoSwiftButton addTarget:self action:@selector(onClickGotoSwiftButton) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.gotoSwiftButton];
-    self.gotoSwiftButton.frame = CGRectMake(100, 400, 200, 40);
+    self.gotoSwiftButton.frame = CGRectMake(100, 250, 200, 40);
 }
 
 - (void)doSomeThing:(NSString *)thingName {
