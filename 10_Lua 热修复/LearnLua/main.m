@@ -11,7 +11,7 @@
 
 int main(int argc, char * argv[]) {
     // 测试单元用例时，需要关闭下面的代码
-    /**
+    
      // 设置日志处理
      kkp_setLuaLogHandler(^(NSString *log) {
          NSLog(@"【统一日志打印】 %@", log);
@@ -26,8 +26,7 @@ int main(int argc, char * argv[]) {
      kkp_start();
      // 执行测试脚本
      kkp_runLuaFile(@"test.lua");
-     */
-    
+     
     
 //    // 清理 hook 的类
 //    kkp_cleanAllClass();

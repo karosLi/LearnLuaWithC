@@ -7,6 +7,7 @@
 
 #import "ViewController.h"
 #import <objc/runtime.h>
+#import <LearnLua-Swift.h>
 
 @interface ViewController () {
     NSInteger _aInteger;
@@ -14,6 +15,7 @@
 
 @property(nonatomic, assign) NSInteger age;
 @property(nonatomic, strong) UIButton *gotoButton;
+@property(nonatomic, strong) UIButton *gotoSwiftButton;
 @property (nonatomic) CGRect vRect;
 
 @property (nonatomic) int index;
@@ -59,9 +61,14 @@
     _gotoButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_gotoButton setTitle:@"跳转" forState:UIControlStateNormal];
     [_gotoButton addTarget:self action:@selector(onClickGotoButton) forControlEvents:UIControlEventTouchUpInside];
-    
     [self.view addSubview:self.gotoButton];
     self.gotoButton.frame = CGRectMake(100, 200, 100, 40);
+    
+    _gotoSwiftButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_gotoSwiftButton setTitle:@"跳转到Swift页面" forState:UIControlStateNormal];
+    [_gotoSwiftButton addTarget:self action:@selector(onClickGotoSwiftButton) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:self.gotoSwiftButton];
+    self.gotoSwiftButton.frame = CGRectMake(100, 400, 200, 40);
 }
 
 - (void)doSomeThing:(NSString *)thingName {
@@ -103,6 +110,11 @@
 - (CGRect)argInRect:(CGRect)vRect
 {
     return vRect;
+}
+
+- (void)onClickGotoSwiftButton {
+    ViewController1 *vc1 = [ViewController1 new];
+    [self.navigationController pushViewController:vc1 animated:YES];
 }
 
 @end

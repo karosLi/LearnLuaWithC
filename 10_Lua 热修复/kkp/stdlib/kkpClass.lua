@@ -10,6 +10,11 @@ function kkp_protocol(protocol_name, protocol_instance_function_table, protocol_
     return kkp_classN.defineProtocol(protocol_name, protocol_instance_function_table, protocol_class_function_table)
 end
 
+-- 找到一个 class 对应的 class user data
+function kkp_class_index(class_name)
+    return kkp_classN.findUserData(class_name)
+end
+
 -- 定义一个 类，用于替换原生 类，或者添加一个 新类
 function kkp_class(options, instance_function, class_function)
     -- 类名，字符串

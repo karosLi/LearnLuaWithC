@@ -1,5 +1,19 @@
 -- require("CustomTableViewController")
 
+-- 替换 swift 类
+-- 添加新类，一个文件里也可以定义多个类
+kkp_class({"LearnLua.ViewController1"},
+function(_ENV)
+    function viewDidLoad()
+        kkp.print("【LUA】LearnLua.ViewController1 viewDidLoad")
+        self:view():setBackgroundColor_(UIColor:yellowColor())
+    end
+    
+    function dealloc()
+        kkp.print("【LUA】LearnLua.ViewController1 dalloc")
+    end
+end)
+
 -- 添加新类，一个文件里也可以定义多个类
 kkp_class({"Custom1TableViewController", "UIViewController"},
 function(_ENV)
@@ -64,8 +78,9 @@ function(_ENV)
 
     -- 添加新类
     function onClickGotoButton()
-        -- local controller = CustomTableViewController:alloc():init()
-        local controller = Custom1TableViewController:alloc():init()
+        local controller = CustomTableViewController:alloc():init()
+        -- local controller = Custom1TableViewController:alloc():init()
+        -- local controller = kkp_class_index("LearnLua.ViewController1"):alloc():init()
         self:navigationController():pushViewController_animated_(controller, true)
     end
 
