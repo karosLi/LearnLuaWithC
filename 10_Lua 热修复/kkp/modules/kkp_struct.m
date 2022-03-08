@@ -251,6 +251,7 @@ static int kkp_struct_create_userdata_closure(lua_State *L) {
         NSDictionary *structDefine = kkp_struct_registeredStructs()[[NSString stringWithUTF8String:name]];
         
         NSString *realTypeDescription = structDefine[@"types"];
+        NSString *keys = structDefine[@"keys"];
        
         /// 把 lua table 转成字典
         void *arg = kkp_toOCObject(L, "@", 1);
@@ -267,7 +268,15 @@ static int kkp_struct_create_userdata_closure(lua_State *L) {
         const char *typeDescription = realTypeDescription.UTF8String;
         size_t size = kkp_sizeOfStructTypes(typeDescription);
         void *structData = malloc(size);
-        kkp_getStructDataOfArray(structData, structDict.allValues, typeDescription);
+        
+        /// 按 key 的顺序添加数据
+        NSMutableArray *structArray = [NSMutableArray array];
+        NSArray *itemKeys = [keys componentsSeparatedByString:@","];
+        for (int i = 0; i < itemKeys.count; i++) {
+            [structArray addObject:structDict[itemKeys[i]]];
+        }
+        
+        kkp_getStructDataOfArray(structData, structArray, typeDescription);
         
         /// 根据结构体指针创建一个 struct user data
         kkp_struct_create_userdata(L, name, typeDescription, structData);
