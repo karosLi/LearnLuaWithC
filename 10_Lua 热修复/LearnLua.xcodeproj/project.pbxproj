@@ -240,8 +240,6 @@
 		7C8A95D627CF525A003E3EEF /* LearnLuaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LearnLuaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C8A95D827CF525A003E3EEF /* LearnLuaTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LearnLuaTests.m; sourceTree = "<group>"; };
 		7C8A95E627CF5410003E3EEF /* libkkp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libkkp.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		7C8A95E827CF5410003E3EEF /* kkp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kkp.h; sourceTree = "<group>"; };
-		7C8A95E927CF5410003E3EEF /* kkp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = kkp.m; sourceTree = "<group>"; };
 		7C8A979027CF6584003E3EEF /* KKPCFunctionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPCFunctionTest.m; sourceTree = "<group>"; };
 		7C8A979127CF6584003E3EEF /* KKPKeyWordTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPKeyWordTest.m; sourceTree = "<group>"; };
 		7C8A979227CF6584003E3EEF /* KKPNewInstanceTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KKPNewInstanceTest.m; sourceTree = "<group>"; };
@@ -338,7 +336,6 @@
 				7C56D66F2796A298007E2C56 /* scripts */,
 				7C76970227954178004F314D /* LearnLua */,
 				7C8A95D727CF525A003E3EEF /* LearnLuaTests */,
-				7C8A95E727CF5410003E3EEF /* kkp */,
 				7C76970127954178004F314D /* Products */,
 				7CD5867F27B77597000D8AED /* Frameworks */,
 			);
@@ -473,15 +470,6 @@
 				7C8A97A827CF66BC003E3EEF /* KKPXCTestCase.m */,
 			);
 			path = LearnLuaTests;
-			sourceTree = "<group>";
-		};
-		7C8A95E727CF5410003E3EEF /* kkp */ = {
-			isa = PBXGroup;
-			children = (
-				7C8A95E827CF5410003E3EEF /* kkp.h */,
-				7C8A95E927CF5410003E3EEF /* kkp.m */,
-			);
-			path = kkp;
 			sourceTree = "<group>";
 		};
 		7CB7758C279F9D500062CFE0 /* kkp */ = {
