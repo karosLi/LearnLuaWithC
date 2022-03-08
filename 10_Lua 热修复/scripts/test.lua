@@ -96,8 +96,8 @@ function(_ENV)
 
     -- 添加新类
     function onClickGotoButton()
-        local controller = CustomTableViewController:alloc():init()
-        -- local controller = Custom1TableViewController:alloc():init()
+        -- local controller = CustomTableViewController:alloc():init()
+        local controller = Custom1TableViewController:alloc():init()
         -- local controller = kkp_class_index("LearnLua.ViewController1"):alloc():init()
         self:navigationController():pushViewController_animated_(controller, true)
     end
