@@ -95,11 +95,6 @@ NSString *kkp_create_real_signature(NSString *signatureStr, BOOL isAllArg, BOOL 
     
     NSArray *lt = [mutableString componentsSeparatedByString:@","];
     
-    /**
-     * 这里注意下block与func签名要区分下,block中没有_cmd, 并且要用@?便是target
-     * 比如 block 签名：i@?i
-     * 比如 非 block 签名 i@:i
-     */
     NSMutableString *funcSignature;
     NSInteger fromIndex = 0;
     
