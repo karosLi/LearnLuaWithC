@@ -454,10 +454,6 @@ static const void *kkp_propKey(NSString *propName) {
     return (__bridge const void *)(key);
 }
 
-static const bool kkp_propKeyExists(NSString *propName) {
-    return [_propKeys.allKeys containsObject:propName];
-}
-
 /// lua 层调用 c 层，在初始化时，需要先创建出来一个 实例对象的 实例 user data
 /// 第一个参数是 class user data，而第一个 upvalue 则是之前捕获的 alloc 字符串
 int kkp_alloc_closure(lua_State *L)
